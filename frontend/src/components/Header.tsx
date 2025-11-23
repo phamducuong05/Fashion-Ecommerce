@@ -1,12 +1,9 @@
 import { Button } from "./variants/button";
 import { ShoppingCart, User, Menu } from "lucide-react";
-// Nên sử dụng 'react-router-dom' cho các ứng dụng React hiện đại
 import { Link } from "react-router";
 
 interface HeaderProps {
   cartItemCount: number;
-  // Prop onCartClick đã được loại bỏ vì nút giờ đây là một liên kết trực tiếp đến trang giỏ hàng.
-  // Nếu bạn cần một hành động khác (như mở giỏ hàng dạng pop-up), bạn nên tạo một nút riêng không chứa <Link>.
 }
 
 const Header = ({ cartItemCount }: HeaderProps) => {
@@ -27,7 +24,6 @@ const Header = ({ cartItemCount }: HeaderProps) => {
 
           {/* Logo */}
           <div className="flex items-center">
-            {/* 2. Làm cho logo đậm và tối màu hơn để khớp với phong cách "Our Products" */}
             <Link
               to="/"
               className="text-2xl font-bold tracking-tight text-gray-900"
@@ -42,31 +38,25 @@ const Header = ({ cartItemCount }: HeaderProps) => {
             <Link to="/" className={navLinkClasses}>
               Home
             </Link>
-            <Link to="/membership" className={navLinkClasses}>
-              Membership
-            </Link>
             <Link to="/products" className={navLinkClasses}>
               Products
             </Link>
             <Link to="/about" className={navLinkClasses}>
               About
             </Link>
+            <Link to="/register" className={navLinkClasses}>
+              Sign up
+            </Link>
           </nav>
 
-          {/* Các nút hành động bên phải */}
           <div className="flex items-center space-x-2">
             <Button variant="ghost" size="icon" asChild>
-              <Link to="/profile" className="text-gray-600 hover:text-gray-900">
+              <Link to="/signin" className="text-gray-600 hover:text-gray-900">
                 <User className="h-5 w-5" />
                 <span className="sr-only">User Profile</span>
               </Link>
             </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="relative"
-              asChild // Sử dụng asChild để Button hoạt động như một thẻ Link
-            >
+            <Button variant="ghost" size="icon" className="relative" asChild>
               <Link to="/cart" className="text-gray-600 hover:text-gray-900">
                 <ShoppingCart className="h-5 w-5" />
                 <span className="sr-only">View Cart</span>

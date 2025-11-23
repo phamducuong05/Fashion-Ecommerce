@@ -1,13 +1,14 @@
-import { useState } from "react";
-import type { Product } from "./components/ProductCard";
+import { useState, useEffect } from "react";
+import type { ProductSummary } from "./components/ProductCard";
 import { Routes, Route } from "react-router";
 import HomePage from "./pages/home";
 import AboutPage from "./pages/about";
 import Header from "./components/Header";
-import ProfilePage from "./pages/profile";
+import SignInPage from "./pages/signin";
 import RegisterPage from "./pages/register";
 import ProductsPage from "./pages/products";
 import CartPage from "./pages/cart";
+import ProductDetail from "./components/ProductDetails";
 
 export interface CartItemType {
   id: string;
@@ -34,9 +35,7 @@ export interface FormSubmission {
   message: string;
 }
 
-// Đảm bảo bạn import đúng type
-
-export const products: Product[] = [
+export const products: ProductSummary[] = [
   {
     id: "1",
     name: "Classic Leather Jacket",
@@ -49,7 +48,6 @@ export const products: Product[] = [
     size: "L", // Bổ sung
     isSale: true,
     section: "sale",
-    gender: "men",
   },
   {
     id: "2",
@@ -62,7 +60,6 @@ export const products: Product[] = [
     size: "US 8", // Bổ sung
     isNew: true,
     section: "new",
-    gender: "women",
   },
   {
     id: "3",
@@ -75,7 +72,6 @@ export const products: Product[] = [
     size: "One Size", // Bổ sung
     isNew: true,
     section: "bestseller",
-    gender: "accessories",
   },
   {
     id: "4",
@@ -89,7 +85,6 @@ export const products: Product[] = [
     size: "M", // Bổ sung
     isSale: true,
     section: "sale",
-    gender: "women",
   },
   {
     id: "5",
@@ -102,7 +97,6 @@ export const products: Product[] = [
     size: "S", // Bổ sung
     isNew: true,
     section: "new",
-    gender: "kids",
   },
   {
     id: "6",
@@ -116,7 +110,6 @@ export const products: Product[] = [
     size: "M", // Bổ sung
     isSale: true,
     section: "bestseller",
-    gender: "women",
   },
   {
     id: "7",
@@ -129,7 +122,6 @@ export const products: Product[] = [
     size: "4Y", // Bổ sung
     isNew: true,
     section: "new",
-    gender: "kids",
   },
   {
     id: "8",
@@ -141,7 +133,6 @@ export const products: Product[] = [
     color: "Green",
     size: "US 10", // Bổ sung
     section: "bestseller",
-    gender: "men",
   },
   {
     id: "9",
@@ -154,13 +145,15 @@ export const products: Product[] = [
     size: "XL", // Bổ sung
     isNew: true,
     section: "sales",
-    gender: "men",
   },
 ];
 
 function App() {
-  const [cartItems, setCartItems] = useState<CartItemType[]>([]);
-  const [featuredTab, setFeaturedTab] = useState("men");
+  const [cartItems, setCartItems] = useState<CartItemType[]>(() => {
+    const cart = localStorage.getItem("cart");
+    return cart ? JSON.parse(cart) : [];
+  });
+  const [featuredTab, setFeaturedTab] = useState("Sets");
   const [whatsHotTab, setWhatsHotTab] = useState("new");
   const [formData, setFormData] = useState<FormData>({
     name: "",
@@ -169,6 +162,10 @@ function App() {
     message: "",
   });
   const [formStores, setFormStores] = useState<FormSubmission[]>([]);
+
+  useEffect(() => {
+    localStorage.setItem("cart", JSON.stringify(cartItems));
+  }, [cartItems]);
 
   const handleSubmitContact = (e: React.FormEvent) => {
     e.preventDefault();
@@ -183,9 +180,9 @@ function App() {
     });
   };
 
-  const removeFromCart = (product: Product) => {};
+  const removeFromCart = (product: ProductSummary) => {};
 
-  const handleAddToCart = (product: Product) => {
+  const handleAddToCart = (product: ProductSummary) => {
     setCartItems((prev) => {
       const isExist = prev.find((item) => item.id === product.id);
       if (isExist) {
@@ -204,7 +201,7 @@ function App() {
   const whatsHotProducts = products.filter((p) => p.section === whatsHotTab);
 
   const featuredProducts = products.filter(
-    (item) => item.gender === featuredTab
+    (item) => item.category === featuredTab
   );
 
   return (
@@ -231,7 +228,7 @@ function App() {
         />
 
         <Route path="/about" element={<AboutPage />} />
-        <Route path="/profile" element={<ProfilePage />}></Route>
+        <Route path="/signin" element={<SignInPage />}></Route>
         <Route path="/register" element={<RegisterPage />}></Route>
         <Route
           path="/products"
@@ -245,6 +242,7 @@ function App() {
             <CartPage cartItems={cartItems} setCartItems={setCartItems} />
           }
         />
+        <Route path="/productdetail" element={<ProductDetail />} />
       </Routes>
     </>
   );

@@ -1,11 +1,12 @@
 import { Button } from "./variants/button";
 import ProductCard from "./ProductCard";
-import type { Product } from "./ProductCard";
+import type { ProductSummary } from "./ProductCard";
 import { Tabs, TabsList, TabsTrigger } from "./Tab";
+import { Link } from "lucide-react";
 
 interface HotProp {
-  whatsHotProducts: Product[];
-  handleAddToCart: (product: Product) => void;
+  whatsHotProducts: ProductSummary[];
+  handleAddToCart: (product: ProductSummary) => void;
   whatsHotTab: string;
   setWhatsHotTab: (value: string) => void;
 }
@@ -28,7 +29,6 @@ const Hot = ({
               <TabsTrigger value="sale">Sales</TabsTrigger>
             </TabsList>
           </Tabs>
-          <Button variant="outline">View All</Button>
         </div>
       </div>
 

@@ -1,9 +1,10 @@
 import { Button } from "./variants/button";
 import { ImageWithFallback } from "./imagefallback";
 import { Badge } from "./variants/Badge";
-import { Heart, ShoppingBag } from "lucide-react";
+import { ShoppingBag, Eye } from "lucide-react";
+import { Link } from "react-router";
 
-export interface Product {
+export interface ProductSummary {
   id: string;
   name: string;
   price: number;
@@ -13,14 +14,13 @@ export interface Product {
   isNew?: boolean;
   isSale?: boolean;
   section?: string;
-  gender?: string;
   color: string;
   size: string;
 }
 
 interface ProductCardProps {
-  product: Product;
-  onAddToCart: (product: Product) => void;
+  product: ProductSummary;
+  onAddToCart: (product: ProductSummary) => void;
 }
 
 const ProductCard = ({ product, onAddToCart }: ProductCardProps) => {
@@ -52,24 +52,26 @@ const ProductCard = ({ product, onAddToCart }: ProductCardProps) => {
             </Badge>
           )}
         </div>
+        <div className="absolute bottom-3 left-3 right-3 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+          {/* Quick add button */}
+          <Button
+            onClick={(e) => {
+              e.preventDefault();
+              onAddToCart(product);
+            }}
+            className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gray-900 hover:bg-gray-800 text-white font-bold py-2 px-4 rounded-lg"
+          >
+            <ShoppingBag className="h-4 w-4 mr-2" />
+            Add to Cart
+          </Button>
 
-        {/* Wishlist button */}
-        <Button
-          variant="outline"
-          size="icon"
-          className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-white/80 hover:bg-white rounded-full shadow-sm"
-        >
-          <Heart className="h-5 w-5" fill="currentColor" />
-        </Button>
-
-        {/* Quick add button */}
-        <Button
-          onClick={() => onAddToCart(product)}
-          className="absolute bottom-3 left-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gray-900 hover:bg-gray-800 text-white font-bold py-2 px-4 rounded-lg"
-        >
-          <ShoppingBag className="h-4 w-4 mr-2" />
-          Add to Cart
-        </Button>
+          <Link to="/productdetail" className="w-full">
+            <Button className="w-full opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gray-900 hover:bg-gray-800 text-white font-bold py-2 px-4 rounded-lg">
+              <Eye className="h-4 w-4 mr-2" />
+              View Detail
+            </Button>
+          </Link>
+        </div>
       </div>
 
       {/* Product Info */}
@@ -77,9 +79,11 @@ const ProductCard = ({ product, onAddToCart }: ProductCardProps) => {
         <p className="text-xs text-gray-500 uppercase tracking-wide">
           {product.category}
         </p>
-        <h3 className="text-lg font-semibold text-gray-900 truncate">
-          {product.name}
-        </h3>
+        <Link to="/productdetail">
+          <h3 className="text-lg font-semibold text-gray-900 truncate">
+            {product.name}
+          </h3>
+        </Link>
         <div className="flex items-center gap-3">
           <p className="font-bold text-xl text-gray-900">
             ${product.price.toFixed(2)}

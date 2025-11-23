@@ -2,20 +2,20 @@ import Hero from "../components/Hero";
 import Hot from "../components/Hot";
 import Featured from "../components/Featured";
 import Merit from "../components/Merit";
-import type { Product } from "../components/ProductCard";
+import type { ProductSummary } from "../components/ProductCard";
 import Contact from "../components/Contact";
 import type { FormData } from "../App";
 import Footer from "../components/Footer";
 
 interface HomeProp {
   cartItemCount: number;
-  whatsHotProducts: Product[];
-  handleAddToCart: (product: Product) => void;
+  whatsHotProducts: ProductSummary[];
+  handleAddToCart: (product: ProductSummary) => void;
   whatsHotTab: string;
   setWhatsHotTab: (value: string) => void;
   featuredTab: string;
   setFeaturedTab: (value: string) => void;
-  featuredProducts: Product[];
+  featuredProducts: ProductSummary[];
   formData: FormData;
   setFormData: React.Dispatch<React.SetStateAction<FormData>>;
   handleSubmitContact: (e: React.FormEvent) => void;

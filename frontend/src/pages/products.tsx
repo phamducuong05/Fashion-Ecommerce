@@ -1,11 +1,11 @@
 import ProductList from "../components/ProductList";
-import type { Product } from "../components/ProductCard";
+import type { ProductSummary } from "../components/ProductCard";
 import { useState } from "react";
 import SideBar from "../components/SideBar";
 
 interface ProductsPageProp {
-  products: Product[];
-  onAddToCart: (product: Product) => void;
+  products: ProductSummary[];
+  onAddToCart: (product: ProductSummary) => void;
 }
 
 const ProductsPage = ({ products, onAddToCart }: ProductsPageProp) => {

@@ -1,13 +1,14 @@
-import type { Product } from "./ProductCard";
+import type { ProductSummary } from "./ProductCard";
 import { Tabs, TabsList, TabsTrigger } from "./Tab";
 import { Button } from "./variants/button";
 import ProductCard from "./ProductCard";
+import { Link } from "react-router";
 
 interface FeatureProp {
   featuredTab: string;
   setFeaturedTab: (value: string) => void;
-  featuredProducts: Product[];
-  handleAddToCart: (product: Product) => void;
+  featuredProducts: ProductSummary[];
+  handleAddToCart: (product: ProductSummary) => void;
 }
 
 const Featured = ({
@@ -23,18 +24,22 @@ const Featured = ({
         <div className="flex items-center gap-4">
           <Tabs value={featuredTab} onValueChange={setFeaturedTab}>
             <TabsList>
-              <TabsTrigger value="men">Men</TabsTrigger>
-              <TabsTrigger value="women">Women</TabsTrigger>
-              <TabsTrigger value="kids">Kids</TabsTrigger>
-              <TabsTrigger value="accessories">Accessories</TabsTrigger>
+              <TabsTrigger value="Outerwear">Outwear</TabsTrigger>
+              <TabsTrigger value="Footwear">FootWear</TabsTrigger>
+              <TabsTrigger value="Accessories">Accessories</TabsTrigger>
+              <TabsTrigger value="Dresses">Dresses</TabsTrigger>
+              <TabsTrigger value="Sets">Sets</TabsTrigger>
+              <TabsTrigger value="Kids">Kids</TabsTrigger>
             </TabsList>
           </Tabs>
-          <Button variant="outline">View All</Button>
+          <Link to="/products">
+            <Button variant="outline">View All</Button>
+          </Link>
         </div>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {featuredProducts.map((product: Product) => (
+        {featuredProducts.map((product: ProductSummary) => (
           <ProductCard
             key={product.id}
             product={product}
