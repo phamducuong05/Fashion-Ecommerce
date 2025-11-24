@@ -1,0 +1,140 @@
+// prisma/schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// --- 1. ENUMS (Các giá trị cố định) ---
+enum Role {
+  USER
+  ADMIN
+}
+
+enum OrderStatus {
+  PENDING   // Chờ xử lý
+  PAID      // Đã thanh toán
+  SHIPPED   // Đang giao
+  COMPLETED // Hoàn thành
+  CANCELLED // Đã hủy
+}
+
+// --- 2. MODELS (Các bảng dữ liệu) ---
+
+// Bảng Người dùng
+model User {
+  id        String   @id @default(uuid()) // Dùng UUID để bảo mật (vd: "550e8400...")
+  email     String   @unique
+  password  String
+  fullName  String?
+  address   String?
+  phone     String?
+  role      Role     @default(USER)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Quan hệ
+  cart      Cart?    // 1 User có 1 Giỏ hàng (Optional vì lúc mới tạo user chưa chắc đã có giỏ)
+  orders    Order[]  // 1 User có nhiều Đơn hàng
+}
+
+// Bảng Danh mục
+model Category {
+  id        String    @id @default(uuid())
+  name      String
+  slug      String    @unique // Đường dẫn thân thiện (vd: ao-so-mi)
+  
+  products  Product[] // 1 Danh mục có nhiều Sản phẩm
+}
+
+// Bảng Sản phẩm
+model Product {
+  id          String   @id @default(uuid())
+  name        String
+  slug        String   @unique
+  description String?  @db.Text // Cho phép lưu văn bản dài
+  price       Decimal  @db.Decimal(10, 2) // Lưu tiền chính xác (10 số, 2 số thập phân)
+  stock       Int      @default(0) // Số lượng tồn kho
+  imageUrl    String?  // Link ảnh Cloudinary
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Quan hệ
+  category    Category? @relation(fields: [categoryId], references: [id])
+  categoryId  String?   // Khóa ngoại
+
+  cartItems   CartItem[]
+  orderItems  OrderItem[]
+}
+
+// Bảng Giỏ hàng
+model Cart {
+  id        String     @id @default(uuid())
+  
+  // Quan hệ 1-1 với User (Khi xóa User -> Xóa luôn Cart)
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String     @unique
+
+  items     CartItem[]
+
+  updatedAt DateTime   @updatedAt
+}
+
+// Bảng Chi tiết Giỏ hàng (Item trong giỏ)
+model CartItem {
+  id        String   @id @default(uuid())
+  quantity  Int      @default(1)
+
+  // Quan hệ với Cart (Xóa Cart -> Xóa luôn Item)
+  cart      Cart     @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  cartId    String
+
+  // Quan hệ với Product
+  product   Product  @relation(fields: [productId], references: [id])
+  productId String
+
+  // Đảm bảo trong 1 giỏ, 1 sản phẩm chỉ xuất hiện 1 lần (để tránh trùng lặp dòng)
+  @@unique([cartId, productId]) 
+}
+
+// Bảng Đơn hàng
+model Order {
+  id              String      @id @default(uuid())
+  orderCode       String      @unique // Mã đơn hàng (VD: ORD-123456)
+  status          OrderStatus @default(PENDING)
+  totalAmount     Decimal     @db.Decimal(10, 2)
+  shippingAddress String
+  customerName    String?
+  customerPhone   String?
+  
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  // Quan hệ với User
+  user            User        @relation(fields: [userId], references: [id])
+  userId          String
+
+  items           OrderItem[]
+}
+
+// Bảng Chi tiết Đơn hàng (Item đã mua)
+model OrderItem {
+  id          String  @id @default(uuid())
+  quantity    Int
+  price       Decimal @db.Decimal(10, 2) // Lưu giá tại thời điểm mua (Snapshot)
+  productName String  // Lưu tên SP tại thời điểm mua
+
+  // Quan hệ với Order (Xóa Order -> Xóa luôn Item)
+  order       Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  orderId     String
+
+  // Quan hệ với Product (SetNull: Nếu SP bị xóa, đơn hàng vẫn còn nhưng product sẽ null)
+  product     Product? @relation(fields: [productId], references: [id], onDelete: SetNull)
+  productId   String?
+}
