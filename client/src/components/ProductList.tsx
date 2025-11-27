@@ -1,9 +1,9 @@
 import ProductCard from "./ProductCard";
-import type { Product } from "../components/ProductCard";
+import type { ProductSummary } from "../components/ProductCard";
 
 interface ProductListProp {
-  products: Product[];
-  onAddToCart: (product: Product) => void;
+  products: ProductSummary[];
+  onAddToCart: (product: ProductSummary) => void;
 }
 
 const ProductList = ({ products, onAddToCart }: ProductListProp) => {

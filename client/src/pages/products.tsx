@@ -1,22 +1,52 @@
 import ProductList from "../components/ProductList";
 import type { ProductSummary } from "../components/ProductCard";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import SideBar from "../components/SideBar";
 
 interface ProductsPageProp {
-  products: ProductSummary[];
   onAddToCart: (product: ProductSummary) => void;
 }
 
-const ProductsPage = ({ products, onAddToCart }: ProductsPageProp) => {
+const ProductsPage = ({ onAddToCart }: ProductsPageProp) => {
+  const [products, setProducts] = useState<ProductSummary[]>([]);
+  const [uniqueCategories, setUniqueCategories] = useState<string[]>([]);
+  const [uniqueColors, setUniqueColors] = useState<string[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const [sortBy, setSortBy] = useState("New Arrivals");
   const [filterCategory, setFilterCategory] = useState<string | null>(null);
-  const [filterSize, setFilterSize] = useState<string | null>(null);
   const [filterColor, setFilterColor] = useState<string | null>(null);
 
-  const uniqueCategories = [...new Set(products.map((p) => p.category))];
-  const uniqueColors = [...new Set(products.map((p) => p.color))] as string[];
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        // Gọi 3 API cùng lúc
+        const [resProd, resCat, resCol] = await Promise.all([
+          fetch("http://localhost:8000/products"),
+          fetch("http://localhost:8000/categories"),
+          fetch("http://localhost:8000/colors"),
+        ]);
+
+        const productsData = (await resProd.json()) as ProductSummary[];
+        const categoriesData = await resCat.json();
+        const colorsData = await resCol.json();
+
+        const catNames = categoriesData.map((c: any) => c.id);
+
+        const colNames = colorsData.map((c: any) => c.id);
+
+        setProducts(productsData);
+        setUniqueCategories([...new Set(catNames)] as string[]);
+        setUniqueColors([...new Set(colNames)] as string[]);
+      } catch (err) {
+        if (err instanceof Error) setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
 
   let filteredProducts = [...products];
 
@@ -33,7 +63,7 @@ const ProductsPage = ({ products, onAddToCart }: ProductsPageProp) => {
   }
 
   if (filterColor) {
-    filteredProducts = filteredProducts.filter((p) => p.color === filterColor);
+    filteredProducts = filteredProducts.filter((p) => p.color == filterColor);
   }
 
   switch (sortBy) {

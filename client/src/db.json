@@ -1,0 +1,329 @@
+{
+  "products": [
+    {
+      "id": "p1",
+      "name": "Áo Thun Basic Cotton",
+      "price": 199000,
+      "originalPrice": 250000,
+      "image": "https://i.pinimg.com/1200x/44/1a/2e/441a2ec559ab291aff510988394309a1.jpg",
+      "category": "t-shirt",
+      "section": ["sale", "bestseller"],
+      "color": "white",
+      "rating": 4.5,
+      "reviewCount": 125,
+      "description": "Áo thun trơn chất liệu cotton 100% thấm hút mồ hôi.",
+      "variants": [
+        {
+          "id": "v1",
+          "colorName": "Đen",
+          "colorCode": "#000000",
+          "size": "L",
+          "imageUrl": "https://i.pinimg.com/736x/f1/48/f9/f148f9de80f390943d9220a16f10f07b.jpg",
+          "stock": 50
+        },
+        {
+          "id": "v2",
+          "colorName": "Trắng",
+          "colorCode": "#ffffff",
+          "size": "M",
+          "imageUrl": "https://i.pinimg.com/1200x/44/1a/2e/441a2ec559ab291aff510988394309a1.jpg",
+          "stock": 30
+        }
+      ]
+    },
+    {
+      "id": "p2",
+      "name": "Hoodie Oversize Streetwear",
+      "price": 450000,
+      "originalPrice": 600000,
+      "image": "https://i.pinimg.com/736x/d9/a6/cc/d9a6cc82106d6178f37c5246a54f1a3f.jpg",
+      "category": "hoodie",
+      "section": ["new"],
+      "color": "black",
+      "rating": 4.8,
+      "reviewCount": 56,
+      "description": "Áo Hoodie form rộng phong cách đường phố, nỉ bông dày dặn.",
+      "variants": [
+        {
+          "id": "v3",
+          "colorName": "Xám Tiêu",
+          "colorCode": "#808080",
+          "size": "XL",
+          "imageUrl": "https://i.pinimg.com/736x/65/3d/e1/653de103f9cf59d4c7c10ac7ac0d3942.jpg",
+          "stock": 20
+        },
+        {
+          "id": "v4",
+          "colorName": "Đen",
+          "colorCode": "#000000",
+          "size": "L",
+          "imageUrl": "https://i.pinimg.com/736x/d9/a6/cc/d9a6cc82106d6178f37c5246a54f1a3f.jpg",
+          "stock": 15
+        }
+      ]
+    },
+    {
+      "id": "p3",
+      "name": "Quần Jeans Baggy Ống Rộng",
+      "price": 350000,
+      "originalPrice": 350000,
+      "image": "https://i.pinimg.com/1200x/b3/88/6c/b3886c1055694d3abbfe413795af8bb0.jpg",
+      "category": "pants",
+      "section": ["bestseller"],
+      "color": "blue",
+      "rating": 4.2,
+      "reviewCount": 89,
+      "description": "Quần Jeans ống rộng hack dáng, chất vải denim không co giãn.",
+      "variants": [
+        {
+          "id": "v5",
+          "colorName": "Xanh Nhạt",
+          "colorCode": "#add8e6",
+          "size": "29",
+          "imageUrl": "https://i.pinimg.com/1200x/b3/88/6c/b3886c1055694d3abbfe413795af8bb0.jpg",
+          "stock": 100
+        },
+        {
+          "id": "v6",
+          "colorName": "Xanh Đậm",
+          "colorCode": "#00008b",
+          "size": "30",
+          "imageUrl": "https://i.pinimg.com/736x/75/56/4c/75564c8c31c54c0633eeb5e3216f70b3.jpg",
+          "stock": 80
+        }
+      ]
+    },
+    {
+      "id": "p4",
+      "name": "Áo Khoác Bomber Gió",
+      "price": 550000,
+      "originalPrice": 750000,
+      "image": "https://i.pinimg.com/736x/6f/e1/06/6fe1067387e0e463495887b848bb726c.jpg",
+      "category": "jacket",
+      "section": ["sale"],
+      "color": "black",
+      "rating": 4.9,
+      "reviewCount": 210,
+      "description": "Áo khoác bomber dù chống nước nhẹ, bo chun chắc chắn.",
+      "variants": [
+        {
+          "id": "v7",
+          "colorName": "Xanh Rêu",
+          "colorCode": "#556b2f",
+          "size": "L",
+          "imageUrl": "https://i.pinimg.com/736x/70/79/51/7079518ae459013fc41001366f592c5e.jpg",
+          "stock": 10
+        },
+        {
+          "id": "v8",
+          "colorName": "Đen",
+          "colorCode": "#000000",
+          "size": "XL",
+          "imageUrl": "https://i.pinimg.com/736x/6f/e1/06/6fe1067387e0e463495887b848bb726c.jpg",
+          "stock": 5
+        }
+      ]
+    },
+    {
+      "id": "p5",
+      "name": "Áo Polo Premium Cá Sấu",
+      "price": 280000,
+      "originalPrice": 320000,
+      "image": "https://i.pinimg.com/1200x/b0/61/de/b061de686fdcdd8e2b442594a62ed024.jpg",
+      "category": "t-shirt",
+      "section": ["new", "bestseller"],
+      "color": "white",
+      "rating": 4.6,
+      "reviewCount": 45,
+      "description": "Áo Polo vải cá sấu co giãn 4 chiều, thiết kế lịch sự.",
+      "variants": [
+        {
+          "id": "v9",
+          "colorName": "Trắng",
+          "colorCode": "#ffffff",
+          "size": "M",
+          "imageUrl": "https://i.pinimg.com/1200x/b0/61/de/b061de686fdcdd8e2b442594a62ed024.jpg",
+          "stock": 45
+        },
+        {
+          "id": "v10",
+          "colorName": "Xanh Navy",
+          "colorCode": "#000080",
+          "size": "L",
+          "imageUrl": "https://i.pinimg.com/736x/a5/7b/5c/a57b5c3af8531b36e6be94d7afa5f581.jpg",
+          "stock": 50
+        }
+      ]
+    },
+    {
+      "id": "p6",
+      "name": "Quần Short Kaki Unisex",
+      "price": 150000,
+      "originalPrice": 180000,
+      "image": "https://i.pinimg.com/1200x/a2/8c/fd/a28cfd77322a392f3b67b6af03eea6fb.jpg",
+      "category": "shorts",
+      "section": ["sale", "bestseller"],
+      "color": "beige",
+      "rating": 4.3,
+      "reviewCount": 300,
+      "description": "Quần short kaki lưng thun thoải mái, màu sắc pastel.",
+      "variants": [
+        {
+          "id": "v11",
+          "colorName": "Be",
+          "colorCode": "#f5f5dc",
+          "size": "M",
+          "imageUrl": "https://i.pinimg.com/1200x/a2/8c/fd/a28cfd77322a392f3b67b6af03eea6fb.jpg",
+          "stock": 120
+        },
+        {
+          "id": "v12",
+          "colorName": "Đen",
+          "colorCode": "#000000",
+          "size": "L",
+          "imageUrl": "https://i.pinimg.com/1200x/54/6f/66/546f662da8c43cdffc6a64831a34d528.jpg",
+          "stock": 90
+        }
+      ]
+    },
+    {
+      "id": "p7",
+      "name": "Váy Hoa Nhí Vintage",
+      "price": 320000,
+      "originalPrice": 320000,
+      "image": "https://i.pinimg.com/736x/45/d8/bf/45d8bfb9fa751b2f31dcd8e9dc321b52.jpg",
+      "category": "dress",
+      "section": ["new"],
+      "color": "yellow",
+      "rating": 4.7,
+      "reviewCount": 22,
+      "description": "Váy liền thân họa tiết hoa nhí, chất voan lụa mềm mại.",
+      "variants": [
+        {
+          "id": "v13",
+          "colorName": "Hồng",
+          "colorCode": "#ffc0cb",
+          "size": "S",
+          "imageUrl": "https://i.pinimg.com/736x/33/e9/37/33e937a2ce932357696866df450fb868.jpg",
+          "stock": 15
+        },
+        {
+          "id": "v14",
+          "colorName": "Vàng",
+          "colorCode": "#ffff00",
+          "size": "M",
+          "imageUrl": "https://i.pinimg.com/736x/45/d8/bf/45d8bfb9fa751b2f31dcd8e9dc321b52.jpg",
+          "stock": 10
+        }
+      ]
+    },
+    {
+      "id": "p8",
+      "name": "Áo Len Cardigan Mùa Thu",
+      "price": 290000,
+      "originalPrice": 350000,
+      "image": "https://i.pinimg.com/1200x/f4/78/15/f478154d8117f2f2c2c9d98074d85770.jpg",
+      "category": "jacket",
+      "section": ["new", "sale"],
+      "color": "brown",
+      "rating": 4.4,
+      "reviewCount": 67,
+      "description": "Áo khoác len mỏng nhẹ, form rộng Hàn Quốc.",
+      "variants": [
+        {
+          "id": "v15",
+          "colorName": "Nâu Tây",
+          "colorCode": "#a52a2a",
+          "size": "FreeSize",
+          "imageUrl": "https://i.pinimg.com/1200x/f4/78/15/f478154d8117f2f2c2c9d98074d85770.jpg",
+          "stock": 40
+        }
+      ]
+    },
+    {
+      "id": "p9",
+      "name": "Quần Jogger Nỉ Thể Thao",
+      "price": 220000,
+      "originalPrice": 250000,
+      "image": "https://i.pinimg.com/736x/f0/f1/31/f0f131d573557c7911c48ade61218937.jpg",
+      "category": "pants",
+      "section": ["bestseller"],
+      "color": "grey",
+      "rating": 4.1,
+      "reviewCount": 150,
+      "description": "Quần Jogger bo gấu, chất nỉ da cá, phù hợp tập gym.",
+      "variants": [
+        {
+          "id": "v16",
+          "colorName": "Xám",
+          "colorCode": "#808080",
+          "size": "L",
+          "imageUrl": "https://i.pinimg.com/736x/f0/f1/31/f0f131d573557c7911c48ade61218937.jpg",
+          "stock": 60
+        },
+        {
+          "id": "v17",
+          "colorName": "Đen",
+          "colorCode": "#000000",
+          "size": "XL",
+          "imageUrl": "https://i.pinimg.com/736x/19/cf/76/19cf76f6dadb3cb1a7836f238c640ec5.jpg",
+          "stock": 55
+        }
+      ]
+    },
+    {
+      "id": "p10",
+      "name": "Sơ Mi Caro Flannel",
+      "price": 380000,
+      "originalPrice": 450000,
+      "image": "https://i.pinimg.com/1200x/ae/aa/8a/aeaa8a58c122206a829b77585c31faae.jpg",
+      "category": "shirt",
+      "section": ["sale"],
+      "color": "blue",
+      "rating": 4.5,
+      "reviewCount": 34,
+      "description": "Áo sơ mi kẻ caro chất dạ nỉ dày dặn.",
+      "variants": [
+        {
+          "id": "v18",
+          "colorName": "Đỏ Đen",
+          "colorCode": "#8b0000",
+          "size": "L",
+          "imageUrl": "https://i.pinimg.com/1200x/6a/04/57/6a0457c8fe53bbb7791b06343de00c34.jpg",
+          "stock": 25
+        },
+        {
+          "id": "v19",
+          "colorName": "Xanh Đen",
+          "colorCode": "#000080",
+          "size": "M",
+          "imageUrl": "https://i.pinimg.com/1200x/ae/aa/8a/aeaa8a58c122206a829b77585c31faae.jpg",
+          "stock": 20
+        }
+      ]
+    }
+  ],
+  "categories": [
+    { "id": "t-shirt", "name": "Áo Thun" },
+    { "id": "hoodie", "name": "Áo Hoodie" },
+    { "id": "pants", "name": "Quần Dài" },
+    { "id": "shorts", "name": "Quần Short" },
+    { "id": "jacket", "name": "Áo Khoác" },
+    { "id": "dress", "name": "Váy Đầm" },
+    { "id": "shirt", "name": "Áo Sơ Mi" }
+  ],
+
+  "colors": [
+    { "id": "black", "name": "Đen", "code": "#000000" },
+    { "id": "white", "name": "Trắng", "code": "#ffffff" },
+    { "id": "grey", "name": "Xám", "code": "#808080" },
+    { "id": "blue", "name": "Xanh Dương", "code": "#0000ff" },
+    { "id": "green", "name": "Xanh Lá", "code": "#008000" },
+    { "id": "red", "name": "Đỏ", "code": "#ff0000" },
+    { "id": "beige", "name": "Màu Be", "code": "#f5f5dc" },
+    { "id": "brown", "name": "Nâu", "code": "#a52a2a" },
+    { "id": "pink", "name": "Hồng", "code": "#ffc0cb" },
+    { "id": "yellow", "name": "Vàng", "code": "#ffff00" },
+    { "id": "navy", "name": "Xanh Navy", "code": "#000080" }
+  ]
+}

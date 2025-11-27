@@ -1,7 +1,9 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Star } from "lucide-react";
 import { ImageWithFallback } from "./imagefallback";
 import { ProductReviews } from "./ProductReviews";
+import { useParams } from "react-router";
+import type { ProductSummary } from "./ProductCard";
 
 interface ProductVariant {
   id: string;
@@ -22,82 +24,65 @@ interface Product {
   variants: ProductVariant[];
 }
 
-const ProductDetail = () => {
-  const mockProduct: Product = {
-    id: "1",
-    name: "Premium Running Sneakers",
-    price: 129.99,
-    rating: 4.5,
-    reviewCount: 328,
-    description:
-      "Experience ultimate comfort and style with our Premium Running Sneakers. Engineered for performance and designed for everyday wear.",
-    variants: [
-      {
-        id: "v1",
-        colorName: "Black",
-        colorCode: "#000000",
-        size: "9",
-        imageUrl:
-          "https://images.unsplash.com/photo-1587563871167-1ee9c731aefb?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxtb2Rlcm4lMjBzbmVha2VyJTIwc2hvZXxlbnwxfHx8fDE3NjM3NDE2NTl8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
-        stock: 10,
-      },
-      {
-        id: "v2",
-        colorName: "Black",
-        colorCode: "#000000",
-        size: "10",
-        imageUrl:
-          "https://images.unsplash.com/photo-1542291026-7eec264c27ab?w=500",
-        stock: 5,
-      },
-      {
-        id: "v3",
-        colorName: "White",
-        colorCode: "#FFFFFF",
-        size: "9",
-        imageUrl:
-          "https://images.unsplash.com/photo-1525966222134-fcfa99b8ae77?w=500",
-        stock: 12,
-      },
-      {
-        id: "v4",
-        colorName: "White",
-        colorCode: "#FFFFFF",
-        size: "11",
-        imageUrl:
-          "https://images.unsplash.com/photo-1525966222134-fcfa99b8ae77?w=500",
-        stock: 0,
-      },
-      {
-        id: "v5",
-        colorName: "Red",
-        colorCode: "#DC2626",
-        size: "10",
-        imageUrl:
-          "https://images.unsplash.com/photo-1587563871167-1ee9c731aefb?w=500",
-        stock: 20,
-      },
-    ],
-  };
-  const [selectedVariant, setSelectedVariant] = useState(
-    mockProduct.variants[0]
+interface ProductDetailProp {
+  onAddToCart: (product: ProductSummary) => void;
+}
+
+const ProductDetail = ({ onAddToCart }: ProductDetailProp) => {
+  const { id } = useParams();
+  const [product, setProduct] = useState<Product | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const [selectedVariant, setSelectedVariant] = useState<ProductVariant | null>(
+    null
   );
 
+  useEffect(() => {
+    const fetchProduct = async () => {
+      try {
+        setLoading(true);
+
+        const res = await fetch(`http://localhost:8000/products/${id}`);
+
+        if (!res.ok) throw new Error("Product not found");
+
+        const data = (await res.json()) as Product;
+        setProduct(data);
+
+        if (data.variants && data.variants.length > 0) {
+          setSelectedVariant(data.variants[0]);
+        }
+      } catch (err) {
+        if (err instanceof Error) {
+          setError(err.message);
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (id) fetchProduct();
+  }, [id]);
+
+  if (loading)
+    return <div className="p-10 text-center">Loading product...</div>;
+  if (error || !product || !selectedVariant)
+    return <div className="p-10 text-center text-red-500">Error: {error}</div>;
+
   const uniqueColorVariants = [
-    ...new Map(
-      mockProduct.variants.map((item) => [item.colorName, item])
-    ).values(),
+    ...new Map(product.variants.map((item) => [item.colorName, item])).values(),
   ];
 
-  const availableSizes = mockProduct.variants.filter(
-    (p) => p.colorName === selectedVariant.colorName && p.stock > 0
+  const availableSizes = product.variants.filter(
+    (p) => p.colorName === selectedVariant.colorName
   );
 
   const handleColorSelect = (colorName: string) => {
-    const firstAvailableSize = mockProduct.variants.find(
+    const variantOfColor = product.variants.find(
       (v) => v.colorName === colorName
     );
-    if (firstAvailableSize) setSelectedVariant(firstAvailableSize);
+    if (variantOfColor) setSelectedVariant(variantOfColor);
   };
 
   const handleSizeSelect = (sizeVariant: ProductVariant) => {
@@ -131,26 +116,26 @@ const ProductDetail = () => {
             <div className="aspect-square bg-gray-100 rounded-lg overflow-hidden">
               <ImageWithFallback
                 src={selectedVariant.imageUrl}
-                alt={mockProduct.name}
+                alt={product.name}
                 className="w-full h-full object-cover"
               />
             </div>
 
             <div className="flex flex-col gap-6">
               <div>
-                <h1>{mockProduct.name}</h1>
+                <h1>{product.name}</h1>
                 <div className="flex items-center gap-3 mb-4">
-                  {renderStars(mockProduct.rating)}
+                  {renderStars(product.rating)}
                   <span className="text-gray-600">
-                    {mockProduct.rating} ({mockProduct.reviewCount} reviews)
+                    {product.rating} ({product.reviewCount} reviews)
                   </span>
                 </div>
                 <div className="mb-6">
                   <span className="text-3xl text-gray-900">
-                    ${mockProduct.price}
+                    ${product.price}
                   </span>
                 </div>
-                <p className="text-gray-600 mb-6">{mockProduct.description}</p>
+                <p className="text-gray-600 mb-6">{product.description}</p>
               </div>
 
               {/* Color Selection */}
@@ -203,7 +188,10 @@ const ProductDetail = () => {
                 </div>
               </div>
 
-              <button className="w-full bg-blue-600 text-white py-4 px-6 rounded-lg hover:bg-blue-700 transition-colors mt-4">
+              <button
+                // onClick={onAddToCart}
+                className="w-full bg-blue-600 text-white py-4 px-6 rounded-lg hover:bg-blue-700 transition-colors mt-4"
+              >
                 Add to Cart
               </button>
             </div>

@@ -13,7 +13,7 @@ export interface ProductSummary {
   category: string;
   isNew?: boolean;
   isSale?: boolean;
-  section?: string;
+  section?: string[];
   color: string;
   size: string;
 }
@@ -65,7 +65,7 @@ const ProductCard = ({ product, onAddToCart }: ProductCardProps) => {
             Add to Cart
           </Button>
 
-          <Link to="/productdetail" className="w-full">
+          <Link to={`/productdetail/${product.id}`} className="w-full">
             <Button className="w-full opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gray-900 hover:bg-gray-800 text-white font-bold py-2 px-4 rounded-lg">
               <Eye className="h-4 w-4 mr-2" />
               View Detail

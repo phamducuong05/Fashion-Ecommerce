@@ -24,12 +24,12 @@ const Featured = ({
         <div className="flex items-center gap-4">
           <Tabs value={featuredTab} onValueChange={setFeaturedTab}>
             <TabsList>
-              <TabsTrigger value="Outerwear">Outwear</TabsTrigger>
-              <TabsTrigger value="Footwear">FootWear</TabsTrigger>
-              <TabsTrigger value="Accessories">Accessories</TabsTrigger>
-              <TabsTrigger value="Dresses">Dresses</TabsTrigger>
-              <TabsTrigger value="Sets">Sets</TabsTrigger>
-              <TabsTrigger value="Kids">Kids</TabsTrigger>
+              <TabsTrigger value="t-shirt">T-Shirt</TabsTrigger>
+              <TabsTrigger value="hoodie">Hoodie</TabsTrigger>
+              <TabsTrigger value="pants">Pants</TabsTrigger>
+              <TabsTrigger value="shorts">Shorts</TabsTrigger>
+              <TabsTrigger value="jacket">Jacket</TabsTrigger>
+              <TabsTrigger value="dress">Dress</TabsTrigger>
             </TabsList>
           </Tabs>
           <Link to="/products">
