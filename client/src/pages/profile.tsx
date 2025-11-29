@@ -1,6 +1,5 @@
 import { ProfileHeader } from "../components/ProfileHeader";
 import { AddressBook } from "../components/AddressBook";
-import { PaymentMethods } from "../components/PaymentMethod";
 import { OrderHistory } from "../components/OrderHistory";
 
 const ProfilePage = () => {
@@ -10,9 +9,8 @@ const ProfilePage = () => {
         <div className="space-y-6">
           <ProfileHeader />
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-1 gap-6">
             <AddressBook />
-            <PaymentMethods />
           </div>
 
           <OrderHistory />

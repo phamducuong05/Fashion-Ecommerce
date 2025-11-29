@@ -1,8 +1,10 @@
 import { OrderSummary } from "../components/OrderSummary";
-import { ShoppingBag } from "lucide-react";
+import { ShoppingBag, ArrowLeft, Ticket } from "lucide-react";
 import type { CartItemType } from "../App";
 import { useState } from "react";
 import { CartItem } from "../components/CartItem";
+import { Link } from "react-router";
+import { Button } from "../components/variants/button";
 
 interface CartProp {
   cartItems: CartItemType[];
@@ -25,7 +27,7 @@ const CartPage = ({ cartItems, setCartItems }: CartProp) => {
   };
 
   const handleRemoveItem = (id: string) => {
-    setCartItems(cartItems.filter((item) => item.id != id));
+    setCartItems(cartItems.filter((item) => item.id !== id));
   };
 
   const subtotal = cartItems.reduce(
@@ -42,7 +44,6 @@ const CartPage = ({ cartItems, setCartItems }: CartProp) => {
   ];
 
   const handleApplyDiscount = (code: string) => {
-    // Simple discount code logic - you can customize this
     const discountCodes: {
       [key: string]: { type: "amount" | "freeship"; value: number };
     } = {
@@ -65,61 +66,122 @@ const CartPage = ({ cartItems, setCartItems }: CartProp) => {
   };
 
   return (
-    <div className="min-h-screen bg-white">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Header */}
-        <div className="flex items-center gap-3 mb-8">
-          <ShoppingBag className="w-8 h-8 text-gray-900" />
-          <h1 className="text-gray-900">Shopping Cart</h1>
-          <span className="text-gray-500">({cartItems.length} items)</span>
+    <div className="min-h-screen bg-gray-50 py-12 font-sans">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900 tracking-tight">
+              Shopping Cart
+            </h1>
+            <p className="text-gray-500 mt-1">Review your selected items</p>
+          </div>
+          <Link
+            to="/products"
+            className="text-indigo-600 hover:text-indigo-800 font-medium flex items-center gap-2 transition-colors"
+          >
+            <ArrowLeft className="w-4 h-4" /> Continue Shopping
+          </Link>
         </div>
 
-        {/* Main Content */}
-        <div className="grid lg:grid-cols-3 gap-8">
-          {/* Cart Items */}
-          <div className="lg:col-span-2">
-            {cartItems.length === 0 ? (
-              <div className="text-center py-12">
-                <ShoppingBag className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                <p className="text-gray-500">Your cart is empty</p>
+        <div className="grid lg:grid-cols-12 gap-8 items-start">
+          <div className="lg:col-span-8 space-y-6">
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+              <div className="px-6 py-4 border-b border-gray-100 bg-gray-50/50 flex justify-between items-center">
+                <span className="font-semibold text-gray-700">Product</span>
+                <span className="font-semibold text-gray-700 hidden sm:block">
+                  {cartItems.length} Items
+                </span>
               </div>
-            ) : (
-              <div className="bg-white border border-gray-200 rounded-lg p-6">
-                {cartItems.map((item) => (
-                  <CartItem
-                    key={item.id}
-                    {...item}
-                    onQuantityChange={handleQuantityChange}
-                    onRemove={handleRemoveItem}
-                  />
-                ))}
+
+              <div className="p-6">
+                {cartItems.length === 0 ? (
+                  <div className="text-center py-16 flex flex-col items-center">
+                    <div className="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mb-4">
+                      <ShoppingBag className="w-10 h-10 text-gray-300" />
+                    </div>
+                    <h3 className="text-lg font-medium text-gray-900">
+                      Your cart is empty
+                    </h3>
+                    <p className="text-gray-500 mb-6 max-w-xs mx-auto">
+                      Looks like you haven't added anything to your cart yet.
+                    </p>
+                    <Link to="/products">
+                      <Button className="bg-black text-white hover:bg-gray-800 px-8">
+                        Start Shopping
+                      </Button>
+                    </Link>
+                  </div>
+                ) : (
+                  <div className="space-y-6">
+                    {cartItems.map((item, index) => (
+                      <div key={item.id}>
+                        <CartItem
+                          {...item}
+                          onQuantityChange={handleQuantityChange}
+                          onRemove={handleRemoveItem}
+                        />
+                        {index !== cartItems.length - 1 && (
+                          <div className="h-px bg-gray-100 my-6" />
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
-            )}
+            </div>
           </div>
 
-          {/* Order Summary */}
-          <div className="lg:col-span-1">
-            <OrderSummary
-              subtotal={subtotal}
-              shipping={actualShipping}
-              discount={discount}
-              onApplyDiscount={handleApplyDiscount}
-            />
+          <div className="lg:col-span-4 space-y-6 lg:sticky lg:top-24">
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+              <h2 className="text-lg font-bold text-gray-900 mb-6">
+                Order Summary
+              </h2>
+              <OrderSummary
+                subtotal={subtotal}
+                shipping={actualShipping}
+                discount={discount}
+                onApplyDiscount={handleApplyDiscount}
+              />
+            </div>
 
-            {/* Discount Codes Helper */}
-            <div className="mt-4 p-4 bg-gray-900 rounded-lg text-sm">
-              <p className="text-white font-medium mb-3">Codes Possessed</p>
-              <div className="space-y-2">
-                {possessedCodes.map((code) => (
-                  <div
-                    key={code.code}
-                    className="flex items-center justify-between bg-gray-800 p-3 rounded-lg"
-                  >
-                    <span className="text-white font-mono">{code.code}</span>
-                    <span className="text-gray-400">{code.description}</span>
-                  </div>
-                ))}
+            {cartItems.length > 0 && (
+              <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                <div className="flex items-center gap-2 mb-4">
+                  <Ticket className="w-5 h-5 text-indigo-600" />
+                  <h3 className="font-bold text-gray-900">Available Coupons</h3>
+                </div>
+
+                <div className="space-y-3">
+                  {possessedCodes.map((code) => (
+                    <div
+                      key={code.code}
+                      className="group relative flex flex-col sm:flex-row sm:items-center justify-between bg-indigo-50/50 border border-dashed border-indigo-200 p-3 rounded-lg hover:border-indigo-400 transition-colors cursor-pointer"
+                      onClick={() => handleApplyDiscount(code.code)}
+                    >
+                      <div className="flex flex-col">
+                        <span className="font-bold text-indigo-700 font-mono tracking-wide">
+                          {code.code}
+                        </span>
+                        <span className="text-xs text-indigo-600/80">
+                          {code.description}
+                        </span>
+                      </div>
+
+                      <div className="mt-2 sm:mt-0">
+                        <button className="text-xs font-bold bg-white text-indigo-600 px-3 py-1 rounded-full border border-indigo-100 shadow-sm group-hover:bg-indigo-600 group-hover:text-white transition-all">
+                          Apply
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
+            )}
+
+            <div className="flex justify-center gap-4 text-gray-400 grayscale opacity-70">
+              <p className="text-xs text-center">
+                Secure Checkout • 30-Day Returns
+              </p>
             </div>
           </div>
         </div>

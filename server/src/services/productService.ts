@@ -8,26 +8,41 @@ export interface ProductSummary {
   originalPrice: number;
   image: string;
   category: string[];
-  section: string[];
+  sections: string[];
   color: string;
   size: string;
 }
 
+interface FilterParams {
+  search?: string;
+  category?: string;
+  sort?: string;
+  page?: number;
+  limit?: number;
+}
+
+interface PaginatedResult {
+  data: ProductSummary[];
+  meta: {
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+  };
+}
+
 const getColorCode = (colorName: string): string => {
-  // Chuyển hết về chữ thường và bỏ khoảng trắng thừa để so sánh cho chuẩn
-  // Ví dụ: "Black" -> "black", " Light Gray " -> "light gray"
   const normalizedColor = colorName.toLowerCase().trim();
 
   const map: Record<string, string> = {
-    gray: "#808080", // Xám chuẩn
-    black: "#000000", // Đen
-    blue: "#0000FF", // Xanh dương
-    "light gray": "#D3D3D3", // Xám nhạt
-    "dark blue": "#00008B", // Xanh dương đậm
-    white: "#FFFFFF", // Trắng
-    brown: "#A52A2A", // Nâu
+    gray: "#808080",
+    black: "#000000",
+    blue: "#0000FF",
+    "light gray": "#D3D3D3",
+    "dark blue": "#00008B",
+    white: "#FFFFFF",
+    brown: "#A52A2A",
 
-    // --- Các màu phổ biến khác (Dự phòng cho tương lai) ---
     red: "#FF0000",
     green: "#008000",
     yellow: "#FFFF00",
@@ -40,16 +55,43 @@ const getColorCode = (colorName: string): string => {
   return map[normalizedColor] || "#CCCCCC";
 };
 
-export const getAllProducts = async (): Promise<ProductSummary[]> => {
+export const getAllProducts = async (
+  params: FilterParams
+): Promise<PaginatedResult> => {
+  const { search, category, sort } = params;
+  const page = params.page || 1;
+  const limit = params.limit || 12;
+  const skip = (page - 1) * limit;
+
+  const whereClause: any = { isActive: true };
+  if (search) whereClause.name = { contains: search, mode: "insensitive" };
+
+  if (category) {
+    whereClause.categories = {
+      some: {
+        name: category,
+      },
+    };
+  }
+
+  let orderBy: any = { createdAt: "desc" };
+
+  if (sort === "New_Arrivals") orderBy = { createdAt: "desc" };
+  if (sort === "Price: Low to High") orderBy = { price: "asc" };
+  if (sort === "Price : High to Low") orderBy = { price: "desc" };
+
   const rawProducts = await prisma.product.findMany({
+    where: whereClause,
+    orderBy: orderBy,
+    skip: skip,
+    take: limit,
     include: {
       categories: true,
       variants: true,
     },
-    orderBy: {
-      createdAt: "desc",
-    },
   });
+
+  const total = await prisma.product.count({ where: whereClause });
 
   const formattedData = rawProducts.map((product) => {
     const representativeVariant = product.variants[0];
@@ -69,13 +111,21 @@ export const getAllProducts = async (): Promise<ProductSummary[]> => {
       originalPrice: Number(product.originalPrice),
       image: product.thumbnail || "",
       category: product.categories.map((cat) => cat.name),
-      section: sections,
+      sections: sections,
       color: representativeVariant ? representativeVariant.color : "Free",
       size: representativeVariant ? representativeVariant.size : "Free",
     };
   });
 
-  return formattedData;
+  return {
+    data: formattedData,
+    meta: {
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit),
+    },
+  };
 };
 
 export interface ProductDetail {
@@ -95,7 +145,6 @@ export interface ProductDetail {
   }[];
 }
 
-// 2. Hàm lấy chi tiết sản phẩm
 export const getProductById = async (
   id: string
 ): Promise<ProductDetail | null> => {

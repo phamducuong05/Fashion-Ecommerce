@@ -1,5 +1,15 @@
 import { Button } from "./variants/button";
-import { Facebook, Instagram, Youtube } from "lucide-react";
+import {
+  Facebook,
+  Instagram,
+  Youtube,
+  Twitter,
+  MapPin,
+  Phone,
+  Mail,
+  Clock,
+  Send,
+} from "lucide-react";
 import type { FormData } from "../App";
 import { cn } from "../utils";
 
@@ -23,68 +33,179 @@ const Contact = ({
       [name as keyof FormData]: value,
     }));
   };
-  return (
-    <section id="contact" className="bg-gray-50 border-t">
-      <div className="container mx-auto px-4 py-16">
-        <h2 className="text-3xl text-center mb-12">Contact Us</h2>
 
-        <div className="grid grid-cols-1 gap-12 max-w-full mx-auto">
-          {/* Contact Form */}
-          <div>
-            <h3 className="text-xl mb-6">Send us a message</h3>
-            <form onSubmit={handleSubmitContact} className="space-y-4">
-              <div>
-                <input
-                  className={cn(
-                    "file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 border-input flex h-9 w-full min-w-0 rounded-md border px-3 py-1 text-base bg-input-background transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm",
-                    "focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]",
-                    "aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive"
-                  )}
-                  placeholder="Họ và tên"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleChange}
-                  required
-                />
+  // Class chung cho Input để code gọn hơn
+  const inputClasses =
+    "w-full bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 block p-3 transition-all duration-200 outline-none";
+
+  return (
+    <section id="contact" className="bg-white py-20">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="text-center mb-16">
+          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 tracking-tight uppercase mb-3">
+            Contact Us
+          </h2>
+          <p className="text-gray-500 max-w-xl mx-auto">
+            We'd love to hear from you. Whether you have a question about
+            shipping, pricing, or styling, our team is ready to help.
+          </p>
+        </div>
+
+        {/* --- CONTACT CARD WRAPPER --- */}
+        <div className="max-w-6xl mx-auto bg-white rounded-3xl overflow-hidden shadow-2xl flex flex-col lg:flex-row border border-gray-100">
+          {/* LEFT SIDE: INFO (Dark Theme) */}
+          <div className="lg:w-5/12 bg-zinc-900 text-white p-10 lg:p-12 flex flex-col justify-between relative overflow-hidden">
+            {/* Background Pattern Decoration */}
+            <div className="absolute top-0 right-0 -mr-20 -mt-20 w-64 h-64 rounded-full bg-indigo-600/20 blur-3xl"></div>
+            <div className="absolute bottom-0 left-0 -ml-20 -mb-20 w-64 h-64 rounded-full bg-indigo-600/20 blur-3xl"></div>
+
+            <div className="relative z-10">
+              <h3 className="text-2xl font-bold mb-8">Contact Information</h3>
+
+              <div className="space-y-8">
+                <div className="flex items-start gap-4">
+                  <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center flex-shrink-0">
+                    <MapPin className="h-5 w-5 text-indigo-400" />
+                  </div>
+                  <div>
+                    <h4 className="font-semibold mb-1 text-gray-200">
+                      Visit Us
+                    </h4>
+                    <p className="text-gray-400 text-sm leading-relaxed">
+                      121 Tran Dai Nghia St, Dong Da Dist,
+                      <br />
+                      Hanoi, Vietnam
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-4">
+                  <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center flex-shrink-0">
+                    <Phone className="h-5 w-5 text-indigo-400" />
+                  </div>
+                  <div>
+                    <h4 className="font-semibold mb-1 text-gray-200">
+                      Call Us
+                    </h4>
+                    <p className="text-gray-400 text-sm">+84 648 559 25</p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-4">
+                  <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center flex-shrink-0">
+                    <Mail className="h-5 w-5 text-indigo-400" />
+                  </div>
+                  <div>
+                    <h4 className="font-semibold mb-1 text-gray-200">
+                      Email Us
+                    </h4>
+                    <p className="text-gray-400 text-sm">
+                      cuongmerlin@gmail.com
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-4">
+                  <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center flex-shrink-0">
+                    <Clock className="h-5 w-5 text-indigo-400" />
+                  </div>
+                  <div>
+                    <h4 className="font-semibold mb-1 text-gray-200">
+                      Working Hours
+                    </h4>
+                    <p className="text-gray-400 text-sm">
+                      Mon - Fri: 9AM - 8PM
+                    </p>
+                    <p className="text-gray-400 text-sm">
+                      Sat - Sun: 10AM - 6PM
+                    </p>
+                  </div>
+                </div>
               </div>
-              <div>
-                <input
-                  className={cn(
-                    "file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 border-input flex h-9 w-full min-w-0 rounded-md border px-3 py-1 text-base bg-input-background transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm",
-                    "focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]",
-                    "aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive"
-                  )}
-                  type="tel"
-                  name="phone"
-                  placeholder="Số điện thoại"
-                  value={formData.phone}
-                  onChange={handleChange}
-                  required
-                />
+            </div>
+
+            {/* Social Icons */}
+            <div className="relative z-10 mt-12">
+              <h4 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-4">
+                Follow Us
+              </h4>
+              <div className="flex gap-4">
+                {[Facebook, Instagram, Youtube, Twitter].map((Icon, index) => (
+                  <a
+                    key={index}
+                    href="#"
+                    className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white hover:bg-indigo-600 hover:border-indigo-600 transition-all duration-300"
+                  >
+                    <Icon className="h-5 w-5" />
+                  </a>
+                ))}
               </div>
+            </div>
+          </div>
+
+          {/* RIGHT SIDE: FORM (Light Theme) */}
+          <div className="lg:w-7/12 p-10 lg:p-12 bg-white">
+            <h3 className="text-2xl font-bold text-gray-900 mb-2">
+              Send us a message
+            </h3>
+            <p className="text-gray-500 mb-8 text-sm">
+              Your email address will not be published. Required fields are
+              marked *
+            </p>
+
+            <form onSubmit={handleSubmitContact} className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block mb-2 text-sm font-medium text-gray-700">
+                    Full Name *
+                  </label>
+                  <input
+                    className={inputClasses}
+                    placeholder="John Doe"
+                    name="name"
+                    value={formData.name}
+                    onChange={handleChange}
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block mb-2 text-sm font-medium text-gray-700">
+                    Phone Number *
+                  </label>
+                  <input
+                    className={inputClasses}
+                    type="tel"
+                    name="phone"
+                    placeholder="+84 ..."
+                    value={formData.phone}
+                    onChange={handleChange}
+                    required
+                  />
+                </div>
+              </div>
+
               <div>
+                <label className="block mb-2 text-sm font-medium text-gray-700">
+                  Email Address *
+                </label>
                 <input
-                  className={cn(
-                    "file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 border-input flex h-9 w-full min-w-0 rounded-md border px-3 py-1 text-base bg-input-background transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm",
-                    "focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]",
-                    "aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive"
-                  )}
+                  className={inputClasses}
                   type="email"
                   name="email"
-                  placeholder="Email"
+                  placeholder="john@example.com"
                   value={formData.email}
                   onChange={handleChange}
                   required
                 />
               </div>
+
               <div>
+                <label className="block mb-2 text-sm font-medium text-gray-700">
+                  Message *
+                </label>
                 <textarea
-                  className={cn(
-                    "file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 border-input flex w-full min-w-0 rounded-md border px-3 py-1 text-base bg-input-background transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm",
-                    "focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]",
-                    "aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive"
-                  )}
-                  placeholder="Nội dung"
+                  className={inputClasses}
+                  placeholder="How can we help you?"
                   name="message"
                   rows={5}
                   value={formData.message}
@@ -92,93 +213,15 @@ const Contact = ({
                   required
                 />
               </div>
+
               <Button
                 type="submit"
-                className="w-full bg-black text-white hover:bg-black/90"
+                className="w-full bg-black text-white hover:bg-zinc-800 py-6 text-base font-medium shadow-lg hover:shadow-xl transition-all active:scale-[0.98]"
               >
-                Gửi
+                Send Message
+                <Send className="ml-2 h-4 w-4" />
               </Button>
             </form>
-          </div>
-
-          {/* Contact Info */}
-          <div>
-            <h3 className="text-xl mb-6">Get in touch</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4 mb-8">
-              <div className="space-y-4">
-                <div>
-                  <h4 className="mb-1">Address</h4>
-                  <p className="text-gray-600">
-                    121 Tran Dai nghia Street, Dong Da District
-                    <br />
-                    Hanoi, Vietnam
-                  </p>
-                </div>
-                <div>
-                  <h4 className="mb-1">Phone</h4>
-                  <p className="text-gray-600">+84 64855925</p>
-                </div>
-              </div>
-              <div className="space-y-4">
-                <div>
-                  <h4 className="mb-1">Email</h4>
-                  <p className="text-gray-600">cuongmerlin@gmail.com</p>
-                </div>
-                <div>
-                  <h4 className="mb-1">Hours</h4>
-                  <p className="text-gray-600">
-                    Mon - Fri: 9:00 AM - 8:00 PM
-                    <br />
-                    Sat - Sun: 10:00 AM - 6:00 PM
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {/* Social Media */}
-            <div>
-              <h4 className="mb-4">Follow us</h4>
-              <div className="flex gap-3">
-                <a
-                  href="https://facebook.com"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-10 h-10 rounded-full bg-black text-white flex items-center justify-center hover:bg-black/80 transition-colors"
-                >
-                  <Facebook className="h-5 w-5" />
-                </a>
-                <a
-                  href="https://instagram.com"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-10 h-10 rounded-full bg-black text-white flex items-center justify-center hover:bg-black/80 transition-colors"
-                >
-                  <Instagram className="h-5 w-5" />
-                </a>
-                <a
-                  href="https://youtube.com"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-10 h-10 rounded-full bg-black text-white flex items-center justify-center hover:bg-black/80 transition-colors"
-                >
-                  <Youtube className="h-5 w-5" />
-                </a>
-                <a
-                  href="https://tiktok.com"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-10 h-10 rounded-full bg-black text-white flex items-center justify-center hover:bg-black/80 transition-colors"
-                >
-                  <svg
-                    className="h-5 w-5"
-                    fill="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z" />
-                  </svg>
-                </a>
-              </div>
-            </div>
           </div>
         </div>
       </div>

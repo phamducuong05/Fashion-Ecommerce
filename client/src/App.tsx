@@ -9,6 +9,7 @@ import RegisterPage from "./pages/register";
 import ProductsPage from "./pages/products";
 import CartPage from "./pages/cart";
 import ProductDetail from "./components/ProductDetails";
+import ContactPage from "./pages/contact";
 
 export interface CartItemType {
   id: string;
@@ -181,7 +182,7 @@ function App() {
             />
           }
         />
-
+        <Route path="/contact" element={<ContactPage />} />
         <Route path="/about" element={<AboutPage />} />
         <Route path="/signin" element={<SignInPage />}></Route>
         <Route path="/register" element={<RegisterPage />}></Route>
