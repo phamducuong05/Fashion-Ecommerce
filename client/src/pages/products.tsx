@@ -2,6 +2,8 @@ import ProductList from "../components/ProductList";
 import type { ProductSummary } from "../components/ProductCard";
 import { useEffect, useState } from "react";
 import SideBar from "../components/SideBar";
+import Pagination from "../components/Pagination";
+import useDebounce from "../hooks/useDebounce";
 
 interface ProductsPageProp {
   onAddToCart: (product: ProductSummary) => void;
@@ -17,63 +19,67 @@ export interface Category {
 
 const ProductsPage = ({ onAddToCart }: ProductsPageProp) => {
   const [products, setProducts] = useState<ProductSummary[]>([]);
-  const [uniqueColors, setUniqueColors] = useState<string[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const [sortBy, setSortBy] = useState("New Arrivals");
   const [categories, setCategories] = useState<Category[]>([]);
   const [filterCategory, setFilterCategory] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+
+  const debouncedSearch = useDebounce(search, 400);
 
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchCategories = async () => {
       try {
-        const [resProd, resCat] = await Promise.all([
-          fetch("http://localhost:3000/api/products"),
-          fetch("http://localhost:3000/api/categories"),
-        ]);
+        const res = await fetch("http://localhost:3000/api/categories");
+        const data = await res.json();
+        setCategories(data.data || []);
+      } catch (err) {
+        console.error("Lỗi tải danh mục:", err);
+      }
+    };
+    fetchCategories();
+  }, []);
 
-        const productsResponse = await resProd.json();
-        const categoriesResponse = await resCat.json();
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [debouncedSearch, filterCategory, sortBy]);
 
-        const productsData = productsResponse.data as ProductSummary[];
-        const categoriesData = categoriesResponse.data as Category[];
-        setCategories(categoriesData);
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        setLoading(true);
 
-        setProducts(productsData);
+        let url = `http://localhost:3000/api/products?page=${currentPage}&limit=1`;
+
+        if (debouncedSearch) url += `&search=${debouncedSearch}`;
+        if (filterCategory) url += `&category=${filterCategory}`;
+        if (sortBy) url += `&sort=${sortBy}`;
+
+        const res = await fetch(url);
+        const json = await res.json();
+
+        setProducts(json.data as ProductSummary[]);
+
+        if (json.pagination) {
+          setTotalPages(json.pagination.totalPages);
+        }
       } catch (err) {
         if (err instanceof Error) setError(err.message);
       } finally {
         setLoading(false);
       }
     };
-    fetchData();
-  }, []);
 
-  let filteredProducts = [...products];
+    fetchProducts();
+  }, [currentPage, debouncedSearch, filterCategory, sortBy]);
 
-  if (search) {
-    filteredProducts = filteredProducts.filter((p) =>
-      p.name.toLowerCase().includes(search.toLowerCase())
-    );
-  }
-
-  if (filterCategory) {
-    filteredProducts = filteredProducts.filter((p) =>
-      p.category.includes(filterCategory)
-    );
-  }
-
-  switch (sortBy) {
-    case "Price: Low to High":
-      filteredProducts.sort((a, b) => a.price - b.price);
-      break;
-    case "Price: High to Low":
-      filteredProducts.sort((a, b) => b.price - a.price);
-      break;
-    default:
-      break;
-  }
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
 
   const clearAllFilters = () => {
     setSearch("");
@@ -110,9 +116,11 @@ const ProductsPage = ({ onAddToCart }: ProductsPageProp) => {
             clearAllFilters={clearAllFilters}
           />
           <main className="flex-1">
-            <ProductList
-              products={filteredProducts}
-              onAddToCart={onAddToCart}
+            <ProductList products={products} onAddToCart={onAddToCart} />
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={handlePageChange}
             />
           </main>
         </div>
