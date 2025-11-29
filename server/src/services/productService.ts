@@ -8,7 +8,7 @@ export interface ProductSummary {
   originalPrice: number;
   image: string;
   category: string[];
-  section: string[];
+  sections: string[];
   color: string;
   size: string;
 }
@@ -111,7 +111,7 @@ export const getAllProducts = async (
       originalPrice: Number(product.originalPrice),
       image: product.thumbnail || "",
       category: product.categories.map((cat) => cat.name),
-      section: sections,
+      sections: sections,
       color: representativeVariant ? representativeVariant.color : "Free",
       size: representativeVariant ? representativeVariant.size : "Free",
     };

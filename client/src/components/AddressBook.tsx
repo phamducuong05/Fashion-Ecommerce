@@ -1,4 +1,4 @@
-import { MapPin, Plus, Edit2, Trash2 } from "lucide-react";
+import { MapPin, Plus, Edit2, Trash2, Check } from "lucide-react";
 
 export function AddressBook() {
   const addresses = [
@@ -29,51 +29,84 @@ export function AddressBook() {
   ];
 
   return (
-    <div className="bg-white rounded-lg shadow p-6">
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-gray-900">Address Book</h2>
-        <button className="inline-flex items-center gap-2 px-3 py-2 text-sm bg-gray-100 text-gray-900 rounded-lg hover:bg-gray-200 transition-colors">
+    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+        <div>
+          <h2 className="text-2xl font-bold text-gray-900 tracking-tight">
+            Address Book
+          </h2>
+          <p className="text-sm text-gray-500 mt-1">
+            Manage your shipping and billing addresses.
+          </p>
+        </div>
+        <button className="inline-flex items-center justify-center gap-2 px-5 py-2.5 text-sm font-semibold bg-black text-white rounded-full hover:bg-zinc-800 transition-all shadow-md hover:shadow-lg active:scale-95">
           <Plus className="w-4 h-4" />
-          Add New
+          Add New Address
         </button>
       </div>
 
-      <div className="space-y-4">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {addresses.map((address) => (
           <div
             key={address.id}
-            className={`border rounded-lg p-4 ${
-              address.isDefault ? "border-black" : "border-gray-200"
+            className={`group relative p-6 rounded-xl border transition-all duration-300 hover:shadow-md ${
+              address.isDefault
+                ? "border-indigo-600 bg-indigo-50/30 ring-1 ring-indigo-600/20"
+                : "border-gray-200 bg-white hover:border-indigo-300"
             }`}
           >
-            <div className="flex items-start justify-between mb-2">
-              <div className="flex items-center gap-2">
-                <MapPin className="w-4 h-4 text-gray-400" />
-                <span className="text-gray-900">{address.label}</span>
-                {address.isDefault && (
-                  <span className="px-2 py-1 text-xs bg-black text-white rounded">
-                    Default
-                  </span>
-                )}
+            <div className="flex items-start justify-between mb-4">
+              <div className="flex items-center gap-3">
+                <div
+                  className={`p-2 rounded-full ${
+                    address.isDefault
+                      ? "bg-indigo-100 text-indigo-600"
+                      : "bg-gray-100 text-gray-500"
+                  }`}
+                >
+                  <MapPin className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-gray-900">{address.label}</h3>
+                  {address.isDefault && (
+                    <span className="inline-flex items-center gap-1 text-[10px] uppercase tracking-wider font-bold text-indigo-600 mt-0.5">
+                      <Check className="w-3 h-3" /> Default
+                    </span>
+                  )}
+                </div>
               </div>
-              <div className="flex items-center gap-2">
-                <button className="p-1 text-gray-400 hover:text-gray-600 transition-colors">
+
+              <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                <button
+                  className="p-2 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-full transition-colors"
+                  title="Edit"
+                >
                   <Edit2 className="w-4 h-4" />
                 </button>
-                <button className="p-1 text-gray-400 hover:text-red-600 transition-colors">
+                <button
+                  className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-full transition-colors"
+                  title="Delete"
+                >
                   <Trash2 className="w-4 h-4" />
                 </button>
               </div>
             </div>
 
-            <div className="text-gray-600 text-sm space-y-1">
-              <p>{address.name}</p>
+            <div className="space-y-1 text-sm text-gray-600 leading-relaxed border-t border-gray-100/50 pt-4">
+              <p className="font-medium text-gray-900 text-base mb-2">
+                {address.name}
+              </p>
               <p>{address.street}</p>
               <p>
                 {address.city}, {address.state} {address.zip}
               </p>
               <p>{address.country}</p>
-              <p>{address.phone}</p>
+              <div className="pt-2 mt-2 flex items-center gap-2 text-gray-500">
+                <span className="text-xs font-medium bg-gray-100 px-2 py-1 rounded">
+                  Phone
+                </span>
+                {address.phone}
+              </div>
             </div>
           </div>
         ))}

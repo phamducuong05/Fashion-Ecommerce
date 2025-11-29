@@ -1,5 +1,5 @@
 import { ImageWithFallback } from "./imagefallback";
-import { Edit } from "lucide-react";
+import { Edit, Calendar, Mail } from "lucide-react";
 
 export function ProfileHeader() {
   const user = {
@@ -11,31 +11,47 @@ export function ProfileHeader() {
   };
 
   return (
-    <div className="bg-white rounded-lg shadow p-6">
-      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6">
-        <div className="relative">
-          <ImageWithFallback
-            src={user.avatar}
-            alt={user.name}
-            className="w-24 h-24 rounded-full object-cover"
-          />
-          <div className="absolute bottom-0 right-0 w-6 h-6 bg-green-500 rounded-full border-4 border-white"></div>
-        </div>
+    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+      <div className="h-32 bg-gradient-to-r from-gray-100 via-gray-200 to-gray-100"></div>
 
-        <div className="flex-1">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div>
-              <h1 className="text-gray-900">{user.name}</h1>
-              <p className="text-gray-600 mt-1">{user.email}</p>
-              <p className="text-gray-500 text-sm mt-1">
-                Member since {user.memberSince}
-              </p>
+      <div className="px-8 pb-8">
+        <div className="relative flex flex-col sm:flex-row items-start sm:items-end -mt-12 gap-6">
+          <div className="relative">
+            <div className="p-1.5 bg-white rounded-full shadow-sm">
+              <ImageWithFallback
+                src={user.avatar}
+                alt={user.name}
+                className="w-32 h-32 rounded-full object-cover"
+              />
             </div>
+            <div className="absolute bottom-4 right-4 w-5 h-5 bg-emerald-500 border-4 border-white rounded-full"></div>
+          </div>
 
-            <button className="inline-flex items-center gap-2 px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors self-start sm:self-auto">
-              <Edit className="w-4 h-4" />
-              Edit Profile
-            </button>
+          <div className="flex-1 w-full sm:w-auto pb-2">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div>
+                <div className="flex items-center gap-2">
+                  <h1 className="text-3xl font-bold text-gray-900 tracking-tight">
+                    {user.name}
+                  </h1>
+                </div>
+                <div className="flex flex-wrap items-center gap-4 mt-2 text-sm text-gray-500">
+                  <div className="flex items-center gap-1.5 hover:text-gray-700 transition-colors">
+                    <Mail className="w-4 h-4" />
+                    {user.email}
+                  </div>
+                  <div className="flex items-center gap-1.5 hover:text-gray-700 transition-colors">
+                    <Calendar className="w-4 h-4" />
+                    Joined {user.memberSince}
+                  </div>
+                </div>
+              </div>
+
+              <button className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-black text-white rounded-full text-sm font-medium hover:bg-zinc-800 transition-all shadow-md hover:shadow-lg active:scale-95">
+                <Edit className="w-4 h-4" />
+                Edit Profile
+              </button>
+            </div>
           </div>
         </div>
       </div>

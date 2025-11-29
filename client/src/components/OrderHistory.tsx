@@ -1,4 +1,11 @@
-import { Package, ChevronRight } from "lucide-react";
+import {
+  Package,
+  ChevronRight,
+  Calendar,
+  Clock,
+  CheckCircle2,
+  Truck,
+} from "lucide-react";
 import { ImageWithFallback } from "./imagefallback";
 
 export function OrderHistory() {
@@ -30,7 +37,7 @@ export function OrderHistory() {
     {
       id: "ORD-2024-1198",
       date: "October 28, 2024",
-      status: "Delivered",
+      status: "Shipped",
       total: 129.99,
       items: [
         {
@@ -46,7 +53,7 @@ export function OrderHistory() {
     {
       id: "ORD-2024-1156",
       date: "October 12, 2024",
-      status: "Delivered",
+      status: "Processing",
       total: 249.97,
       items: [
         {
@@ -69,80 +76,138 @@ export function OrderHistory() {
     },
   ];
 
-  const getStatusColor = (status: string) => {
+  const getStatusConfig = (status: string) => {
     switch (status.toLowerCase()) {
       case "delivered":
-        return "bg-green-100 text-green-800";
+        return {
+          style: "bg-emerald-50 text-emerald-700 border-emerald-200",
+          icon: CheckCircle2,
+          dot: "bg-emerald-500",
+        };
       case "shipped":
-        return "bg-blue-100 text-blue-800";
+        return {
+          style: "bg-blue-50 text-blue-700 border-blue-200",
+          icon: Truck,
+          dot: "bg-blue-500",
+        };
       case "processing":
-        return "bg-yellow-100 text-yellow-800";
+        return {
+          style: "bg-amber-50 text-amber-700 border-amber-200",
+          icon: Clock,
+          dot: "bg-amber-500",
+        };
       default:
-        return "bg-gray-100 text-gray-800";
+        return {
+          style: "bg-gray-50 text-gray-700 border-gray-200",
+          icon: Package,
+          dot: "bg-gray-500",
+        };
     }
   };
 
   return (
-    <div className="bg-white rounded-lg shadow p-6">
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-gray-900">Order History</h2>
-        <span className="text-gray-500 text-sm">{orders.length} orders</span>
+    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+        <div>
+          <h2 className="text-2xl font-bold text-gray-900 tracking-tight">
+            Order History
+          </h2>
+          <p className="text-sm text-gray-500 mt-1">
+            Check the status of recent orders.
+          </p>
+        </div>
+        <div className="px-4 py-2 bg-gray-50 rounded-lg border border-gray-200 text-sm font-medium text-gray-600">
+          Total Orders: {orders.length}
+        </div>
       </div>
 
-      <div className="space-y-4">
-        {orders.map((order) => (
-          <div
-            key={order.id}
-            className="border border-gray-200 rounded-lg p-4 hover:border-gray-300 transition-colors"
-          >
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-4">
-              <div className="flex items-center gap-3">
-                <Package className="w-5 h-5 text-gray-400" />
-                <div>
-                  <p className="text-gray-900">{order.id}</p>
-                  <p className="text-gray-500 text-sm">{order.date}</p>
-                </div>
-              </div>
+      <div className="space-y-6">
+        {orders.map((order) => {
+          const statusConfig = getStatusConfig(order.status);
+          const StatusIcon = statusConfig.icon;
 
-              <div className="flex items-center gap-3">
-                <span
-                  className={`px-3 py-1 text-sm rounded-full ${getStatusColor(
-                    order.status
-                  )}`}
-                >
-                  {order.status}
-                </span>
-                <button className="p-2 text-gray-400 hover:text-gray-600 transition-colors">
-                  <ChevronRight className="w-5 h-5" />
+          return (
+            <div
+              key={order.id}
+              className="group border border-gray-200 rounded-xl overflow-hidden hover:border-indigo-200 hover:shadow-md transition-all duration-300"
+            >
+              <div className="bg-gray-50/50 p-6 border-b border-gray-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div className="flex items-start gap-4">
+                  <div className="p-3 bg-white rounded-xl border border-gray-200 shadow-sm">
+                    <Package className="w-6 h-6 text-indigo-600" />
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <h3 className="font-bold text-gray-900">{order.id}</h3>
+                      <span
+                        className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium border ${statusConfig.style}`}
+                      >
+                        <span
+                          className={`w-1.5 h-1.5 rounded-full ${statusConfig.dot}`}
+                        />
+                        {order.status}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2 mt-1 text-sm text-gray-500">
+                      <Calendar className="w-3.5 h-3.5" />
+                      {order.date}
+                    </div>
+                  </div>
+                </div>
+
+                <button className="flex items-center gap-1 text-sm font-semibold text-indigo-600 hover:text-indigo-800 transition-colors group-hover:translate-x-1 duration-300">
+                  View Details <ChevronRight className="w-4 h-4" />
                 </button>
               </div>
-            </div>
 
-            <div className="space-y-3 mb-4">
-              {order.items.map((item, index) => (
-                <div key={index} className="flex items-center gap-3">
-                  <ImageWithFallback
-                    src={item.image}
-                    alt={item.name}
-                    className="w-16 h-16 rounded-lg object-cover"
-                  />
-                  <div className="flex-1">
-                    <p className="text-gray-900">{item.name}</p>
-                    <p className="text-gray-500 text-sm">
-                      Size: {item.size} • Qty: {item.quantity}
-                    </p>
-                  </div>
-                  <p className="text-gray-900">${item.price.toFixed(2)}</p>
+              <div className="p-6">
+                <div className="space-y-6">
+                  {order.items.map((item, index) => (
+                    <div
+                      key={index}
+                      className="flex items-start sm:items-center gap-4"
+                    >
+                      <div className="relative group/image">
+                        <ImageWithFallback
+                          src={item.image}
+                          alt={item.name}
+                          className="w-20 h-20 rounded-lg object-cover border border-gray-100"
+                        />
+                      </div>
+
+                      <div className="flex-1 min-w-0">
+                        <h4 className="font-medium text-gray-900 truncate">
+                          {item.name}
+                        </h4>
+                        <div className="flex items-center gap-3 mt-1 text-sm text-gray-500">
+                          <span className="bg-gray-100 px-2 py-0.5 rounded text-xs">
+                            Size: {item.size}
+                          </span>
+                          <span>Qty: {item.quantity}</span>
+                        </div>
+                      </div>
+
+                      <div className="text-right">
+                        <p className="font-semibold text-gray-900">
+                          ${item.price.toFixed(2)}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
                 </div>
-              ))}
-            </div>
 
-            <div className="flex items-center justify-between pt-4 border-t border-gray-200">
-              <span className="text-gray-600">Total</span>
-              <span className="text-gray-900">${order.total.toFixed(2)}</span>
+                <div className="mt-6 pt-6 border-t border-gray-100 flex justify-between items-center">
+                  <span className="text-sm font-medium text-gray-500">
+                    Total Amount
+                  </span>
+                  <span className="text-xl font-bold text-gray-900">
+                    ${order.total.toFixed(2)}
+                  </span>
+                </div>
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );
