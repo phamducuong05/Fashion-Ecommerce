@@ -1,0 +1,82 @@
+# --------------------------
+# Python
+# --------------------------
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual Environment
+venv/
+.venv/
+env/
+ENV/
+
+# Distribution / Packaging
+build/
+dist/
+pip-wheel-metadata/
+*.egg-info/
+*.egg
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / Coverage
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+pytest_cache/
+nosetests.xml
+coverage.xml
+
+# Django
+*.log
+staticfiles/
+media/
+
+# Flask
+instance/
+*.db
+
+# Jupyter Notebook
+.ipynb_checkpoints
+*.ipynb_convert
+
+# PyCharm / IntelliJ
+.idea/
+
+# VSCode
+.vscode/
+
+# Byte-compiled / optimized
+*.pyo
+*.pyd
+
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# pytype
+.pytype/
+
+# Environments
+.env
+.env.*
+*.env
+*.ini
+
+# Runtime files
+*.pid
+*.log
+
+# Local settings
+settings_local.py
+
+# System files (Windows / Mac)
+Thumbs.db
+.DS_Store
