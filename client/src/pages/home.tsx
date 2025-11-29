@@ -57,11 +57,11 @@ const HomePage = ({ cartItemCount, handleAddToCart }: HomeProp) => {
   }, []);
 
   const whatsHotProducts = products.filter((p: ProductSummary) =>
-    p.section?.includes(whatsHotTab)
+    p.sections?.includes(whatsHotTab)
   );
 
-  const featuredProducts = products.filter(
-    (item) => item.category === featuredTab
+  const featuredProducts = products.filter((item) =>
+    item.category.includes(featuredTab)
   );
 
   return (

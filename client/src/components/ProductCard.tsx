@@ -10,10 +10,8 @@ export interface ProductSummary {
   price: number;
   originalPrice?: number;
   image: string;
-  category: string;
-  isNew?: boolean;
-  isSale?: boolean;
-  section?: string[];
+  category: string[];
+  sections?: string[];
   color: string;
   size: string;
 }
@@ -41,12 +39,12 @@ const ProductCard = ({ product, onAddToCart }: ProductCardProps) => {
 
         {/* Badges */}
         <div className="absolute top-3 left-3 flex flex-col gap-2 z-10">
-          {product.isNew && (
+          {product.sections?.includes("new") && (
             <Badge className="bg-black text-white font-semibold px-2 py-1 rounded-md">
               New
             </Badge>
           )}
-          {product.isSale && discount > 0 && (
+          {product.sections?.includes("sale") && discount > 0 && (
             <Badge className="bg-red-600 text-white font-semibold px-2 py-1 rounded-md">
               -{discount}%
             </Badge>
@@ -76,9 +74,6 @@ const ProductCard = ({ product, onAddToCart }: ProductCardProps) => {
 
       {/* Product Info */}
       <div className="p-4 space-y-2">
-        <p className="text-xs text-gray-500 uppercase tracking-wide">
-          {product.category}
-        </p>
         <Link to="/productdetail">
           <h3 className="text-lg font-semibold text-gray-900 truncate">
             {product.name}
@@ -88,7 +83,7 @@ const ProductCard = ({ product, onAddToCart }: ProductCardProps) => {
           <p className="font-bold text-xl text-gray-900">
             ${product.price.toFixed(2)}
           </p>
-          {product.originalPrice && (
+          {product.originalPrice && product.originalPrice > product.price && (
             <p className="text-sm text-gray-400 line-through">
               ${product.originalPrice.toFixed(2)}
             </p>

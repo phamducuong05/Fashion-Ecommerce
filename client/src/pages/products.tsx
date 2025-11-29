@@ -7,38 +7,40 @@ interface ProductsPageProp {
   onAddToCart: (product: ProductSummary) => void;
 }
 
+export interface Category {
+  id: number;
+  name: string;
+  image: string | null;
+  parentId: number | null;
+  children?: Category[];
+}
+
 const ProductsPage = ({ onAddToCart }: ProductsPageProp) => {
   const [products, setProducts] = useState<ProductSummary[]>([]);
-  const [uniqueCategories, setUniqueCategories] = useState<string[]>([]);
   const [uniqueColors, setUniqueColors] = useState<string[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const [sortBy, setSortBy] = useState("New Arrivals");
+  const [categories, setCategories] = useState<Category[]>([]);
   const [filterCategory, setFilterCategory] = useState<string | null>(null);
-  const [filterColor, setFilterColor] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // Gọi 3 API cùng lúc
-        const [resProd, resCat, resCol] = await Promise.all([
-          fetch("http://localhost:8000/products"),
-          fetch("http://localhost:8000/categories"),
-          fetch("http://localhost:8000/colors"),
+        const [resProd, resCat] = await Promise.all([
+          fetch("http://localhost:3000/api/products"),
+          fetch("http://localhost:3000/api/categories"),
         ]);
 
-        const productsData = (await resProd.json()) as ProductSummary[];
-        const categoriesData = await resCat.json();
-        const colorsData = await resCol.json();
+        const productsResponse = await resProd.json();
+        const categoriesResponse = await resCat.json();
 
-        const catNames = categoriesData.map((c: any) => c.id);
-
-        const colNames = colorsData.map((c: any) => c.id);
+        const productsData = productsResponse.data as ProductSummary[];
+        const categoriesData = categoriesResponse.data as Category[];
+        setCategories(categoriesData);
 
         setProducts(productsData);
-        setUniqueCategories([...new Set(catNames)] as string[]);
-        setUniqueColors([...new Set(colNames)] as string[]);
       } catch (err) {
         if (err instanceof Error) setError(err.message);
       } finally {
@@ -57,13 +59,9 @@ const ProductsPage = ({ onAddToCart }: ProductsPageProp) => {
   }
 
   if (filterCategory) {
-    filteredProducts = filteredProducts.filter(
-      (p) => p.category === filterCategory
+    filteredProducts = filteredProducts.filter((p) =>
+      p.category.includes(filterCategory)
     );
-  }
-
-  if (filterColor) {
-    filteredProducts = filteredProducts.filter((p) => p.color == filterColor);
   }
 
   switch (sortBy) {
@@ -81,7 +79,6 @@ const ProductsPage = ({ onAddToCart }: ProductsPageProp) => {
     setSearch("");
     setSortBy("New Arrivals");
     setFilterCategory(null);
-    setFilterColor(null);
   };
 
   return (
@@ -105,14 +102,11 @@ const ProductsPage = ({ onAddToCart }: ProductsPageProp) => {
         {/* Bố cục chính: Sidebar + Product List */}
         <div className="flex flex-col md:flex-row">
           <SideBar
-            categories={uniqueCategories}
-            colors={uniqueColors}
+            categories={categories}
             sortBy={sortBy}
             setSortBy={setSortBy}
             filterCategory={filterCategory}
             setFilterCategory={setFilterCategory}
-            filterColor={filterColor}
-            setFilterColor={setFilterColor}
             clearAllFilters={clearAllFilters}
           />
           <main className="flex-1">
