@@ -7,11 +7,11 @@ import type { ProductSummary } from "./ProductCard";
 
 interface ProductVariant {
   id: string;
-  colorName: string;
+  color: string;
   colorCode: string;
   size: string;
-  imageUrl: string;
   stock: number;
+  image: string;
 }
 
 interface Product {
@@ -43,11 +43,12 @@ const ProductDetail = ({ onAddToCart }: ProductDetailProp) => {
       try {
         setLoading(true);
 
-        const res = await fetch(`http://localhost:8000/products/${id}`);
+        const res = await fetch(`http://localhost:3000/api/products/${id}`);
 
         if (!res.ok) throw new Error("Product not found");
 
-        const data = (await res.json()) as Product;
+        const response = await res.json();
+        const data = response.data as Product;
         setProduct(data);
 
         if (data.variants && data.variants.length > 0) {
@@ -71,17 +72,15 @@ const ProductDetail = ({ onAddToCart }: ProductDetailProp) => {
     return <div className="p-10 text-center text-red-500">Error: {error}</div>;
 
   const uniqueColorVariants = [
-    ...new Map(product.variants.map((item) => [item.colorName, item])).values(),
+    ...new Map(product.variants.map((item) => [item.color, item])).values(),
   ];
 
   const availableSizes = product.variants.filter(
-    (p) => p.colorName === selectedVariant.colorName
+    (p) => p.color === selectedVariant.color
   );
 
   const handleColorSelect = (colorName: string) => {
-    const variantOfColor = product.variants.find(
-      (v) => v.colorName === colorName
-    );
+    const variantOfColor = product.variants.find((v) => v.color === colorName);
     if (variantOfColor) setSelectedVariant(variantOfColor);
   };
 
@@ -115,7 +114,7 @@ const ProductDetail = ({ onAddToCart }: ProductDetailProp) => {
           <div className="grid md:grid-cols-2 gap-8 p-8">
             <div className="aspect-square bg-gray-100 rounded-lg overflow-hidden">
               <ImageWithFallback
-                src={selectedVariant.imageUrl}
+                src={selectedVariant.image}
                 alt={product.name}
                 className="w-full h-full object-cover"
               />
@@ -141,20 +140,20 @@ const ProductDetail = ({ onAddToCart }: ProductDetailProp) => {
               {/* Color Selection */}
               <div>
                 <label>
-                  Color: <span>{selectedVariant.colorName}</span>
+                  Color: <span>{selectedVariant.color}</span>
                 </label>
                 <div className="flex gap-3">
                   {uniqueColorVariants.map((colorVar) => (
                     <button
                       key={colorVar.id}
-                      onClick={() => handleColorSelect(colorVar.colorName)}
+                      onClick={() => handleColorSelect(colorVar.color)}
                       className={`w-10 h-10 rounded-full border-2 transition-all ${
-                        selectedVariant.colorName === colorVar.colorName
+                        selectedVariant.color === colorVar.color
                           ? "border-blue-600 scale-110"
                           : "border-gray-300 hover:border-gray-400"
                       }`}
                       style={{ backgroundColor: colorVar.colorCode }}
-                      aria-label={selectedVariant.colorName}
+                      aria-label={selectedVariant.color}
                     />
                   ))}
                 </div>
