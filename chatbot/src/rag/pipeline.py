@@ -5,6 +5,7 @@ from src.services.llm_service import LLMService
 from src.services.rerank_service import RerankService
 from src.utils.text_helper import PROMPT_TEMPLATE
 
+
 class Pipeline:
     def __init__(
         self,

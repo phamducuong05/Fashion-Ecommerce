@@ -2,7 +2,7 @@ import logging
 
 from fastapi import FastAPI
 from src.core.logging import setup_logger
-from .api.v1.routers import router as v1_router
+from src.api.v1.routers import router as v1_router
 
 setup_logger()
 

@@ -8,7 +8,7 @@ logger = logging.getLogger(__name__)
 
 
 class QdrantService:
-    def __init__(self, url: str, api_key: str,  collection_name: str):
+    def __init__(self, url: str, api_key: str, collection_name: str):
         self.client = QdrantClient(url=url, api_key=api_key, check_compatibility=False)
         self.collection_name = collection_name
         self.DENSE_VECTOR_NAME = "text-dense"

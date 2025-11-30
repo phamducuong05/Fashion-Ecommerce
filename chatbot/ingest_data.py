@@ -38,7 +38,9 @@ def main():
     embedding_service = EmbeddingService(
         dense_model_name=DENSE_MODEL_NAME, sparse_model_name=SPARSE_MODEL_NAME
     )
-    qdrant_service = QdrantService(url=QDRANT_URL, api_key=QDRANT_API_KEY, collection_name=COLLECTION_NAME)
+    qdrant_service = QdrantService(
+        url=QDRANT_URL, api_key=QDRANT_API_KEY, collection_name=COLLECTION_NAME
+    )
     qdrant_service.create_collection_hybrid()
     sync_service = SyncService(
         psql_service=psql_service,

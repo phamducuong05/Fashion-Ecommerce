@@ -21,7 +21,9 @@ def get_embedding_service() -> EmbeddingService:
 @lru_cache()
 def get_qdrant_service() -> QdrantService:
     return QdrantService(
-        url=settings.QDRANT_URL, api_key=settings.QDRANT_API_KEY, collection_name=settings.COLLECTION_NAME
+        url=settings.QDRANT_URL,
+        api_key=settings.QDRANT_API_KEY,
+        collection_name=settings.COLLECTION_NAME,
     )
 
 
