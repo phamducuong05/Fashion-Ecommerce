@@ -8,19 +8,20 @@ datasource db {
 }
 
 model User {
-  id            Int           @id @default(autoincrement())
-  email         String        @unique
+  id            Int               @id @default(autoincrement())
+  email         String            @unique
   password      String
   fullName      String?
   phone         String?
-  role          Role          @default(USER)
+  role          Role              @default(USER)
   avatar        String?
-  createdAt     DateTime      @default(now())
+  createdAt     DateTime          @default(now())
   addresses     Address[]
   cart          Cart?
   orders        Order[]
   reviews       Review[]
   savedVouchers UserVoucher[]
+  conversation  ChatConversation?
 }
 
 model Address {
@@ -171,6 +172,32 @@ model SupportMessage {
   content   String
   status    String   @default("PENDING")
   createdAt DateTime @default(now())
+}
+
+model ChatConversation {
+  id           Int           @id @default(autoincrement())
+  userId       Int
+  unreadCount  Int           @default(0)
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  messages     ChatMessage[]
+
+  @@unique([userId])
+}
+
+model ChatMessage {
+  id             Int              @id @default(autoincrement())
+  conversationId Int
+  sender         MessageSender
+  text           String
+  timestamp      DateTime         @default(now())
+  conversation   ChatConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+}
+
+enum MessageSender {
+  customer
+  admin
 }
 
 enum Role {
