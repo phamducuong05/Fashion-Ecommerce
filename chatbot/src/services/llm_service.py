@@ -16,23 +16,53 @@ GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 
 
 class LLMService:
+    """
+    Service layer wrapper for Groq LLM API, providing both normal and streaming
+    completion utilities, as well as structured query decomposition for hybrid search.
+
+    This class abstracts:
+        1. Low-level communication with Groq's ChatCompletion API (async).
+        2. Unified interface for full-response and streamed-response modes.
+        3. Query decomposition where the model must output a strict JSON schema.
+        4. Fallback behavior to ensure system stability when the model produces invalid JSON.
+
+    Attributes:
+        client (AsyncGroq): Asynchronous Groq API client instance.
+        model_name (str): Default model used for all completion requests.
+    """
     def __init__(self, api_key: str, model_name: str):
         self.client = AsyncGroq(api_key=api_key)
         self.model_name = model_name
         logger.info(f"LLMService initialized with model: {model_name}")
 
     async def response(
-        self, prompt: str, stream: bool = False
+        self,
+        prompt: str,
+        stream: bool = False
     ) -> Union[str, AsyncGenerator]:
         """
-        Get response from LLM
+        Sends a completion request to the Groq language model.
 
-        Parameters:
-            prompt: prompt for LLM
-            stream: whether to stream the response (True) or return the full response at once (False)
+        This method supports two modes:
+            - Non-streaming: returns the full LLM output as a single string.
+            - Streaming: returns an async generator yielding tokens incrementally.
+
+        Args:
+            prompt (str):
+                The input text to be sent to the LLM.
+            stream (bool, optional):
+                Whether the response should be streamed. If True, the method returns
+                an async generator. Defaults to False.
 
         Returns:
-            Union[str, Generator]: The full response string or a generator yielding chunks.
+            Union[str, AsyncGenerator]:
+                - If stream=False: returns the complete response as a string.
+                - If stream=True: returns an async generator producing incremental chunks.
+
+        Raises:
+            Exception:
+                Any exception raised by the API or during streaming will be logged
+                and re-raised to the caller.
         """
         # Log the request (Truncate prompt to avoid massive logs)
         preview_prompt = (prompt[:50] + "...") if len(prompt) > 50 else prompt
@@ -44,7 +74,7 @@ class LLMService:
                 messages=[{"role": "user", "content": prompt}],
                 model=self.model_name,
                 temperature=0.7,
-                max_completion_tokens=8192,
+                max_tokens=8192,
                 top_p=1,
                 stream=stream,
                 stop=None,
@@ -56,7 +86,7 @@ class LLMService:
                     logger.debug("Starting response stream...")
                     try:
                         async for chunk in chat_completion:
-                            content = chunk.choices[0].delta.content
+                            content = chunk.choices[0].delta.content 
                             if content:
                                 yield content
                     except Exception as e:
@@ -73,20 +103,38 @@ class LLMService:
 
     async def generate_search_queries(self, user_query: str) -> List[Dict[str, Any]]:
         """
-        Analyzes and rewrites the user query for Hybrid Search, performing decomposition if necessary.
+        Performs intelligent query decomposition using the LLM to prepare input
+        for hybrid semantic-keyword search.
 
-        This method instructs the LLM to:
-        1. Detect if the user is asking for multiple products (e.g., "shoes and shirt").
-        2. Split them into separate sub-queries.
-        3. Generate 'semantic_query' and 'keywords' for EACH sub-query.
+        The model is instructed to:
+            1. Analyze the raw user query.
+            2. Detect if the user is requesting multiple independent items.
+            3. Split the request into sub-queries as needed.
+            4. Produce, for each sub-query:
+                - semantic_query (str): cleaned, optimized query text.
+                - keywords (List[str]): extracted keyword list for sparse search.
 
-        Parameters:
-            user_query: The raw question from the user.
+        The model is required to output strict JSON. If JSON parsing fails or
+        the structure is invalid, the method falls back to a robust default that
+        treats the entire user query as a single search unit.
+
+        Args:
+            user_query (str):
+                The raw text provided by the user describing what they want.
 
         Returns:
-            List[Dict]: A list of dictionaries, where each dict contains:
-                        - 'semantic_query' (str)
-                        - 'keywords' (List[str])
+            List[Dict[str, Any]]:
+                A list of objects with the structure:
+                {
+                    "semantic_query": str,
+                    "keywords": List[str]
+                }
+                In case of failure, returns a single-element fallback list.
+
+        Raises:
+            Exception:
+                Any LLM or parsing-related exception is logged and re-raised
+                after fallback handling.
         """
         logger.info(f"Generating search queries for input: '{user_query}'")
         try:
@@ -122,20 +170,3 @@ class LLMService:
             logger.warning("Triggering fallback mechanism: returning original query.")
             # Fallback mechanism: Return the original query as a single item list
             return [{"semantic_query": user_query, "keywords": user_query.split()}]
-
-
-# Testing
-async def main():
-    llm = LLMService(api_key=GROQ_API_KEY, model_name="openai/gpt-oss-20b")
-
-    # Test hybrid search query generation
-    print("--- Hybrid Search Query Generation ---")
-    raw_query = "Find me 2 products: a pair of shoes and a t-shirt. Both of them must be suitable suitable for sports"
-
-    optimized_query = await llm.generate_search_queries(raw_query)
-
-    print(json.dumps(optimized_query, indent=4, ensure_ascii=False))
-
-
-if __name__ == "__main__":
-    asyncio.run(main())
