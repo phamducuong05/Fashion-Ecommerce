@@ -3,6 +3,7 @@ from src.services.embedding_service import EmbeddingService
 from src.services.qdrant_service import QdrantService
 from src.services.llm_service import LLMService
 from src.services.rerank_service import RerankService
+from src.services.cache_service import CacheService
 from src.utils.text_helper import PROMPT_TEMPLATE
 
 
@@ -13,11 +14,13 @@ class Pipeline:
         qdrant_service: QdrantService,
         rerank_service: RerankService,
         llm_service: LLMService,
+        cache_service: CacheService,
     ):
         self.embedding_service = embedding_service
         self.qdrant_service = qdrant_service
         self.rerank_service = rerank_service
         self.llm_service = llm_service
+        self.cache_service = cache_service
 
     def __build_context(self, selected_products):
         context_str = ""
@@ -37,6 +40,15 @@ class Pipeline:
         return context_str
 
     async def get_rag_response(self, user_query: str) -> Union[Any, AsyncGenerator]:
+        # Check if the query is already in LangCache
+        cache_ans = await self.cache_service.search_response(prompt=user_query)
+        if cache_ans:
+
+            async def cache_streamer():
+                yield cache_ans
+
+            return cache_streamer()
+
         # Reformat user query (for Dense vector search) and extract keywords (for Sparse vector search)
         search_queries = await self.llm_service.generate_search_queries(
             user_query=user_query
@@ -91,6 +103,30 @@ class Pipeline:
         prompt = PROMPT_TEMPLATE.format(context_str=context_str, query=user_query)
 
         # Get response from LLM based on the context
+        full_response_text = ""
         stream_gen = await self.llm_service.response(prompt=prompt, stream=True)
 
-        return stream_gen
+        async def response_streamer():
+            full_response_text = ""
+            try:
+                async for chunk in stream_gen:
+                    if chunk:
+                        full_response_text += chunk
+                        yield chunk
+
+                # [QUAN TRỌNG] Lưu cache SAU KHI vòng lặp kết thúc
+                if full_response_text.strip():
+                    # logger.info(f"Saving response to cache (len={len(full_response_text)})")
+                    await self.cache_service.save_response(
+                        prompt=user_query, response=full_response_text
+                    )
+                else:
+                    # logger.warning("Empty response from LLM, skipping cache save.")
+                    print("Error here else")
+
+            except Exception as e:
+                # logger.error(f"Error during streaming/caching: {e}")
+                # Không raise lỗi ở đây để tránh đứt kết nối client nếu chỉ lỗi save cache
+                print("Error here except")
+
+        return response_streamer()

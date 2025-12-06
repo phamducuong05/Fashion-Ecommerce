@@ -7,6 +7,7 @@ from src.services.embedding_service import EmbeddingService
 from src.services.qdrant_service import QdrantService
 from src.services.rerank_service import RerankService
 from src.services.sync_service import SyncService
+from src.services.cache_service import CacheService
 from src.rag.pipeline import Pipeline
 
 
@@ -47,6 +48,15 @@ def get_psql_service() -> PSQLService:
     )
 
 
+@lru_cache
+def get_cache_service() -> CacheService:
+    return CacheService(
+        server_url=settings.LANGCACHE_SERVER_URL,
+        cache_id=settings.LANGCACHE_CACHE_ID,
+        api_key=settings.LANGCACHE_API_KEY,
+    )
+
+
 def get_sync_service(
     psql_service: PSQLService = Depends(get_psql_service),
     qdrant_service: QdrantService = Depends(get_qdrant_service),
@@ -60,14 +70,16 @@ def get_sync_service(
 
 
 def get_rag_pipeline(
-    llm: LLMService = Depends(get_llm_service),
-    embed: EmbeddingService = Depends(get_embedding_service),
-    qdrant: QdrantService = Depends(get_qdrant_service),
-    rerank: RerankService = Depends(get_rerank_service),
+    llm_service: LLMService = Depends(get_llm_service),
+    embedding_service: EmbeddingService = Depends(get_embedding_service),
+    qdrant_service: QdrantService = Depends(get_qdrant_service),
+    rerank_service: RerankService = Depends(get_rerank_service),
+    cache_service: CacheService = Depends(get_cache_service),
 ) -> Pipeline:
     return Pipeline(
-        llm_service=llm,
-        embedding_service=embed,
-        qdrant_service=qdrant,
-        rerank_service=rerank,
+        llm_service=llm_service,
+        embedding_service=embedding_service,
+        qdrant_service=qdrant_service,
+        rerank_service=rerank_service,
+        cache_service=cache_service,
     )

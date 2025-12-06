@@ -6,6 +6,11 @@ class Settings(BaseSettings):
     # API_KEY
     GROQ_API_KEY: str
 
+    # LANGCACHE
+    LANGCACHE_SERVER_URL: str
+    LANGCACHE_CACHE_ID: str
+    LANGCACHE_API_KEY: str
+
     # QDRANT
     QDRANT_URL: str
     QDRANT_API_KEY: str
