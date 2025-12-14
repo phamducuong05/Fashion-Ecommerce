@@ -1,72 +1,157 @@
 import { TrendingUp, DollarSign, ShoppingCart, Users, ArrowUp, ArrowDown } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
+import type { LucideIcon } from 'lucide-react';
 
-const revenueData = [
-  { name: 'Jan', revenue: 4200 },
-  { name: 'Feb', revenue: 5100 },
-  { name: 'Mar', revenue: 4800 },
-  { name: 'Apr', revenue: 6200 },
-  { name: 'May', revenue: 7100 },
-  { name: 'Jun', revenue: 8400 },
-  { name: 'Jul', revenue: 7800 },
-  { name: 'Aug', revenue: 9200 },
-  { name: 'Sep', revenue: 8900 },
-  { name: 'Oct', revenue: 10100 },
-  { name: 'Nov', revenue: 11200 },
-  { name: 'Dec', revenue: 12400 },
+import { useEffect, useState } from 'react';
+import axios from 'axios';
+
+// Type for data from Backend
+type Stat = {
+  title: string;
+  value: number;
+  change: number;
+  trend: 'up' | 'down';
+};
+
+type RevenueData = {
+  name: string;
+  revenue: number;
+};
+
+type CategoryData = {
+  name: string;
+  value: number;
+};
+
+type BestSellingProduct = {
+  id: number;
+  name: string;
+  sales: number;
+  revenue: number;
+  trend: 'up' | 'down';
+  change: number;
+}
+
+type DashboardResponse = {
+  stats: Stat[];
+  revenueData: RevenueData[];
+  categoryData: CategoryData[];
+  bestSellingProducts: BestSellingProduct[];
+};
+
+// Type for data in Frontend
+
+// Stat 
+type StatUI = {
+  title: string;
+  value: string;
+  change: string;
+  trend: 'up' | 'down';
+  icon: LucideIcon;
+  color: string;
+}
+
+const statConfig: Record<
+  string,
+  {
+    icon: LucideIcon;
+    color: string;
+    formatValue: (v: number) => string;
+  }
+> = {
+  'Total Revenue': {
+    icon: DollarSign,
+    color: 'from-[#A0826D] to-[#8B6F47]',
+    formatValue: (v) => `$${v.toLocaleString()}`
+  },
+  'Total Orders': {
+    icon: ShoppingCart,
+    color: 'from-[#B8956A] to-[#9B7653]',
+    formatValue: (v) => v.toLocaleString()
+  },
+  'Total Customers': {
+    icon: Users,
+    color: 'from-[#C19A6B] to-[#A0826D]',
+    formatValue: (v) => v.toLocaleString()
+  },
+  'Conversion Rate': {
+    icon: TrendingUp,
+    color: 'from-[#9B7653] to-[#8B6F47]',
+    formatValue: (v) => `${v}%`
+  }
+};
+
+// CategoryData
+const CATEGORY_COLORS = [
+  '#A0826D',
+  '#8B6F47',
+  '#9B7653',
+  '#B8956A',
+  '#6F4E37'
 ];
 
-const categoryData = [
-  { name: 'Men Fashion', value: 4200, color: '#A0826D' },
-  { name: 'Women Fashion', value: 5800, color: '#8B6F47' },
-  { name: 'Kids', value: 2100, color: '#9B7653' },
-  { name: 'Accessories', value: 1800, color: '#B8956A' },
-  { name: 'Bags & Wallets', value: 2900, color: '#6F4E37' },
-];
-
-const bestSellingProducts = [
-  { id: 1, name: 'Floral Summer Dress', sales: 342, revenue: 30780, trend: 'up', change: 12 },
-  { id: 2, name: 'Classic Cotton T-Shirt', sales: 298, revenue: 8942, trend: 'up', change: 8 },
-  { id: 3, name: 'Leather Crossbody Bag', sales: 276, revenue: 35880, trend: 'down', change: -3 },
-  { id: 4, name: 'Slim Fit Jeans', sales: 245, revenue: 19600, trend: 'up', change: 15 },
-  { id: 5, name: 'Kids Running Shoes', sales: 198, revenue: 9900, trend: 'up', change: 5 },
-];
+type CategoryDataUI = {
+  name: string;
+  value: number;
+  color: string;
+};
 
 export function Dashboard() {
-  const stats = [
-    {
-      title: 'Total Revenue',
-      value: '$94,200',
-      change: '+12.5%',
-      trend: 'up',
-      icon: DollarSign,
-      color: 'from-[#A0826D] to-[#8B6F47]',
-    },
-    {
-      title: 'Total Orders',
-      value: '1,842',
-      change: '+8.2%',
-      trend: 'up',
-      icon: ShoppingCart,
-      color: 'from-[#B8956A] to-[#9B7653]',
-    },
-    {
-      title: 'Total Customers',
-      value: '3,254',
-      change: '+15.3%',
-      trend: 'up',
-      icon: Users,
-      color: 'from-[#C19A6B] to-[#A0826D]',
-    },
-    {
-      title: 'Conversion Rate',
-      value: '3.8%',
-      change: '-2.1%',
-      trend: 'down',
-      icon: TrendingUp,
-      color: 'from-[#9B7653] to-[#8B6F47]',
-    },
-  ];
+  const [stats, setStats] = useState<StatUI[]>([]);
+  const [revenueData, setRevenueData] = useState<RevenueData[]>([]);
+  const [categoryData, setCategoryData] = useState<CategoryDataUI[]>([]);
+  const [bestSellingProducts, setBestSellingProducts] = useState<BestSellingProduct[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const getDashboardData = async () => {
+      try {
+        const response = await axios.get<DashboardResponse>('/api/dashboard');
+
+        // Transform backend -> UI stats
+        const statUIs: StatUI[] = response.data.stats.map(
+          (stat: Stat) => {
+            const config = statConfig[stat.title];
+
+            if (!config) {
+              throw new Error(`Missing statConfig for "${stat.title}"`);
+            }
+
+            return {
+              title: stat.title,
+              value: config.formatValue(stat.value),
+              change: `${stat.change > 0 ? '+' : ''}${stat.change}%`,
+              trend: stat.trend,
+              icon: config.icon,
+              color: config.color
+            };
+          }
+        );
+
+        const categoryDataUI: CategoryDataUI[] = response.data.categoryData.map(
+          (item, index) => ({
+            ...item,
+            color: CATEGORY_COLORS[index % CATEGORY_COLORS.length]
+          })
+        )
+
+        setStats(statUIs);
+        setRevenueData(response.data.revenueData);
+        setCategoryData(categoryDataUI);
+        setBestSellingProducts(response.data.bestSellingProducts);
+      } catch (error) {
+        console.error('Failed to load dashboard data', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    getDashboardData();
+  }, []);
+
+  if (loading) {
+    return <div className="p-6">Loading dashboard...</div>;
+  }
 
   return (
     <div className="space-y-6">
@@ -141,7 +226,11 @@ export function Dashboard() {
                 cx="50%"
                 cy="50%"
                 labelLine={false}
-                label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                label={({ name, percent }) =>
+                  percent !== undefined
+                    ? `${name} ${(percent * 100).toFixed(0)}%`
+                    : name
+                }
                 outerRadius={80}
                 fill="#8884d8"
                 dataKey="value"

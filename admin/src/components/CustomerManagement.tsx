@@ -1,7 +1,10 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Search, Eye, Package, ChevronDown, ChevronUp } from 'lucide-react';
 import { ImageWithFallback } from './figma/ImageWithFallback';
 
+import axios from 'axios';
+
+// Type for data from Backend
 interface OrderItem {
   productName: string;
   category: string;
@@ -29,222 +32,19 @@ interface Customer {
   joinDate: string;
 }
 
-const initialCustomers: Customer[] = [
-  {
-    id: 1,
-    name: 'Sarah Johnson',
-    email: 'sarah.j@email.com',
-    totalSpent: 1249.97,
-    joinDate: '2024-01-15',
-    orders: [
-      { 
-        id: 'ORD-1001', 
-        date: '2024-11-20', 
-        total: 299.98, 
-        status: 'delivered',
-        items: [
-          {
-            productName: 'Classic Cotton T-Shirt',
-            category: 'Men - T-Shirts',
-            quantity: 2,
-            price: 29.99,
-            size: 'M',
-            color: 'Black',
-            imageUrl: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400'
-          },
-          {
-            productName: 'Leather Crossbody Bag',
-            category: 'Bags',
-            quantity: 1,
-            price: 129.99,
-            size: 'One Size',
-            color: 'Brown',
-            imageUrl: 'https://images.unsplash.com/photo-1548036328-c9fa89d128fa?w=400'
-          }
-        ]
-      },
-      { 
-        id: 'ORD-1002', 
-        date: '2024-11-25', 
-        total: 149.97, 
-        status: 'shipped',
-        items: [
-          {
-            productName: 'Floral Summer Dress',
-            category: 'Women - Dress',
-            quantity: 1,
-            price: 89.99,
-            size: 'S',
-            color: 'Floral Blue',
-            imageUrl: 'https://images.unsplash.com/photo-1572804013309-59a88b7e92f1?w=400'
-          },
-          {
-            productName: 'Casual Sneakers',
-            category: 'Women - Shoes',
-            quantity: 1,
-            price: 59.99,
-            size: 'M',
-            color: 'White',
-            imageUrl: 'https://images.unsplash.com/photo-1549298916-b41d501d3772?w=400'
-          }
-        ]
-      },
-      { 
-        id: 'ORD-1003', 
-        date: '2024-11-27', 
-        total: 799.99, 
-        status: 'processing',
-        items: [
-          {
-            productName: 'Premium Wool Coat',
-            category: 'Women - Top',
-            quantity: 1,
-            price: 399.99,
-            size: 'M',
-            color: 'Camel',
-            imageUrl: 'https://images.unsplash.com/photo-1539533018447-63fcce2678e3?w=400'
-          },
-          {
-            productName: 'Designer Handbag',
-            category: 'Bags',
-            quantity: 1,
-            price: 400.00,
-            size: 'One Size',
-            color: 'Black',
-            imageUrl: 'https://images.unsplash.com/photo-1584917865442-de89df76afd3?w=400'
-          }
-        ]
-      },
-    ],
-  },
-  {
-    id: 2,
-    name: 'Michael Chen',
-    email: 'mchen@email.com',
-    totalSpent: 2899.95,
-    joinDate: '2023-08-22',
-    orders: [
-      { 
-        id: 'ORD-1004', 
-        date: '2024-11-18', 
-        total: 599.97, 
-        status: 'delivered',
-        items: [
-          {
-            productName: 'Slim Fit Jeans',
-            category: 'Men - Jeans',
-            quantity: 3,
-            price: 79.99,
-            size: 'L',
-            color: 'Dark Blue',
-            imageUrl: 'https://images.unsplash.com/photo-1542272604-787c3835535d?w=400'
-          },
-          {
-            productName: 'Polo Shirt',
-            category: 'Men - Polo',
-            quantity: 2,
-            price: 45.99,
-            size: 'L',
-            color: 'Navy',
-            imageUrl: 'https://images.unsplash.com/photo-1586790170083-2f9ceadc732d?w=400'
-          }
-        ]
-      },
-      { 
-        id: 'ORD-1005', 
-        date: '2024-11-24', 
-        total: 249.98, 
-        status: 'delivered',
-        items: [
-          {
-            productName: 'Hooded Sweatshirt',
-            category: 'Men - Hoodie',
-            quantity: 2,
-            price: 69.99,
-            size: 'XL',
-            color: 'Gray',
-            imageUrl: 'https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=400'
-          },
-          {
-            productName: 'Baseball Cap',
-            category: 'Hats',
-            quantity: 1,
-            price: 24.99,
-            size: 'One Size',
-            color: 'Black',
-            imageUrl: 'https://images.unsplash.com/photo-1588850561407-ed78c282e89b?w=400'
-          }
-        ]
-      },
-    ],
-  },
-  {
-    id: 3,
-    name: 'Emma Davis',
-    email: 'emma.davis@email.com',
-    totalSpent: 445.98,
-    joinDate: '2024-06-10',
-    orders: [
-      { 
-        id: 'ORD-1006', 
-        date: '2024-11-26', 
-        total: 99.99, 
-        status: 'pending',
-        items: [
-          {
-            productName: 'Yoga Leggings',
-            category: 'Women - Legging',
-            quantity: 1,
-            price: 49.99,
-            size: 'M',
-            color: 'Black',
-            imageUrl: 'https://images.unsplash.com/photo-1506629082955-511b1aa562c8?w=400'
-          },
-          {
-            productName: 'Athletic Top',
-            category: 'Women - Top',
-            quantity: 1,
-            price: 39.99,
-            size: 'S',
-            color: 'Pink',
-            imageUrl: 'https://images.unsplash.com/photo-1562157873-818bc0726f68?w=400'
-          }
-        ]
-      },
-      { 
-        id: 'ORD-1007', 
-        date: '2024-11-15', 
-        total: 345.99, 
-        status: 'delivered',
-        items: [
-          {
-            productName: 'Kids Running Shoes',
-            category: 'Kids - Shoes',
-            quantity: 2,
-            price: 49.99,
-            size: 'M',
-            color: 'Blue',
-            imageUrl: 'https://images.unsplash.com/photo-1514989940723-e8e51635b782?w=400'
-          },
-          {
-            productName: 'Kids T-Shirt Set',
-            category: 'Kids - T-Shirt',
-            quantity: 3,
-            price: 19.99,
-            size: 'S',
-            color: 'Assorted',
-            imageUrl: 'https://images.unsplash.com/photo-1519238263530-99bdd11df2ea?w=400'
-          }
-        ]
-      },
-    ],
-  },
-];
-
 export function CustomerManagement() {
-  const [customers] = useState<Customer[]>(initialCustomers);
+  const [customers, setCustomers] = useState<Customer[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [expandedCustomer, setExpandedCustomer] = useState<number | null>(null);
+
+  useEffect(() => {
+    const getCustomerData = async () => {
+      const reponse = await axios.get<Customer[]>('/api/customer');
+
+      setCustomers(reponse.data);
+    }
+    getCustomerData();
+  }, [])
 
   const filteredCustomers = customers.filter(
     (customer) =>

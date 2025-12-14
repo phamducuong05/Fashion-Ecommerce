@@ -1,7 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Plus, Search, Edit, Trash2, X } from 'lucide-react';
 import { ImageWithFallback } from './figma/ImageWithFallback';
+import axios from 'axios';
 
+// Type for data from Backend
 interface ProductVariant {
   size: string;
   colors: string[];
@@ -41,62 +43,8 @@ const FASHION_CATEGORIES = [
 
 const SIZES = ['S', 'M', 'L', 'XL', 'XXL'];
 
-const initialProducts: Product[] = [
-  { 
-    id: 1, 
-    name: 'Classic Cotton T-Shirt', 
-    category: 'Men - T-Shirts', 
-    price: 29.99, 
-    stock: 45, 
-    image: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400', 
-    status: 'available',
-    variants: [
-      { size: 'M', colors: ['Black', 'White', 'Navy'], imageUrl: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400' },
-      { size: 'L', colors: ['Black', 'White'], imageUrl: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400' },
-    ]
-  },
-  { 
-    id: 2, 
-    name: 'Floral Summer Dress', 
-    category: 'Women - Dress', 
-    price: 89.99, 
-    stock: 32, 
-    image: 'https://images.unsplash.com/photo-1572804013309-59a88b7e92f1?w=400', 
-    status: 'available',
-    variants: [
-      { size: 'S', colors: ['Floral Blue', 'Floral Pink'], imageUrl: 'https://images.unsplash.com/photo-1572804013309-59a88b7e92f1?w=400' },
-      { size: 'M', colors: ['Floral Blue', 'Floral Pink'], imageUrl: 'https://images.unsplash.com/photo-1572804013309-59a88b7e92f1?w=400' },
-    ]
-  },
-  { 
-    id: 3, 
-    name: 'Leather Crossbody Bag', 
-    category: 'Bags', 
-    price: 129.99, 
-    stock: 18, 
-    image: 'https://images.unsplash.com/photo-1548036328-c9fa89d128fa?w=400', 
-    status: 'available',
-    variants: [
-      { size: 'One Size', colors: ['Brown', 'Black', 'Tan'], imageUrl: 'https://images.unsplash.com/photo-1548036328-c9fa89d128fa?w=400' },
-    ]
-  },
-  { 
-    id: 4, 
-    name: 'Kids Running Shoes', 
-    category: 'Kids - Shoes', 
-    price: 49.99, 
-    stock: 0, 
-    image: 'https://images.unsplash.com/photo-1514989940723-e8e51635b782?w=400', 
-    status: 'sold-out',
-    variants: [
-      { size: 'S', colors: ['Blue', 'Pink'], imageUrl: 'https://images.unsplash.com/photo-1514989940723-e8e51635b782?w=400' },
-      { size: 'M', colors: ['Blue', 'Pink'], imageUrl: 'https://images.unsplash.com/photo-1514989940723-e8e51635b782?w=400' },
-    ]
-  },
-];
-
 export function ProductManagement() {
-  const [products, setProducts] = useState<Product[]>(initialProducts);
+  const [products, setProducts] = useState<Product[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
@@ -115,6 +63,20 @@ export function ProductManagement() {
     imageUrl: '',
   });
 
+  useEffect(() => {
+    const getProductData = async () => {
+      try {
+        const response = await axios.get<Product[]>('/api/product');
+        setProducts(response.data);
+      } catch (err) {
+        console.error('Failed to fetch products', err);
+        alert('Cannot load products');
+      }
+    };
+
+    getProductData();
+  }, []);
+
   const handleAdd = () => {
     setEditingProduct(null);
     setFormData({
@@ -130,6 +92,7 @@ export function ProductManagement() {
     setShowModal(true);
   };
 
+  // Update product's details
   const handleEdit = (product: Product) => {
     setEditingProduct(product);
     setFormData({
@@ -145,9 +108,18 @@ export function ProductManagement() {
     setShowModal(true);
   };
 
-  const handleDelete = (id: number) => {
-    if (confirm('Are you sure you want to delete this product?')) {
-      setProducts(products.filter((p) => p.id !== id));
+  // Delete product
+  const handleDelete = async (id: number) => {
+    const ok = window.confirm('Are you sure you want to delete this product?');
+    if (!ok) return;
+
+    try {
+      await axios.delete(`/api/product/${id}`);
+
+      setProducts((prev) => prev.filter((p) => p.id !== id));
+    } catch (error) {
+      console.error('Delete product failed', error);
+      alert('Failed to delete product');
     }
   };
 
@@ -172,46 +144,51 @@ export function ProductManagement() {
     setVariants(variants.filter((_, i) => i !== index));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (variants.length === 0) {
       alert('Please add at least one product variant');
       return;
     }
 
-    if (editingProduct) {
-      setProducts(
-        products.map((p) =>
-          p.id === editingProduct.id
-            ? {
-                ...p,
-                name: formData.name,
-                category: formData.category,
-                price: parseFloat(formData.price),
-                stock: parseInt(formData.stock),
-                image: formData.image || variants[0].imageUrl,
-                status: formData.status,
-                variants: variants,
-              }
-            : p
-        )
-      );
-    } else {
-      const newProduct: Product = {
-        id: Math.max(...products.map((p) => p.id)) + 1,
-        name: formData.name,
-        category: formData.category,
-        price: parseFloat(formData.price),
-        stock: parseInt(formData.stock),
-        image: formData.image || variants[0].imageUrl,
-        status: formData.status,
-        variants: variants,
-      };
-      setProducts([...products, newProduct]);
+    const payload = {
+      name: formData.name,
+      category: formData.category,
+      price: Number(formData.price),
+      stock: Number(formData.stock),
+      image: formData.image || variants[0].imageUrl,
+      status: formData.status,
+      variants,
+    };
+
+    try {
+      if (editingProduct) {
+        // UPDATE
+        const res = await axios.put(
+          `/api/product/${editingProduct.id}`,
+          payload
+        );
+
+        setProducts((prev) =>
+          prev.map((p) =>
+            p.id === editingProduct.id ? res.data : p
+          )
+        );
+      } else {
+        // ADD
+        const res = await axios.post('/api/product', payload);
+        setProducts((prev) => [...prev, res.data]);
+      }
+
+      setShowModal(false);
+      setEditingProduct(null);
+    } catch (err) {
+      console.error('Submit product failed', err);
+      alert('Failed to save product');
     }
-    setShowModal(false);
   };
+
 
   const filteredProducts = products.filter(
     (product) =>

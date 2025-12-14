@@ -1,6 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Search, Eye, X, CheckCircle, XCircle } from 'lucide-react';
 import { ImageWithFallback } from './figma/ImageWithFallback';
+
+import axios from 'axios';
 
 interface OrderItem {
   productName: string;
@@ -19,241 +21,25 @@ interface Order {
   status: 'pending' | 'delivered' | 'cancelled';
   customerName: string;
   customerEmail: string;
-  items: OrderItem[];
   shippingAddress: string;
+  items: OrderItem[];
 }
 
-const initialOrders: Order[] = [
-  {
-    id: 'ORD-1001',
-    date: '2024-11-20',
-    total: 299.98,
-    status: 'delivered',
-    customerName: 'Sarah Johnson',
-    customerEmail: 'sarah.j@email.com',
-    shippingAddress: '123 Main St, New York, NY 10001',
-    items: [
-      {
-        productName: 'Classic Cotton T-Shirt',
-        category: 'Men - T-Shirts',
-        quantity: 2,
-        price: 29.99,
-        size: 'M',
-        color: 'Black',
-        imageUrl: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400'
-      },
-      {
-        productName: 'Leather Crossbody Bag',
-        category: 'Bags',
-        quantity: 1,
-        price: 129.99,
-        size: 'One Size',
-        color: 'Brown',
-        imageUrl: 'https://images.unsplash.com/photo-1548036328-c9fa89d128fa?w=400'
-      }
-    ]
-  },
-  {
-    id: 'ORD-1002',
-    date: '2024-11-25',
-    total: 149.97,
-    status: 'delivered',
-    customerName: 'Sarah Johnson',
-    customerEmail: 'sarah.j@email.com',
-    shippingAddress: '123 Main St, New York, NY 10001',
-    items: [
-      {
-        productName: 'Floral Summer Dress',
-        category: 'Women - Dress',
-        quantity: 1,
-        price: 89.99,
-        size: 'S',
-        color: 'Floral Blue',
-        imageUrl: 'https://images.unsplash.com/photo-1572804013309-59a88b7e92f1?w=400'
-      },
-      {
-        productName: 'Casual Sneakers',
-        category: 'Women - Shoes',
-        quantity: 1,
-        price: 59.99,
-        size: 'M',
-        color: 'White',
-        imageUrl: 'https://images.unsplash.com/photo-1549298916-b41d501d3772?w=400'
-      }
-    ]
-  },
-  {
-    id: 'ORD-1003',
-    date: '2024-11-27',
-    total: 799.99,
-    status: 'pending',
-    customerName: 'Sarah Johnson',
-    customerEmail: 'sarah.j@email.com',
-    shippingAddress: '123 Main St, New York, NY 10001',
-    items: [
-      {
-        productName: 'Premium Wool Coat',
-        category: 'Women - Top',
-        quantity: 1,
-        price: 399.99,
-        size: 'M',
-        color: 'Camel',
-        imageUrl: 'https://images.unsplash.com/photo-1539533018447-63fcce2678e3?w=400'
-      },
-      {
-        productName: 'Designer Handbag',
-        category: 'Bags',
-        quantity: 1,
-        price: 400.00,
-        size: 'One Size',
-        color: 'Black',
-        imageUrl: 'https://images.unsplash.com/photo-1584917865442-de89df76afd3?w=400'
-      }
-    ]
-  },
-  {
-    id: 'ORD-1004',
-    date: '2024-11-18',
-    total: 599.97,
-    status: 'delivered',
-    customerName: 'Michael Chen',
-    customerEmail: 'mchen@email.com',
-    shippingAddress: '456 Oak Ave, Los Angeles, CA 90001',
-    items: [
-      {
-        productName: 'Slim Fit Jeans',
-        category: 'Men - Jeans',
-        quantity: 3,
-        price: 79.99,
-        size: 'L',
-        color: 'Dark Blue',
-        imageUrl: 'https://images.unsplash.com/photo-1542272604-787c3835535d?w=400'
-      },
-      {
-        productName: 'Polo Shirt',
-        category: 'Men - Polo',
-        quantity: 2,
-        price: 45.99,
-        size: 'L',
-        color: 'Navy',
-        imageUrl: 'https://images.unsplash.com/photo-1586790170083-2f9ceadc732d?w=400'
-      }
-    ]
-  },
-  {
-    id: 'ORD-1005',
-    date: '2024-11-24',
-    total: 249.98,
-    status: 'delivered',
-    customerName: 'Michael Chen',
-    customerEmail: 'mchen@email.com',
-    shippingAddress: '456 Oak Ave, Los Angeles, CA 90001',
-    items: [
-      {
-        productName: 'Hooded Sweatshirt',
-        category: 'Men - Hoodie',
-        quantity: 2,
-        price: 69.99,
-        size: 'XL',
-        color: 'Gray',
-        imageUrl: 'https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=400'
-      },
-      {
-        productName: 'Baseball Cap',
-        category: 'Hats',
-        quantity: 1,
-        price: 24.99,
-        size: 'One Size',
-        color: 'Black',
-        imageUrl: 'https://images.unsplash.com/photo-1588850561407-ed78c282e89b?w=400'
-      }
-    ]
-  },
-  {
-    id: 'ORD-1006',
-    date: '2024-11-26',
-    total: 99.99,
-    status: 'pending',
-    customerName: 'Emma Davis',
-    customerEmail: 'emma.davis@email.com',
-    shippingAddress: '789 Pine Rd, Chicago, IL 60601',
-    items: [
-      {
-        productName: 'Yoga Leggings',
-        category: 'Women - Legging',
-        quantity: 1,
-        price: 49.99,
-        size: 'M',
-        color: 'Black',
-        imageUrl: 'https://images.unsplash.com/photo-1506629082955-511b1aa562c8?w=400'
-      },
-      {
-        productName: 'Athletic Top',
-        category: 'Women - Top',
-        quantity: 1,
-        price: 39.99,
-        size: 'S',
-        color: 'Pink',
-        imageUrl: 'https://images.unsplash.com/photo-1562157873-818bc0726f68?w=400'
-      }
-    ]
-  },
-  {
-    id: 'ORD-1007',
-    date: '2024-11-22',
-    total: 200.00,
-    status: 'cancelled',
-    customerName: 'James Wilson',
-    customerEmail: 'jwilson@email.com',
-    shippingAddress: '321 Elm St, Houston, TX 77001',
-    items: [
-      {
-        productName: 'Winter Jacket',
-        category: 'Men - Sweater',
-        quantity: 1,
-        price: 200.00,
-        size: 'L',
-        color: 'Navy',
-        imageUrl: 'https://images.unsplash.com/photo-1551028719-00167b16eac5?w=400'
-      }
-    ]
-  },
-  {
-    id: 'ORD-1008',
-    date: '2024-11-27',
-    total: 179.97,
-    status: 'pending',
-    customerName: 'Lisa Anderson',
-    customerEmail: 'lisa.a@email.com',
-    shippingAddress: '555 Maple Dr, Seattle, WA 98101',
-    items: [
-      {
-        productName: 'Leather Wallet',
-        category: 'Wallets',
-        quantity: 2,
-        price: 49.99,
-        size: 'One Size',
-        color: 'Brown',
-        imageUrl: 'https://images.unsplash.com/photo-1627123424574-724758594e93?w=400'
-      },
-      {
-        productName: 'Denim Skirt',
-        category: 'Women - Skirt',
-        quantity: 1,
-        price: 79.99,
-        size: 'M',
-        color: 'Light Blue',
-        imageUrl: 'https://images.unsplash.com/photo-1583496661160-fb5886a0aaaa?w=400'
-      }
-    ]
-  },
-];
-
 export function OrderManagement() {
-  const [orders, setOrders] = useState<Order[]>(initialOrders);
+  const [orders, setOrders] = useState<Order[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [activeSection, setActiveSection] = useState<'delivered' | 'pending' | 'cancelled'>('pending');
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+
+  useEffect(() => {
+    const getOrderData = async () => {
+      const response = await axios.get<Order[]>('/api/order');
+
+      setOrders(response.data);
+    }
+
+    getOrderData();
+  }, [])
 
   const handleConfirmOrder = (orderId: string) => {
     if (confirm('Mark this order as delivered?')) {

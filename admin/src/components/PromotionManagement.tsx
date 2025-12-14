@@ -1,6 +1,13 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Plus, Edit, Trash2, X, Tag, Calendar, Image as ImageIcon } from 'lucide-react';
 import { ImageWithFallback } from './figma/ImageWithFallback';
+import axios from 'axios';
+
+// Type for data from Backend
+interface PromotionReponse {
+  discount: Discount[],
+  banner: Banner[]
+}
 
 interface Discount {
   id: number;
@@ -22,62 +29,11 @@ interface Banner {
   active: boolean;
 }
 
-const initialDiscounts: Discount[] = [
-  {
-    id: 1,
-    code: 'WINTER25',
-    description: 'Winter Sale - 25% off all winter items',
-    percentOff: 25,
-    startDate: '2024-12-01',
-    endDate: '2024-12-31',
-    active: true,
-  },
-  {
-    id: 2,
-    code: 'NEWMEMBER15',
-    description: 'New member discount - 15% off first order',
-    percentOff: 15,
-    startDate: '2024-11-01',
-    endDate: '2025-03-31',
-    active: true,
-  },
-  {
-    id: 3,
-    code: 'SUMMER30',
-    description: 'Summer clearance sale',
-    percentOff: 30,
-    startDate: '2024-06-01',
-    endDate: '2024-08-31',
-    active: false,
-  },
-];
-
-const initialBanners: Banner[] = [
-  {
-    id: 1,
-    title: 'Winter Collection 2024',
-    subtitle: 'Stay warm and stylish with our latest winter arrivals',
-    imageUrl: 'https://images.unsplash.com/photo-1483985988355-763728e1935b?w=1200',
-    buttonText: 'Shop Now',
-    buttonLink: '/collections/winter',
-    active: true,
-  },
-  {
-    id: 2,
-    title: 'New Season Sale',
-    subtitle: 'Up to 50% off on selected items',
-    imageUrl: 'https://images.unsplash.com/photo-1441984904996-e0b6ba687e04?w=1200',
-    buttonText: 'View Deals',
-    buttonLink: '/sale',
-    active: false,
-  },
-];
-
 export function PromotionManagement() {
   const [activeTab, setActiveTab] = useState<'discounts' | 'banners'>('discounts');
   
   // Discount Management
-  const [discounts, setDiscounts] = useState<Discount[]>(initialDiscounts);
+  const [discounts, setDiscounts] = useState<Discount[]>([]);
   const [showDiscountModal, setShowDiscountModal] = useState(false);
   const [editingDiscount, setEditingDiscount] = useState<Discount | null>(null);
   const [discountFormData, setDiscountFormData] = useState({
@@ -90,7 +46,7 @@ export function PromotionManagement() {
   });
 
   // Banner Management
-  const [banners, setBanners] = useState<Banner[]>(initialBanners);
+  const [banners, setBanners] = useState<Banner[]>([]);
   const [showBannerModal, setShowBannerModal] = useState(false);
   const [editingBanner, setEditingBanner] = useState<Banner | null>(null);
   const [bannerFormData, setBannerFormData] = useState({
@@ -101,6 +57,17 @@ export function PromotionManagement() {
     buttonLink: '',
     active: false,
   });
+
+  useEffect(() => {
+    const getPromotionData = async () => {
+      const response = await axios.get<PromotionReponse>('/api/promotion');
+
+      setDiscounts(response.data.discount);
+      setBanners(response.data.banner)
+    }
+
+    getPromotionData();
+  }, [])
 
   // Discount Handlers
   const handleAddDiscount = () => {
