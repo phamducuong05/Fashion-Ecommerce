@@ -41,30 +41,63 @@ export function OrderManagement() {
     getOrderData();
   }, [])
 
-  const handleConfirmOrder = (orderId: string) => {
-    if (confirm('Mark this order as delivered?')) {
-      setOrders(orders.map(order => 
-        order.id === orderId ? { ...order, status: 'delivered' as const } : order
-      ));
-      setSelectedOrder(null);
+  const updateOrderStatus = async (
+    id: string,
+    status: 'delivered' | 'cancelled'
+  ) => {
+    const payload = {
+      id,
+      status
     }
+    await axios.patch(`/api/order/${id}`, payload);
+  }
+
+  const optimisticUpdateOrderStatus = async (
+    orderId: string,
+    nextStatus: 'delivered' | 'cancelled'
+  ) => {
+    // 1. snapshot
+    const previousOrders = [...orders];
+
+    // 2. optimistic update
+    setOrders(prev =>
+      prev.map(order =>
+        order.id === orderId
+          ? { ...order, status: nextStatus }
+          : order
+      )
+    );
+
+    setSelectedOrder(null);
+
+    try {
+      // 3. call API
+      await updateOrderStatus(orderId, nextStatus);
+    } catch (error) {
+      // 4. rollback
+      console.error(error);
+      setOrders(previousOrders);
+      alert('Update order status failed. Changes reverted.');
+    }
+  };
+
+  const handleConfirmOrder = (orderId: string) => {
+    if (!confirm('Mark this order as delivered?')) return;
+    optimisticUpdateOrderStatus(orderId, 'delivered');
   };
 
   const handleCancelOrder = (orderId: string) => {
-    if (confirm('Are you sure you want to cancel this order?')) {
-      setOrders(orders.map(order => 
-        order.id === orderId ? { ...order, status: 'cancelled' as const } : order
-      ));
-      setSelectedOrder(null);
-    }
+    if (!confirm('Are you sure you want to cancel this order?')) return;
+    optimisticUpdateOrderStatus(orderId, 'cancelled');
   };
 
   const filteredOrders = orders.filter(order => {
-    const matchesSearch = 
-      order.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      order.customerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      order.customerEmail.toLowerCase().includes(searchTerm.toLowerCase());
+    const sTerm = searchTerm.toLowerCase();
+    const idMatch = order.id?.toString().toLowerCase().includes(sTerm) || false;
+    const nameMatch = order.customerName?.toLowerCase().includes(sTerm) || false;
+    const emailMatch = order.customerEmail?.toLowerCase().includes(sTerm) || false;
     
+    const matchesSearch = idMatch || nameMatch || emailMatch;
     const matchesSection = order.status === activeSection;
     
     return matchesSearch && matchesSection;

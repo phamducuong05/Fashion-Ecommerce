@@ -19,7 +19,7 @@ interface Order {
   id: string;
   date: string;
   total: number;
-  status: 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
+  status: 'pending' | 'processing' | 'delivered' | 'cancelled';
   items: OrderItem[];
 }
 
@@ -58,8 +58,6 @@ export function CustomerManagement() {
         return 'bg-yellow-100 text-yellow-700';
       case 'processing':
         return 'bg-blue-100 text-blue-700';
-      case 'shipped':
-        return 'bg-purple-100 text-purple-700';
       case 'delivered':
         return 'bg-green-100 text-green-700';
       case 'cancelled':

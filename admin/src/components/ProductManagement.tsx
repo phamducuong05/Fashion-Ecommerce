@@ -118,7 +118,7 @@ export function ProductManagement() {
 
       setProducts((prev) => prev.filter((p) => p.id !== id));
     } catch (error) {
-      console.error('Delete product failed', error);
+      console.error(`Failed to delete product with id ${id}`, error);
       alert('Failed to delete product');
     }
   };
