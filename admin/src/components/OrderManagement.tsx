@@ -33,7 +33,7 @@ export function OrderManagement() {
 
   useEffect(() => {
     const getOrderData = async () => {
-      const response = await axios.get<Order[]>('/api/order');
+      const response = await axios.get<Order[]>('/api/orders');
 
       setOrders(response.data);
     }
@@ -49,7 +49,7 @@ export function OrderManagement() {
       id,
       status
     }
-    await axios.patch(`/api/order/${id}`, payload);
+    await axios.patch(`/api/orders/${id}`, payload);
   }
 
   const optimisticUpdateOrderStatus = async (

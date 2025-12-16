@@ -66,7 +66,7 @@ export function ProductManagement() {
   useEffect(() => {
     const getProductData = async () => {
       try {
-        const response = await axios.get<Product[]>('/api/product');
+        const response = await axios.get<Product[]>('/api/products');
         setProducts(response.data);
       } catch (err) {
         console.error('Failed to fetch products', err);
@@ -114,7 +114,7 @@ export function ProductManagement() {
     if (!ok) return;
 
     try {
-      await axios.delete(`/api/product/${id}`);
+      await axios.delete(`/api/products/${id}`);
 
       setProducts((prev) => prev.filter((p) => p.id !== id));
     } catch (error) {
@@ -166,7 +166,7 @@ export function ProductManagement() {
       if (editingProduct) {
         // UPDATE
         const res = await axios.put(
-          `/api/product/${editingProduct.id}`,
+          `/api/products/${editingProduct.id}`,
           payload
         );
 
@@ -177,7 +177,7 @@ export function ProductManagement() {
         );
       } else {
         // ADD
-        const res = await axios.post('/api/product', payload);
+        const res = await axios.post('/api/products', payload);
         setProducts((prev) => [...prev, res.data]);
       }
 

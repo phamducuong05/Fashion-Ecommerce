@@ -4,8 +4,8 @@ import { ImageWithFallback } from './figma/ImageWithFallback';
 import axios from 'axios';
 
 interface PromotionResponse {
-  discount: Discount[];
-  banner: Banner[];
+  discounts: Discount[];
+  banners: Banner[];
 }
 
 interface Discount {
@@ -60,9 +60,9 @@ export function PromotionManagement() {
     const getPromotionData = async () => {
       try {
         setIsLoading(true);
-        const response = await axios.get<PromotionResponse>('/api/promotion');
-        setDiscounts(response.data.discount);
-        setBanners(response.data.banner);
+        const response = await axios.get<PromotionResponse>('/api/promotions');
+        setDiscounts(response.data.discounts);
+        setBanners(response.data.banners);
       } catch (error) {
         console.error(error);
         alert('Failed to fetch promotion data');
@@ -111,7 +111,7 @@ export function PromotionManagement() {
     }
 
     try {
-      await axios.delete(`/api/promotion/discount/${id}`);
+      await axios.delete(`/api/promotions/discounts/${id}`);
       setDiscounts((prev) => prev.filter((d) => d.id !== id));
     } catch (error) {
       console.error(error);
@@ -134,14 +134,14 @@ export function PromotionManagement() {
     try {
       if (editingDiscount) {
         const response = await axios.put<Discount>(
-          `/api/promotion/discount/${editingDiscount.id}`,
+          `/api/promotions/discounts/${editingDiscount.id}`,
           payload
         );
         setDiscounts((prev) =>
           prev.map((d) => (d.id === editingDiscount.id ? response.data : d))
         );
       } else {
-        const response = await axios.post<Discount>('/api/promotion/discount', payload);
+        const response = await axios.post<Discount>('/api/promotions/discounts', payload);
         setDiscounts((prev) => [...prev, response.data]);
       }
       setShowDiscountModal(false);
@@ -183,7 +183,7 @@ export function PromotionManagement() {
     }
 
     try {
-      await axios.delete(`/api/promotion/banner/${id}`);
+      await axios.delete(`/api/promotions/banners/${id}`);
       setBanners((prev) => prev.filter((b) => b.id !== id));
     } catch (error) {
       console.error(error);
@@ -199,14 +199,14 @@ export function PromotionManagement() {
     try {
       if (editingBanner) {
         const response = await axios.put<Banner>(
-            `/api/promotion/banner/${editingBanner.id}`, 
+            `/api/promotions/banners/${editingBanner.id}`, 
             payload
         );
         setBanners((prev) =>
           prev.map((b) => (b.id === editingBanner.id ? response.data : b))
         );
       } else {
-        const response = await axios.post<Banner>('/api/promotion/banner', payload);
+        const response = await axios.post<Banner>('/api/promotions/banners', payload);
         setBanners((prev) => [...prev, response.data]);
       }
       setShowBannerModal(false);
@@ -221,7 +221,7 @@ export function PromotionManagement() {
         const targetBanner = banners.find(b => b.id === id);
         if(!targetBanner) return;
 
-        await axios.put(`/api/promotion/banner/${id}`, {
+        await axios.put(`/api/promotions/banners/${id}`, {
             ...targetBanner,
             active: true
         });

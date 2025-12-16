@@ -39,7 +39,7 @@ export function CustomerManagement() {
 
   useEffect(() => {
     const getCustomerData = async () => {
-      const reponse = await axios.get<Customer[]>('/api/customer');
+      const reponse = await axios.get<Customer[]>('/api/customers');
 
       setCustomers(reponse.data);
     }
