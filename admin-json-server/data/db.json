@@ -144,13 +144,11 @@
   },
   "products": [
     {
-      "id": "1",
       "name": "Classic Cotton T-Shirt",
       "category": "Men - T-Shirts",
-      "price": 29.99,
+      "price": 298,
       "stock": 45,
       "image": "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400",
-      "description": "A classic cotton t-shirt, comfortable and perfect for everyday wear.",
       "status": "available",
       "variants": [
         {
@@ -170,7 +168,8 @@
           ],
           "imageUrl": "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400"
         }
-      ]
+      ],
+      "id": "1"
     },
     {
       "id": "2",
@@ -421,7 +420,7 @@
       "id": "ORD-1008",
       "date": "2024-11-27",
       "total": 179.97,
-      "status": "pending",
+      "status": "delivered",
       "customerName": "Lisa Anderson",
       "customerEmail": "lisa.a@email.com",
       "shippingAddress": "555 Maple Dr, Seattle, WA 98101",
@@ -658,60 +657,49 @@
       ]
     }
   ],
-  "promotions": {
-    "discounts": [
-      {
-        "id": 1,
-        "code": "WINTER25",
-        "description": "Winter Sale - 25% off all winter items",
-        "percentOff": 25,
-        "startDate": "2024-12-01",
-        "endDate": "2024-12-31",
-        "active": true
-      },
-      {
-        "id": 2,
-        "code": "NEWMEMBER15",
-        "description": "New member discount - 15% off first order",
-        "percentOff": 15,
-        "startDate": "2024-11-01",
-        "endDate": "2025-03-31",
-        "active": true
-      },
-      {
-        "id": 3,
-        "code": "SUMMER30",
-        "description": "Summer clearance sale",
-        "percentOff": 30,
-        "startDate": "2024-06-01",
-        "endDate": "2024-08-31",
-        "active": false
-      }
-    ],
-    "banners": [
-      {
-        "id": 1,
-        "title": "Winter Collection 2024",
-        "subtitle": "Stay warm and stylish with our latest winter arrivals",
-        "imageUrl": "https://images.unsplash.com/photo-1483985988355-763728e1935b?w=1200",
-        "buttonText": "Shop Now",
-        "buttonLink": "/collections/winter",
-        "active": true
-      },
-      {
-        "id": 2,
-        "title": "New Season Sale",
-        "subtitle": "Up to 50% off on selected items",
-        "imageUrl": "https://images.unsplash.com/photo-1441984904996-e0b6ba687e04?w=1200",
-        "buttonText": "View Deals",
-        "buttonLink": "/sale",
-        "active": false
-      }
-    ]
-  },
+  "discounts": [
+    {
+      "code": "NEWMEMBER15",
+      "description": "New member discount - 30% off first order",
+      "percentOff": 30,
+      "startDate": "2024-11-01",
+      "endDate": "2025-03-31",
+      "active": true,
+      "id": "2"
+    },
+    {
+      "id": "3",
+      "code": "SUMMER30",
+      "description": "Summer clearance sale",
+      "percentOff": 30,
+      "startDate": "2024-06-01",
+      "endDate": "2024-08-31",
+      "active": false
+    }
+  ],
+  "banners": [
+    {
+      "title": "Winter Collection 2024",
+      "subtitle": "WINTER BITCH",
+      "imageUrl": "https://images.unsplash.com/photo-1483985988355-763728e1935b?w=1200",
+      "buttonText": "Shop Now",
+      "buttonLink": "/collections/winter",
+      "active": true,
+      "id": "1"
+    },
+    {
+      "id": "2",
+      "title": "New Season Sale",
+      "subtitle": "Up to 50% off on selected items",
+      "imageUrl": "https://images.unsplash.com/photo-1441984904996-e0b6ba687e04?w=1200",
+      "buttonText": "View Deals",
+      "buttonLink": "/sale",
+      "active": false
+    }
+  ],
   "chatmessages": [
     {
-      "id": 1,
+      "id": "1",
       "customerName": "Sarah Johnson",
       "customerEmail": "sarah.j@email.com",
       "lastMessage": "When will my order be delivered?",
@@ -733,7 +721,7 @@
       ]
     },
     {
-      "id": 2,
+      "id": "2",
       "customerName": "Michael Chen",
       "customerEmail": "mchen@email.com",
       "lastMessage": "Thank you for your help!",
@@ -773,7 +761,7 @@
       ]
     },
     {
-      "id": 3,
+      "id": "3",
       "customerName": "Emma Davis",
       "customerEmail": "emma.davis@email.com",
       "lastMessage": "Do you ship internationally?",
