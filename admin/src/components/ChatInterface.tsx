@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Send, Search } from 'lucide-react';
+import axios from 'axios';
 
 interface Message {
   id: number;
@@ -18,93 +19,21 @@ interface Chat {
   messages: Message[];
 }
 
-const initialChats: Chat[] = [
-  {
-    id: 1,
-    customerName: 'Sarah Johnson',
-    customerEmail: 'sarah.j@email.com',
-    lastMessage: 'When will my order be delivered?',
-    unread: 2,
-    lastActive: new Date('2024-11-27T14:30:00'),
-    messages: [
-      {
-        id: 1,
-        sender: 'customer',
-        text: 'Hi, I placed an order yesterday. Order #ORD-1003',
-        timestamp: new Date('2024-11-27T14:25:00'),
-      },
-      {
-        id: 2,
-        sender: 'customer',
-        text: 'When will my order be delivered?',
-        timestamp: new Date('2024-11-27T14:30:00'),
-      },
-    ],
-  },
-  {
-    id: 2,
-    customerName: 'Michael Chen',
-    customerEmail: 'mchen@email.com',
-    lastMessage: 'Thank you for your help!',
-    unread: 0,
-    lastActive: new Date('2024-11-26T10:15:00'),
-    messages: [
-      {
-        id: 1,
-        sender: 'customer',
-        text: 'I need to change my shipping address',
-        timestamp: new Date('2024-11-26T10:00:00'),
-      },
-      {
-        id: 2,
-        sender: 'admin',
-        text: "I'd be happy to help! Could you provide your order number?",
-        timestamp: new Date('2024-11-26T10:05:00'),
-      },
-      {
-        id: 3,
-        sender: 'customer',
-        text: 'Order #ORD-1005',
-        timestamp: new Date('2024-11-26T10:08:00'),
-      },
-      {
-        id: 4,
-        sender: 'admin',
-        text: 'Address updated successfully!',
-        timestamp: new Date('2024-11-26T10:12:00'),
-      },
-      {
-        id: 5,
-        sender: 'customer',
-        text: 'Thank you for your help!',
-        timestamp: new Date('2024-11-26T10:15:00'),
-      },
-    ],
-  },
-  {
-    id: 3,
-    customerName: 'Emma Davis',
-    customerEmail: 'emma.davis@email.com',
-    lastMessage: 'Do you ship internationally?',
-    unread: 1,
-    lastActive: new Date('2024-11-27T11:45:00'),
-    messages: [
-      {
-        id: 1,
-        sender: 'customer',
-        text: 'Do you ship internationally?',
-        timestamp: new Date('2024-11-27T11:45:00'),
-      },
-    ],
-  },
-];
-
 export function ChatInterface() {
-  const [chats] = useState<Chat[]>(initialChats);
+  const [chats, setChats] = useState<Chat[]>([]);
   const [selectedChat, setSelectedChat] = useState<Chat | null>(chats[0]);
   const [searchTerm, setSearchTerm] = useState('');
   const [messageText, setMessageText] = useState('');
   const [messages, setMessages] = useState<Message[]>(selectedChat?.messages || []);
+
+  useEffect(() => {
+    const getChatMessages = async () => {
+      const response = await axios.get<Chat[]>('/api/chatmessages')
+
+      setChats(response.data)
+    }
+    getChatMessages();
+  }, [])
 
   const handleSendMessage = (e: React.FormEvent) => {
     e.preventDefault();
@@ -181,7 +110,7 @@ export function ChatInterface() {
                 </div>
                 <p className="text-sm text-gray-600 truncate">{chat.lastMessage}</p>
                 <p className="text-xs text-gray-400 mt-1">
-                  {chat.lastActive.toLocaleTimeString([], {
+                  {new Date(chat.lastActive).toLocaleTimeString([], {
                     hour: '2-digit',
                     minute: '2-digit',
                   })}
@@ -221,7 +150,7 @@ export function ChatInterface() {
                           message.sender === 'admin' ? 'text-[#F5DEB3]' : 'text-gray-400'
                         }`}
                       >
-                        {message.timestamp.toLocaleTimeString([], {
+                        {new Date (message.timestamp).toLocaleTimeString([], {
                           hour: '2-digit',
                           minute: '2-digit',
                         })}
