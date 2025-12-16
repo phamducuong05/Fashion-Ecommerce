@@ -1,0 +1,51 @@
+{
+  "discount": [
+    {
+      "id": 1,
+      "code": "WINTER25",
+      "description": "Winter Sale - 25% off all winter items",
+      "percentOff": 25,
+      "startDate": "2024-12-01",
+      "endDate": "2024-12-31",
+      "active": true
+    },
+    {
+      "id": 2,
+      "code": "NEWMEMBER15",
+      "description": "New member discount - 15% off first order",
+      "percentOff": 15,
+      "startDate": "2024-11-01",
+      "endDate": "2025-03-31",
+      "active": true
+    },
+    {
+      "id": 3,
+      "code": "SUMMER30",
+      "description": "Summer clearance sale",
+      "percentOff": 30,
+      "startDate": "2024-06-01",
+      "endDate": "2024-08-31",
+      "active": false
+    }
+  ],
+  "banner": [
+    {
+      "id": 1,
+      "title": "Winter Collection 2024",
+      "subtitle": "Stay warm and stylish with our latest winter arrivals",
+      "imageUrl": "https://images.unsplash.com/photo-1483985988355-763728e1935b?w=1200",
+      "buttonText": "Shop Now",
+      "buttonLink": "/collections/winter",
+      "active": true
+    },
+    {
+      "id": 2,
+      "title": "New Season Sale",
+      "subtitle": "Up to 50% off on selected items",
+      "imageUrl": "https://images.unsplash.com/photo-1441984904996-e0b6ba687e04?w=1200",
+      "buttonText": "View Deals",
+      "buttonLink": "/sale",
+      "active": false
+    }
+  ]
+}

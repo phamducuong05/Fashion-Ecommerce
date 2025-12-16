@@ -1,0 +1,792 @@
+{
+  "dashboard": {
+    "stats": [
+      {
+        "title": "Total Revenue",
+        "value": 94200,
+        "change": 12.5,
+        "trend": "up"
+      },
+      {
+        "title": "Total Orders",
+        "value": 1842,
+        "change": 8.2,
+        "trend": "up"
+      },
+      {
+        "title": "Total Customers",
+        "value": 3254,
+        "change": 15.3,
+        "trend": "up"
+      },
+      {
+        "title": "Conversion Rate",
+        "value": 3.8,
+        "unit": "%",
+        "change": -2.1,
+        "trend": "down"
+      }
+    ],
+    "revenueData": [
+      {
+        "name": "Jan",
+        "revenue": 4200
+      },
+      {
+        "name": "Feb",
+        "revenue": 5100
+      },
+      {
+        "name": "Mar",
+        "revenue": 4800
+      },
+      {
+        "name": "Apr",
+        "revenue": 6200
+      },
+      {
+        "name": "May",
+        "revenue": 7100
+      },
+      {
+        "name": "Jun",
+        "revenue": 8400
+      },
+      {
+        "name": "Jul",
+        "revenue": 7800
+      },
+      {
+        "name": "Aug",
+        "revenue": 9200
+      },
+      {
+        "name": "Sep",
+        "revenue": 8900
+      },
+      {
+        "name": "Oct",
+        "revenue": 10100
+      },
+      {
+        "name": "Nov",
+        "revenue": 11200
+      },
+      {
+        "name": "Dec",
+        "revenue": 12400
+      }
+    ],
+    "categoryData": [
+      {
+        "name": "Men Fashion",
+        "value": 4200
+      },
+      {
+        "name": "Women Fashion",
+        "value": 5800
+      },
+      {
+        "name": "Kids",
+        "value": 2100
+      },
+      {
+        "name": "Accessories",
+        "value": 1800
+      },
+      {
+        "name": "Bags & Wallets",
+        "value": 2900
+      }
+    ],
+    "bestSellingProducts": [
+      {
+        "id": 1,
+        "name": "Floral Summer Dress",
+        "sales": 342,
+        "revenue": 30780,
+        "trend": "up",
+        "change": 12
+      },
+      {
+        "id": 2,
+        "name": "Classic Cotton T-Shirt",
+        "sales": 298,
+        "revenue": 8942,
+        "trend": "up",
+        "change": 8
+      },
+      {
+        "id": 3,
+        "name": "Leather Crossbody Bag",
+        "sales": 276,
+        "revenue": 35880,
+        "trend": "down",
+        "change": -3
+      },
+      {
+        "id": 4,
+        "name": "Slim Fit Jeans",
+        "sales": 245,
+        "revenue": 19600,
+        "trend": "up",
+        "change": 15
+      },
+      {
+        "id": 5,
+        "name": "Kids Running Shoes",
+        "sales": 198,
+        "revenue": 9900,
+        "trend": "up",
+        "change": 5
+      }
+    ]
+  },
+  "products": [
+    {
+      "id": "1",
+      "name": "Classic Cotton T-Shirt",
+      "category": "Men - T-Shirts",
+      "price": 29.99,
+      "stock": 45,
+      "image": "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400",
+      "description": "A classic cotton t-shirt, comfortable and perfect for everyday wear.",
+      "status": "available",
+      "variants": [
+        {
+          "size": "M",
+          "colors": [
+            "Black",
+            "White",
+            "Navy"
+          ],
+          "imageUrl": "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400"
+        },
+        {
+          "size": "L",
+          "colors": [
+            "Black",
+            "White"
+          ],
+          "imageUrl": "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400"
+        }
+      ]
+    },
+    {
+      "id": "2",
+      "name": "Floral Summer Dress",
+      "category": "Women - Dress",
+      "price": 89.99,
+      "stock": 32,
+      "image": "https://images.unsplash.com/photo-1572804013309-59a88b7e92f1?w=400",
+      "description": "A light and airy floral summer dress, perfect for warm days.",
+      "status": "available",
+      "variants": [
+        {
+          "size": "S",
+          "colors": [
+            "Floral Blue",
+            "Floral Pink"
+          ],
+          "imageUrl": "https://images.unsplash.com/photo-1572804013309-59a88b7e92f1?w=400"
+        },
+        {
+          "size": "M",
+          "colors": [
+            "Floral Blue",
+            "Floral Pink"
+          ],
+          "imageUrl": "https://images.unsplash.com/photo-1572804013309-59a88b7e92f1?w=400"
+        }
+      ]
+    },
+    {
+      "id": "3",
+      "name": "Leather Crossbody Bag",
+      "category": "Bags",
+      "price": 129.99,
+      "stock": 18,
+      "image": "https://images.unsplash.com/photo-1548036328-c9fa89d128fa?w=400",
+      "description": "A stylish leather crossbody bag, perfect for daily use and travel.",
+      "status": "available",
+      "variants": [
+        {
+          "size": "One Size",
+          "colors": [
+            "Brown",
+            "Black",
+            "Tan"
+          ],
+          "imageUrl": "https://images.unsplash.com/photo-1548036328-c9fa89d128fa?w=400"
+        }
+      ]
+    }
+  ],
+  "orders": [
+    {
+      "id": "ORD-1001",
+      "date": "2024-11-20",
+      "total": 299.98,
+      "status": "delivered",
+      "customerName": "Sarah Johnson",
+      "customerEmail": "sarah.j@email.com",
+      "shippingAddress": "123 Main St, New York, NY 10001",
+      "items": [
+        {
+          "productName": "Classic Cotton T-Shirt",
+          "category": "Men - T-Shirts",
+          "quantity": 2,
+          "price": 29.99,
+          "size": "M",
+          "color": "Black",
+          "imageUrl": "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400"
+        },
+        {
+          "productName": "Leather Crossbody Bag",
+          "category": "Bags",
+          "quantity": 1,
+          "price": 129.99,
+          "size": "One Size",
+          "color": "Brown",
+          "imageUrl": "https://images.unsplash.com/photo-1548036328-c9fa89d128fa?w=400"
+        }
+      ]
+    },
+    {
+      "id": "ORD-1002",
+      "date": "2024-11-25",
+      "total": 149.97,
+      "status": "delivered",
+      "customerName": "Sarah Johnson",
+      "customerEmail": "sarah.j@email.com",
+      "shippingAddress": "123 Main St, New York, NY 10001",
+      "items": [
+        {
+          "productName": "Floral Summer Dress",
+          "category": "Women - Dress",
+          "quantity": 1,
+          "price": 89.99,
+          "size": "S",
+          "color": "Floral Blue",
+          "imageUrl": "https://images.unsplash.com/photo-1572804013309-59a88b7e92f1?w=400"
+        },
+        {
+          "productName": "Casual Sneakers",
+          "category": "Women - Shoes",
+          "quantity": 1,
+          "price": 59.99,
+          "size": "M",
+          "color": "White",
+          "imageUrl": "https://images.unsplash.com/photo-1549298916-b41d501d3772?w=400"
+        }
+      ]
+    },
+    {
+      "id": "ORD-1003",
+      "date": "2024-11-27",
+      "total": 799.99,
+      "status": "cancelled",
+      "customerName": "Sarah Johnson",
+      "customerEmail": "sarah.j@email.com",
+      "shippingAddress": "123 Main St, New York, NY 10001",
+      "items": [
+        {
+          "productName": "Premium Wool Coat",
+          "category": "Women - Top",
+          "quantity": 1,
+          "price": 399.99,
+          "size": "M",
+          "color": "Camel",
+          "imageUrl": "https://images.unsplash.com/photo-1539533018447-63fcce2678e3?w=400"
+        },
+        {
+          "productName": "Designer Handbag",
+          "category": "Bags",
+          "quantity": 1,
+          "price": 400,
+          "size": "One Size",
+          "color": "Black",
+          "imageUrl": "https://images.unsplash.com/photo-1584917865442-de89df76afd3?w=400"
+        }
+      ]
+    },
+    {
+      "id": "ORD-1004",
+      "date": "2024-11-18",
+      "total": 599.97,
+      "status": "delivered",
+      "customerName": "Michael Chen",
+      "customerEmail": "mchen@email.com",
+      "shippingAddress": "456 Oak Ave, Los Angeles, CA 90001",
+      "items": [
+        {
+          "productName": "Slim Fit Jeans",
+          "category": "Men - Jeans",
+          "quantity": 3,
+          "price": 79.99,
+          "size": "L",
+          "color": "Dark Blue",
+          "imageUrl": "https://images.unsplash.com/photo-1542272604-787c3835535d?w=400"
+        },
+        {
+          "productName": "Polo Shirt",
+          "category": "Men - Polo",
+          "quantity": 2,
+          "price": 45.99,
+          "size": "L",
+          "color": "Navy",
+          "imageUrl": "https://images.unsplash.com/photo-1586790170083-2f9ceadc732d?w=400"
+        }
+      ]
+    },
+    {
+      "id": "ORD-1005",
+      "date": "2024-11-24",
+      "total": 249.98,
+      "status": "delivered",
+      "customerName": "Michael Chen",
+      "customerEmail": "mchen@email.com",
+      "shippingAddress": "456 Oak Ave, Los Angeles, CA 90001",
+      "items": [
+        {
+          "productName": "Hooded Sweatshirt",
+          "category": "Men - Hoodie",
+          "quantity": 2,
+          "price": 69.99,
+          "size": "XL",
+          "color": "Gray",
+          "imageUrl": "https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=400"
+        },
+        {
+          "productName": "Baseball Cap",
+          "category": "Hats",
+          "quantity": 1,
+          "price": 24.99,
+          "size": "One Size",
+          "color": "Black",
+          "imageUrl": "https://images.unsplash.com/photo-1588850561407-ed78c282e89b?w=400"
+        }
+      ]
+    },
+    {
+      "id": "ORD-1006",
+      "date": "2024-11-26",
+      "total": 99.99,
+      "status": "delivered",
+      "customerName": "Emma Davis",
+      "customerEmail": "emma.davis@email.com",
+      "shippingAddress": "789 Pine Rd, Chicago, IL 60601",
+      "items": [
+        {
+          "productName": "Yoga Leggings",
+          "category": "Women - Legging",
+          "quantity": 1,
+          "price": 49.99,
+          "size": "M",
+          "color": "Black",
+          "imageUrl": "https://images.unsplash.com/photo-1506629082955-511b1aa562c8?w=400"
+        },
+        {
+          "productName": "Athletic Top",
+          "category": "Women - Top",
+          "quantity": 1,
+          "price": 39.99,
+          "size": "S",
+          "color": "Pink",
+          "imageUrl": "https://images.unsplash.com/photo-1562157873-818bc0726f68?w=400"
+        }
+      ]
+    },
+    {
+      "id": "ORD-1007",
+      "date": "2024-11-22",
+      "total": 200,
+      "status": "cancelled",
+      "customerName": "James Wilson",
+      "customerEmail": "jwilson@email.com",
+      "shippingAddress": "321 Elm St, Houston, TX 77001",
+      "items": [
+        {
+          "productName": "Winter Jacket",
+          "category": "Men - Sweater",
+          "quantity": 1,
+          "price": 200,
+          "size": "L",
+          "color": "Navy",
+          "imageUrl": "https://images.unsplash.com/photo-1551028719-00167b16eac5?w=400"
+        }
+      ]
+    },
+    {
+      "id": "ORD-1008",
+      "date": "2024-11-27",
+      "total": 179.97,
+      "status": "pending",
+      "customerName": "Lisa Anderson",
+      "customerEmail": "lisa.a@email.com",
+      "shippingAddress": "555 Maple Dr, Seattle, WA 98101",
+      "items": [
+        {
+          "productName": "Leather Wallet",
+          "category": "Wallets",
+          "quantity": 2,
+          "price": 49.99,
+          "size": "One Size",
+          "color": "Brown",
+          "imageUrl": "https://images.unsplash.com/photo-1627123424574-724758594e93?w=400"
+        },
+        {
+          "productName": "Denim Skirt",
+          "category": "Women - Skirt",
+          "quantity": 1,
+          "price": 79.99,
+          "size": "M",
+          "color": "Light Blue",
+          "imageUrl": "https://images.unsplash.com/photo-1583496661160-fb5886a0aaaa?w=400"
+        }
+      ]
+    }
+  ],
+  "customers": [
+    {
+      "id": "1",
+      "name": "Sarah Johnson",
+      "email": "sarah.j@email.com",
+      "totalSpent": 1249.97,
+      "joinDate": "2024-01-15",
+      "orders": [
+        {
+          "id": "ORD-1001",
+          "date": "2024-11-20",
+          "total": 299.98,
+          "status": "delivered",
+          "items": [
+            {
+              "productName": "Classic Cotton T-Shirt",
+              "category": "Men - T-Shirts",
+              "quantity": 2,
+              "price": 29.99,
+              "size": "M",
+              "color": "Black",
+              "imageUrl": "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400"
+            },
+            {
+              "productName": "Leather Crossbody Bag",
+              "category": "Bags",
+              "quantity": 1,
+              "price": 129.99,
+              "size": "One Size",
+              "color": "Brown",
+              "imageUrl": "https://images.unsplash.com/photo-1548036328-c9fa89d128fa?w=400"
+            }
+          ]
+        },
+        {
+          "id": "ORD-1002",
+          "date": "2024-11-25",
+          "total": 149.97,
+          "status": "delivered",
+          "items": [
+            {
+              "productName": "Floral Summer Dress",
+              "category": "Women - Dress",
+              "quantity": 1,
+              "price": 89.99,
+              "size": "S",
+              "color": "Floral Blue",
+              "imageUrl": "https://images.unsplash.com/photo-1572804013309-59a88b7e92f1?w=400"
+            },
+            {
+              "productName": "Casual Sneakers",
+              "category": "Women - Shoes",
+              "quantity": 1,
+              "price": 59.99,
+              "size": "M",
+              "color": "White",
+              "imageUrl": "https://images.unsplash.com/photo-1549298916-b41d501d3772?w=400"
+            }
+          ]
+        },
+        {
+          "id": "ORD-1003",
+          "date": "2024-11-27",
+          "total": 799.99,
+          "status": "processing",
+          "items": [
+            {
+              "productName": "Premium Wool Coat",
+              "category": "Women - Top",
+              "quantity": 1,
+              "price": 399.99,
+              "size": "M",
+              "color": "Camel",
+              "imageUrl": "https://images.unsplash.com/photo-1539533018447-63fcce2678e3?w=400"
+            },
+            {
+              "productName": "Designer Handbag",
+              "category": "Bags",
+              "quantity": 1,
+              "price": 400,
+              "size": "One Size",
+              "color": "Black",
+              "imageUrl": "https://images.unsplash.com/photo-1584917865442-de89df76afd3?w=400"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "2",
+      "name": "Michael Chen",
+      "email": "mchen@email.com",
+      "totalSpent": 2899.95,
+      "joinDate": "2023-08-22",
+      "orders": [
+        {
+          "id": "ORD-1004",
+          "date": "2024-11-18",
+          "total": 599.97,
+          "status": "delivered",
+          "items": [
+            {
+              "productName": "Slim Fit Jeans",
+              "category": "Men - Jeans",
+              "quantity": 3,
+              "price": 79.99,
+              "size": "L",
+              "color": "Dark Blue",
+              "imageUrl": "https://images.unsplash.com/photo-1542272604-787c3835535d?w=400"
+            },
+            {
+              "productName": "Polo Shirt",
+              "category": "Men - Polo",
+              "quantity": 2,
+              "price": 45.99,
+              "size": "L",
+              "color": "Navy",
+              "imageUrl": "https://images.unsplash.com/photo-1586790170083-2f9ceadc732d?w=400"
+            }
+          ]
+        },
+        {
+          "id": "ORD-1005",
+          "date": "2024-11-24",
+          "total": 249.98,
+          "status": "delivered",
+          "items": [
+            {
+              "productName": "Hooded Sweatshirt",
+              "category": "Men - Hoodie",
+              "quantity": 2,
+              "price": 69.99,
+              "size": "XL",
+              "color": "Gray",
+              "imageUrl": "https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=400"
+            },
+            {
+              "productName": "Baseball Cap",
+              "category": "Hats",
+              "quantity": 1,
+              "price": 24.99,
+              "size": "One Size",
+              "color": "Black",
+              "imageUrl": "https://images.unsplash.com/photo-1588850561407-ed78c282e89b?w=400"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "3",
+      "name": "Emma Davis",
+      "email": "emma.davis@email.com",
+      "totalSpent": 445.98,
+      "joinDate": "2024-06-10",
+      "orders": [
+        {
+          "id": "ORD-1006",
+          "date": "2024-11-26",
+          "total": 99.99,
+          "status": "pending",
+          "items": [
+            {
+              "productName": "Yoga Leggings",
+              "category": "Women - Legging",
+              "quantity": 1,
+              "price": 49.99,
+              "size": "M",
+              "color": "Black",
+              "imageUrl": "https://images.unsplash.com/photo-1506629082955-511b1aa562c8?w=400"
+            },
+            {
+              "productName": "Athletic Top",
+              "category": "Women - Top",
+              "quantity": 1,
+              "price": 39.99,
+              "size": "S",
+              "color": "Pink",
+              "imageUrl": "https://images.unsplash.com/photo-1562157873-818bc0726f68?w=400"
+            }
+          ]
+        },
+        {
+          "id": "ORD-1007",
+          "date": "2024-11-15",
+          "total": 345.99,
+          "status": "delivered",
+          "items": [
+            {
+              "productName": "Kids Running Shoes",
+              "category": "Kids - Shoes",
+              "quantity": 2,
+              "price": 49.99,
+              "size": "M",
+              "color": "Blue",
+              "imageUrl": "https://images.unsplash.com/photo-1514989940723-e8e51635b782?w=400"
+            },
+            {
+              "productName": "Kids T-Shirt Set",
+              "category": "Kids - T-Shirt",
+              "quantity": 3,
+              "price": 19.99,
+              "size": "S",
+              "color": "Assorted",
+              "imageUrl": "https://images.unsplash.com/photo-1519238263530-99bdd11df2ea?w=400"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "promotions": {
+    "discounts": [
+      {
+        "id": 1,
+        "code": "WINTER25",
+        "description": "Winter Sale - 25% off all winter items",
+        "percentOff": 25,
+        "startDate": "2024-12-01",
+        "endDate": "2024-12-31",
+        "active": true
+      },
+      {
+        "id": 2,
+        "code": "NEWMEMBER15",
+        "description": "New member discount - 15% off first order",
+        "percentOff": 15,
+        "startDate": "2024-11-01",
+        "endDate": "2025-03-31",
+        "active": true
+      },
+      {
+        "id": 3,
+        "code": "SUMMER30",
+        "description": "Summer clearance sale",
+        "percentOff": 30,
+        "startDate": "2024-06-01",
+        "endDate": "2024-08-31",
+        "active": false
+      }
+    ],
+    "banners": [
+      {
+        "id": 1,
+        "title": "Winter Collection 2024",
+        "subtitle": "Stay warm and stylish with our latest winter arrivals",
+        "imageUrl": "https://images.unsplash.com/photo-1483985988355-763728e1935b?w=1200",
+        "buttonText": "Shop Now",
+        "buttonLink": "/collections/winter",
+        "active": true
+      },
+      {
+        "id": 2,
+        "title": "New Season Sale",
+        "subtitle": "Up to 50% off on selected items",
+        "imageUrl": "https://images.unsplash.com/photo-1441984904996-e0b6ba687e04?w=1200",
+        "buttonText": "View Deals",
+        "buttonLink": "/sale",
+        "active": false
+      }
+    ]
+  },
+  "chatmessages": [
+    {
+      "id": 1,
+      "customerName": "Sarah Johnson",
+      "customerEmail": "sarah.j@email.com",
+      "lastMessage": "When will my order be delivered?",
+      "unread": 2,
+      "lastActive": "2024-11-27T14:30:00.000Z",
+      "messages": [
+        {
+          "id": 1,
+          "sender": "customer",
+          "text": "Hi, I placed an order yesterday. Order #ORD-1003",
+          "timestamp": "2024-11-27T14:25:00.000Z"
+        },
+        {
+          "id": 2,
+          "sender": "customer",
+          "text": "When will my order be delivered?",
+          "timestamp": "2024-11-27T14:30:00.000Z"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "customerName": "Michael Chen",
+      "customerEmail": "mchen@email.com",
+      "lastMessage": "Thank you for your help!",
+      "unread": 0,
+      "lastActive": "2024-11-26T10:15:00.000Z",
+      "messages": [
+        {
+          "id": 1,
+          "sender": "customer",
+          "text": "I need to change my shipping address",
+          "timestamp": "2024-11-26T10:00:00.000Z"
+        },
+        {
+          "id": 2,
+          "sender": "admin",
+          "text": "I'd be happy to help! Could you provide your order number?",
+          "timestamp": "2024-11-26T10:05:00.000Z"
+        },
+        {
+          "id": 3,
+          "sender": "customer",
+          "text": "Order #ORD-1005",
+          "timestamp": "2024-11-26T10:08:00.000Z"
+        },
+        {
+          "id": 4,
+          "sender": "admin",
+          "text": "Address updated successfully!",
+          "timestamp": "2024-11-26T10:12:00.000Z"
+        },
+        {
+          "id": 5,
+          "sender": "customer",
+          "text": "Thank you for your help!",
+          "timestamp": "2024-11-26T10:15:00.000Z"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "customerName": "Emma Davis",
+      "customerEmail": "emma.davis@email.com",
+      "lastMessage": "Do you ship internationally?",
+      "unread": 1,
+      "lastActive": "2024-11-27T11:45:00.000Z",
+      "messages": [
+        {
+          "id": 1,
+          "sender": "customer",
+          "text": "Do you ship internationally?",
+          "timestamp": "2024-11-27T11:45:00.000Z"
+        }
+      ]
+    }
+  ]
+}
