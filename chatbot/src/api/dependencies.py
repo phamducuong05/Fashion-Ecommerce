@@ -3,6 +3,7 @@ from functools import lru_cache
 from src.core.config import settings
 from src.core.database import PSQLService
 from src.services.llm_service import LLMService
+from src.services.semantic_router_service import SemanticRouterService
 from src.services.embedding_service import EmbeddingService
 from src.services.memory_service import MemoryService
 from src.services.qdrant_service import QdrantService
@@ -11,6 +12,9 @@ from src.services.sync_service import SyncService
 from src.services.cache_service import CacheService
 from src.rag.pipeline import Pipeline
 
+@lru_cache()
+def get_semantic_router_service() -> SemanticRouterService:
+    return SemanticRouterService()
 
 @lru_cache()
 def get_embedding_service() -> EmbeddingService:
@@ -77,6 +81,7 @@ def get_sync_service(
 
 
 def get_rag_pipeline(
+    semantic_router_service: SemanticRouterService = Depends(get_semantic_router_service),
     llm_service: LLMService = Depends(get_llm_service),
     embedding_service: EmbeddingService = Depends(get_embedding_service),
     memory_service: MemoryService = Depends(get_memory_service),
@@ -85,6 +90,7 @@ def get_rag_pipeline(
     cache_service: CacheService = Depends(get_cache_service),
 ) -> Pipeline:
     return Pipeline(
+        semantic_router_service=semantic_router_service,
         llm_service=llm_service,
         embedding_service=embedding_service,
         memory_service=memory_service,

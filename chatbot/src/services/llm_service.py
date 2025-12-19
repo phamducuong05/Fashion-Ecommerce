@@ -100,14 +100,14 @@ class LLMService:
         except Exception as e:
             logger.error(f"Error calling LLM API: {str(e)}", exc_info=True)
         
-    async def rewrite_query_with_memory(self, user_query: str, history: List[Dict]) -> str:
+    async def rewrite_query_with_memory(self, query: str, history: List[Dict]) -> str:
         if not history:
-            return user_query
+            return query
         
         history_text = "\n".join([f"{msg['role']}: {msg['content']}" for msg in history])
-        prompt = REWRITE_QUERY_WITH_HISTORY_PROMPT_TEMPLATE.format(history=history_text, new_query=user_query)
+        prompt = REWRITE_QUERY_WITH_HISTORY_PROMPT_TEMPLATE.format(history=history_text, new_query=query)
         
-        logger.info(f"Rewriting new user's query {user_query} according to chat history...")
+        logger.info(f"Rewriting new user's query {query} according to chat history...")
         try:
             completion = await self.client.chat.completions.create(
                 model=self.model_name,
@@ -117,15 +117,14 @@ class LLMService:
                 temperature=0.1,
             )
             rewritten_query = completion.choices[0].message.content
-            print(rewritten_query)
             
             return rewritten_query
         except Exception as e:
-            logger.error(f"Failed to rewrite new user's query {user_query} according to chat history: {e}")
+            logger.error(f"Failed to rewrite new user's query {query} according to chat history: {e}")
             logger.warning(f"Trigger fallback mechanism. Returning original query.")
-            return user_query
+            return query
             
-    async def generate_search_queries(self, user_query: str) -> List[Dict[str, Any]]:
+    async def generate_search_queries(self, query: str) -> List[Dict[str, Any]]:
         """
         Performs intelligent query decomposition using the LLM to prepare input
         for hybrid semantic-keyword search.
@@ -143,7 +142,7 @@ class LLMService:
         treats the entire user query as a single search unit.
 
         Args:
-            user_query (str):
+            query (str):
                 The raw text provided by the user describing what they want.
 
         Returns:
@@ -160,13 +159,13 @@ class LLMService:
                 Any LLM or parsing-related exception is logged and re-raised
                 after fallback handling.
         """
-        logger.info(f"Generating search queries for input: '{user_query}'")
+        logger.info(f"Generating search queries for input: '{query}'")
         try:
             completion = await self.client.chat.completions.create(
                 model=self.model_name,
                 messages=[
                     {"role": "system", "content": FORMAT_USER_INPUT_PROMPT},
-                    {"role": "user", "content": user_query},
+                    {"role": "user", "content": query},
                 ],
                 temperature=0.1,  # Lower temperature for strict JSON compliance
                 response_format={"type": "json_object"},
@@ -193,4 +192,4 @@ class LLMService:
             logger.error(f"Error during query decomposition: {str(e)}", exc_info=True)
             logger.warning("Triggering fallback mechanism: returning original query.")
             # Fallback mechanism: Return the original query as a single item list
-            return [{"semantic_query": user_query, "keywords": user_query.split()}]
+            return [{"semantic_query": query, "keywords": query.split()}]

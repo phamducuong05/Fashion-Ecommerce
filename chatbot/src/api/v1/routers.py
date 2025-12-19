@@ -14,7 +14,7 @@ async def chat_endpoints(
     request: ChatRequest, pipeline: Pipeline = Depends(get_rag_pipeline)
 ):
 
-    response_generator = await pipeline.get_rag_response(session_id=request.session_id, user_query=request.query)
+    response_generator = await pipeline.get_response(session_id=request.session_id, user_query=request.query)
 
     return StreamingResponse(response_generator, media_type="text/event-stream")
 
