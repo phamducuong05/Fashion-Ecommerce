@@ -25,7 +25,6 @@ class RerankService:
             logger.error(
                 f"Failed to load Rerank model '{model_name}': {e}", exc_info=True
             )
-            raise
 
     def rerank_matched_products(
         self, semantic_query: str, matched_products: List[Any], top_k: int = 5
@@ -89,6 +88,6 @@ class RerankService:
         except Exception as e:
             logger.error(f"Error during reranking: {e}", exc_info=True)
             logger.warning(
-                "Fallback triggered. Returning original matched products unmodified."
+                "Trigger fallback mechanism. Returning original matched products unmodified."
             )
             return matched_products

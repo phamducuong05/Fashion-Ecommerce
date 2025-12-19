@@ -7,7 +7,7 @@ from dotenv import load_dotenv
 from groq import AsyncGroq
 from typing import Union, AsyncGenerator, Dict, Any, List
 
-from src.utils.text_helper import FORMAT_USER_INPUT_PROMPT
+from src.utils.text_helper import FORMAT_USER_INPUT_PROMPT, REWRITE_QUERY_WITH_HISTORY_PROMPT_TEMPLATE
 
 logger = logging.getLogger(__name__)
 
@@ -70,7 +70,7 @@ class LLMService:
             f"Sending request to LLM (Stream={stream}). Prompt preview: '{preview_prompt}'"
         )
         try:
-            chat_completion = await self.client.chat.completions.create(
+            completion = await self.client.chat.completions.create(
                 messages=[{"role": "user", "content": prompt}],
                 model=self.model_name,
                 temperature=0.7,
@@ -85,7 +85,7 @@ class LLMService:
                 async def streamer():
                     logger.debug("Starting response stream...")
                     try:
-                        async for chunk in chat_completion:
+                        async for chunk in completion:
                             content = chunk.choices[0].delta.content 
                             if content:
                                 yield content
@@ -96,11 +96,35 @@ class LLMService:
                 return streamer()
             else:
                 logger.debug("Received full response from LLM.")
-                return chat_completion.choices[0].message["content"]
+                return completion.choices[0].message["content"]
         except Exception as e:
             logger.error(f"Error calling LLM API: {str(e)}", exc_info=True)
-            raise e
-
+        
+    async def rewrite_query_with_memory(self, user_query: str, history: List[Dict]) -> str:
+        if not history:
+            return user_query
+        
+        history_text = "\n".join([f"{msg['role']}: {msg['content']}" for msg in history])
+        prompt = REWRITE_QUERY_WITH_HISTORY_PROMPT_TEMPLATE.format(history=history_text, new_query=user_query)
+        
+        logger.info(f"Rewriting new user's query {user_query} according to chat history...")
+        try:
+            completion = await self.client.chat.completions.create(
+                model=self.model_name,
+                messages=[
+                    {"role": "user", "content": prompt}
+                ],
+                temperature=0.1,
+            )
+            rewritten_query = completion.choices[0].message.content
+            print(rewritten_query)
+            
+            return rewritten_query
+        except Exception as e:
+            logger.error(f"Failed to rewrite new user's query {user_query} according to chat history: {e}")
+            logger.warning(f"Trigger fallback mechanism. Returning original query.")
+            return user_query
+            
     async def generate_search_queries(self, user_query: str) -> List[Dict[str, Any]]:
         """
         Performs intelligent query decomposition using the LLM to prepare input

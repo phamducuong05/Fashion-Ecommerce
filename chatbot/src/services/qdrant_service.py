@@ -21,7 +21,7 @@ class QdrantService:
             api_key: Qdrant API key or None for local deployments.
             collection_name: Name of the collection where vectors will be stored.
         """
-        self.client = QdrantClient(url=url, api_key=api_key, check_compatibility=False)
+        self.client = QdrantClient(url=url, api_key=api_key, check_compatibility=False, timeout=60)
         self.collection_name = collection_name
 
         self.DENSE_VECTOR_NAME = "text-dense"
@@ -113,7 +113,6 @@ class QdrantService:
 
         except Exception as e:
             logger.error(f"Error during upsert operation: {e}", exc_info=True)
-            raise
 
     def delete_products(self, ids: List[int]) -> None:
         """
@@ -141,7 +140,6 @@ class QdrantService:
 
         except Exception as e:
             logger.error(f"Error deleting products: {e}", exc_info=True)
-            raise
 
     def search_hybrid(
         self,
@@ -196,4 +194,3 @@ class QdrantService:
 
         except Exception as e:
             logger.error(f"Error during Hybrid Search: {e}", exc_info=True)
-            raise

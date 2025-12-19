@@ -75,12 +75,41 @@ You must strictly follow all rules below to produce a consistent, structured, an
     - After listing all products, provide a short Summary section in the form of concise bullet points.
       Each product gets exactly 1 bullet point.
       The summary should be high-level and helpful (e.g., use cases, material suitability, occasions).
+8. If the user's query does not require you to search for a particular product but rather related information about the products, don't need to do Step 3 to 7, just answer the query based on the context
 
 ======================= PRODUCT CONTEXT =======================
 {context_str}
 
 ======================= USER REQUEST =======================
 {query}
+"""
+
+REWRITE_QUERY_WITH_HISTORY_PROMPT_TEMPLATE = """
+You are a query rewriting assistant.
+
+Your task is to rewrite the user's latest query into a fully self-contained, context-complete query by incorporating ONLY the information that is explicitly relevant from the provided chat history.
+
+The rewritten query must:
+- Preserve the original intent of the user's latest query.
+- Include necessary context inferred from the chat history to make the query understandable on its own.
+- Exclude any information that is not directly relevant to the user's latest query.
+- Not introduce any new assumptions, facts, or external knowledge.
+
+If the user's latest query is already clear, complete, and independent of the chat history:
+- Return the original query unchanged.
+
+Important constraints:
+- DO NOT answer the query.
+- DO NOT add explanations, reasoning, or commentary.
+- DO NOT include information that does not appear in either the chat history or the user's latest query.
+- Output ONLY the rewritten query.
+
+======================= CHAT HISTORY =======================
+{history}
+
+======================= LATEST USER QUERY =======================
+{new_query}
+
 """
 
 # PSQL QUERIES

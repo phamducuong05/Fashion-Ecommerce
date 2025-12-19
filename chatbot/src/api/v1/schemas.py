@@ -3,9 +3,8 @@ from typing import List, Optional
 
 
 class ChatRequest(BaseModel):
+    session_id: str
     query: str = Field(..., min_length=1, example="Tìm giày thể thao màu đỏ")
-    stream: bool = True
-
 
 class ProductSyncRequest(BaseModel):
     product_id: int

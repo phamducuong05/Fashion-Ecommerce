@@ -64,4 +64,3 @@ class EmbeddingService:
 
         except Exception as e:
             logger.error(f"Error embedding {len(texts)} texts: {str(e)}", exc_info=True)
-            raise
