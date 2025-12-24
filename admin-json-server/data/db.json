@@ -682,8 +682,6 @@
       "title": "Winter Collection 2024",
       "subtitle": "WINTER BITCH",
       "imageUrl": "https://images.unsplash.com/photo-1483985988355-763728e1935b?w=1200",
-      "buttonText": "Shop Now",
-      "buttonLink": "/collections/winter",
       "active": true,
       "id": "1"
     },
@@ -692,9 +690,7 @@
       "title": "New Season Sale",
       "subtitle": "Up to 50% off on selected items",
       "imageUrl": "https://images.unsplash.com/photo-1441984904996-e0b6ba687e04?w=1200",
-      "buttonText": "View Deals",
-      "buttonLink": "/sale",
-      "active": false
+      "active": true
     }
   ],
   "chatmessages": [

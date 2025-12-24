@@ -18,8 +18,6 @@ interface Banner {
   title: string;
   subtitle: string;
   imageUrl: string;
-  buttonText: string;
-  buttonLink: string;
   active: boolean;
 }
 
@@ -46,8 +44,6 @@ export function PromotionManagement() {
     title: '',
     subtitle: '',
     imageUrl: '',
-    buttonText: '',
-    buttonLink: '',
     active: false,
   });
 
@@ -153,8 +149,6 @@ export function PromotionManagement() {
       title: '',
       subtitle: '',
       imageUrl: '',
-      buttonText: '',
-      buttonLink: '',
       active: false,
     });
     setShowBannerModal(true);
@@ -166,8 +160,6 @@ export function PromotionManagement() {
       title: banner.title,
       subtitle: banner.subtitle,
       imageUrl: banner.imageUrl,
-      buttonText: banner.buttonText,
-      buttonLink: banner.buttonLink,
       active: banner.active,
     });
     setShowBannerModal(true);
@@ -382,10 +374,10 @@ export function PromotionManagement() {
                       <h3 className="text-[#3E2723] mb-1 font-bold text-lg">{banner.title}</h3>
                       <p className="text-[#6F4E37] mb-3">{banner.subtitle}</p>
                       <div className="flex items-center justify-between gap-4 flex-wrap">
-                        <div className="text-sm text-gray-600">
+                        {/* <div className="text-sm text-gray-600">
                           <p className="font-medium">Button: "{banner.buttonText}"</p>
                           <p className="text-xs text-gray-500 truncate max-w-[200px]">Link: {banner.buttonLink}</p>
-                        </div>
+                        </div> */}
                         <div className="flex gap-2">
                           {!banner.active && (
                             <button
@@ -579,7 +571,7 @@ export function PromotionManagement() {
                 <p className="text-xs text-gray-500 mt-1">Recommended size: 1200x400px</p>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Button Text</label>
                   <input
@@ -602,7 +594,7 @@ export function PromotionManagement() {
                     placeholder="e.g., /collections/winter"
                   />
                 </div>
-              </div>
+              </div> */}
 
               <div className="flex items-center gap-2 bg-orange-50 p-3 rounded-lg border border-orange-100">
                 <input
