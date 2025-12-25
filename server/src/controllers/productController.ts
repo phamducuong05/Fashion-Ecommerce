@@ -2,12 +2,23 @@ import { Request, Response } from "express";
 import * as productService from "../services/productService";
 
 export const getProducts = async (req: Request, res: Response) => {
+  const { search, category, sort, page, limit } = req.query;
+
+  const filters = {
+    search: search as string,
+    category: category as string,
+    sort: sort as string,
+    page: page ? Number(page) : 1,
+    limit: limit ? Number(limit) : 12,
+  };
+
   try {
-    const products = await productService.getAllProducts();
+    const result = await productService.getAllProducts(filters);
 
     res.json({
       success: true,
-      data: products,
+      data: result.data,
+      pagination: result.meta,
     });
   } catch (error) {
     console.error(error);
