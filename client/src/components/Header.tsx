@@ -4,9 +4,10 @@ import { Link } from "react-router";
 
 interface HeaderProps {
   cartItemCount: number;
+  isLoggedIn: boolean;
 }
 
-const Header = ({ cartItemCount }: HeaderProps) => {
+const Header = ({ cartItemCount, isLoggedIn }: HeaderProps) => {
   // Tạo một biến chứa các class chung cho link điều hướng để dễ quản lý và nhất quán
   const navLinkClasses =
     "text-sm font-medium text-gray-600 transition-colors hover:text-gray-900";
@@ -44,16 +45,18 @@ const Header = ({ cartItemCount }: HeaderProps) => {
             <Link to="/about" className={navLinkClasses}>
               About
             </Link>
-            <Link to="/register" className={navLinkClasses}>
-              Sign up
-            </Link>
+            {!isLoggedIn && (
+              <Link to="/register" className={navLinkClasses}>
+                Sign up
+              </Link>
+            )}
           </nav>
 
           <div className="flex items-center space-x-2">
             <Button variant="ghost" size="icon" asChild>
-              <Link to="/signin" className="text-gray-600 hover:text-gray-900">
+              <Link to={isLoggedIn ? "/profile" : "/signin"} className="text-gray-600 hover:text-gray-900">
                 <User className="h-5 w-5" />
-                <span className="sr-only">User Profile</span>
+                <span className="sr-only">{isLoggedIn ? "My Profile" : "Sign In"}</span>
               </Link>
             </Button>
             <Button variant="ghost" size="icon" className="relative" asChild>

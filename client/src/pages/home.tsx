@@ -3,6 +3,7 @@ import Hot from "../components/Hot";
 import Featured from "../components/Featured";
 import Merit from "../components/Merit";
 import type { ProductSummary } from "../components/ProductCard";
+import { API_URL } from "../config";
 import Contact from "../components/Contact";
 import type { FormData } from "../App";
 import Footer from "../components/Footer";
@@ -40,9 +41,12 @@ const HomePage = ({ cartItemCount, handleAddToCart }: HomeProp) => {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const res = await fetch("http://localhost:8000/products");
+        console.log("⚡️ [HOME] Fetching products from API...");
+        const res = await fetch("http://localhost:3000/api/products");
         if (!res.ok) throw new Error("Failed to fetch products");
-        const data = (await res.json()) as ProductSummary[];
+        
+        const responseData = await res.json();
+        const data = responseData.data as ProductSummary[];
         setProduct(data);
       } catch (err) {
         if (err instanceof Error) {

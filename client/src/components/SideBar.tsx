@@ -8,7 +8,26 @@ interface SidebarProps {
   filterCategory: string | null;
   setFilterCategory: (category: string | null) => void;
   clearAllFilters: () => void;
+  // New props
+  minPrice: string;
+  setMinPrice: (val: string) => void;
+  maxPrice: string;
+  setMaxPrice: (val: string) => void;
+  color: string;
+  setColor: (val: string) => void;
+  applyFilters: () => void;
 }
+
+const colors = [
+  { name: "Black", code: "#000000" },
+  { name: "White", code: "#FFFFFF", border: true },
+  { name: "Blue", code: "#0000FF" },
+  { name: "Red", code: "#FF0000" },
+  { name: "Green", code: "#008000" },
+  { name: "Yellow", code: "#FFFF00" },
+  { name: "Gray", code: "#808080" },
+  { name: "Pink", code: "#FFC0CB" },
+];
 
 const Sidebar: React.FC<SidebarProps> = ({
   categories,
@@ -17,6 +36,13 @@ const Sidebar: React.FC<SidebarProps> = ({
   filterCategory,
   setFilterCategory,
   clearAllFilters,
+  minPrice,
+  setMinPrice,
+  maxPrice,
+  setMaxPrice,
+  color,
+  setColor,
+  applyFilters,
 }) => {
   const [expandedCategories, setExpandedCategories] = useState<string[]>(
     categories.map((c) => c.name)
@@ -48,16 +74,67 @@ const Sidebar: React.FC<SidebarProps> = ({
 
         {/* Sort By */}
         <div>
-          <h3 className="text-md font-semibold text-gray-900 mb-3">Sort By</h3>
-          <select
-            value={sortBy}
-            onChange={(e) => setSortBy(e.target.value)}
-            className="w-full p-2.5 bg-white border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-shadow"
+           <h3 className="text-md font-semibold text-gray-900 mb-3">Sort By</h3>
+           <select
+             value={sortBy}
+             onChange={(e) => setSortBy(e.target.value)}
+             className="w-full p-2.5 bg-white border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-shadow"
+           >
+             <option value="newest">New Arrivals</option>
+             <option value="price_asc">Price: Low to High</option>
+             <option value="price_desc">Price: High to Low</option>
+             <option value="best_selling">Best Selling</option>
+           </select>
+         </div>
+
+        <hr className="border-gray-200" />
+
+        {/* Price Filter */}
+        <div>
+          <h3 className="text-md font-semibold text-gray-900 mb-3">Price Range</h3>
+          <div className="flex items-center gap-2 mb-2">
+            <input
+              type="number"
+              placeholder="Min"
+              value={minPrice}
+              onChange={(e) => setMinPrice(e.target.value)}
+              className="w-full p-2 border border-gray-300 rounded text-sm"
+            />
+            <span className="text-gray-400">-</span>
+            <input
+              type="number"
+              placeholder="Max"
+              value={maxPrice}
+              onChange={(e) => setMaxPrice(e.target.value)}
+              className="w-full p-2 border border-gray-300 rounded text-sm"
+            />
+          </div>
+          <button
+            onClick={applyFilters}
+            className="w-full py-2 bg-black text-white text-sm font-medium rounded hover:bg-gray-800 transition-colors"
           >
-            <option>New Arrivals</option>
-            <option>Price: Low to High</option>
-            <option>Price: High to Low</option>
-          </select>
+            Apply Price Filter
+          </button>
+        </div>
+
+        <hr className="border-gray-200" />
+
+        {/* Color Filter */}
+        <div>
+          <h3 className="text-md font-semibold text-gray-900 mb-3">Colors</h3>
+          <div className="flex flex-wrap gap-2">
+            {colors.map((c) => (
+              <button
+                key={c.name}
+                onClick={() => setColor(color === c.name ? "" : c.name)}
+                className={`w-8 h-8 rounded-full border-2 transition-all ${
+                  color === c.name ? "ring-2 ring-indigo-500 ring-offset-2 border-transparent" : "border-transparent"
+                } ${c.border ? "border-gray-200" : ""}`}
+                style={{ backgroundColor: c.code }}
+                title={c.name}
+              />
+            ))}
+          </div>
         </div>
 
         <hr className="border-gray-200" />

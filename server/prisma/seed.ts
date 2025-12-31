@@ -1,5 +1,5 @@
 // prisma/seed.ts
-import prisma from "../src/utils/prisma";
+import { prisma } from "../src/config/database";
 import { faker } from "@faker-js/faker";
 
 const randomElement = <T>(array: T[]) =>

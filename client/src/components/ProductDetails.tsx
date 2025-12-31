@@ -4,14 +4,15 @@ import { ImageWithFallback } from "./imagefallback";
 import { ProductReviews } from "./ProductReviews";
 import { useParams } from "react-router";
 import type { ProductSummary } from "./ProductCard";
+import { API_URL } from "../config";
 
 interface ProductVariant {
-  id: string;
+  id: number;
   color: string;
   colorCode: string;
   size: string;
   stock: number;
-  image: string;
+  image: string | null;
 }
 
 interface Product {
@@ -21,6 +22,8 @@ interface Product {
   rating: number;
   reviewCount: number;
   description: string;
+  thumbnail: string;
+  category: string[];
   variants: ProductVariant[];
 }
 
@@ -43,7 +46,7 @@ const ProductDetail = ({ onAddToCart }: ProductDetailProp) => {
       try {
         setLoading(true);
 
-        const res = await fetch(`http://localhost:3000/api/products/${id}`);
+        const res = await fetch(`${API_URL}/api/products/${id}`);
 
         if (!res.ok) throw new Error("Product not found");
 
@@ -53,10 +56,13 @@ const ProductDetail = ({ onAddToCart }: ProductDetailProp) => {
 
         if (data.variants && data.variants.length > 0) {
           setSelectedVariant(data.variants[0]);
-        }
+        } 
+        // Logic change: don't set global error here, just let it render with null selectedVariant
       } catch (err) {
         if (err instanceof Error) {
           setError(err.message);
+        } else {
+          setError("An unknown error occurred");
         }
       } finally {
         setLoading(false);
@@ -66,18 +72,41 @@ const ProductDetail = ({ onAddToCart }: ProductDetailProp) => {
     if (id) fetchProduct();
   }, [id]);
 
+  const handleAddToCart = () => {
+    if (!product || !selectedVariant) return;
+    
+    // Construct ProductSummary for cart
+    const productToAdd: ProductSummary = {
+        id: product.id,
+        name: product.name,
+        price: product.price,
+        image: selectedVariant.image || "", // Use variant image or empty
+        category: product.category,
+        color: selectedVariant.color,
+        size: selectedVariant.size,
+        // Optional fields
+        // originalPrice: ... (if available in backend)
+    };
+
+    onAddToCart(productToAdd);
+  };
+
   if (loading)
     return <div className="p-10 text-center">Loading product...</div>;
-  if (error || !product || !selectedVariant)
+
+  if (error)
     return <div className="p-10 text-center text-red-500">Error: {error}</div>;
 
-  const uniqueColorVariants = [
-    ...new Map(product.variants.map((item) => [item.color, item])).values(),
-  ];
+  if (!product)
+    return <div className="p-10 text-center text-red-500">Product not found</div>;
 
-  const availableSizes = product.variants.filter(
+  const uniqueColorVariants = product.variants ? [
+    ...new Map(product.variants.map((item) => [item.color, item])).values(),
+  ] : [];
+
+  const availableSizes = selectedVariant ? product.variants.filter(
     (p) => p.color === selectedVariant.color
-  );
+  ) : [];
 
   const handleColorSelect = (colorName: string) => {
     const variantOfColor = product.variants.find((v) => v.color === colorName);
@@ -114,7 +143,7 @@ const ProductDetail = ({ onAddToCart }: ProductDetailProp) => {
           <div className="grid md:grid-cols-2 gap-8 p-8">
             <div className="aspect-square bg-gray-100 rounded-lg overflow-hidden">
               <ImageWithFallback
-                src={selectedVariant.image}
+                src={selectedVariant?.image || product.thumbnail || ""}
                 alt={product.name}
                 className="w-full h-full object-cover"
               />
@@ -137,7 +166,8 @@ const ProductDetail = ({ onAddToCart }: ProductDetailProp) => {
                 <p className="text-gray-600 mb-6">{product.description}</p>
               </div>
 
-              {/* Color Selection */}
+               {/* Color Selection - Hide if no variants */}
+              {product.variants && product.variants.length > 0 && selectedVariant && (
               <div>
                 <label>
                   Color: <span>{selectedVariant.color}</span>
@@ -158,8 +188,10 @@ const ProductDetail = ({ onAddToCart }: ProductDetailProp) => {
                   ))}
                 </div>
               </div>
+              )}
 
-              {/* Size Selection */}
+              {/* Size Selection - Hide if no variants */}
+              {product.variants && product.variants.length > 0 && selectedVariant && (
               <div>
                 <label>
                   Size: <span>{selectedVariant.size}</span>
@@ -186,12 +218,14 @@ const ProductDetail = ({ onAddToCart }: ProductDetailProp) => {
                   ))}
                 </div>
               </div>
+              )}
 
               <button
-                // onClick={onAddToCart}
-                className="w-full bg-blue-600 text-white py-4 px-6 rounded-lg hover:bg-blue-700 transition-colors mt-4"
+                onClick={handleAddToCart}
+                disabled={!selectedVariant || (selectedVariant.stock === 0)}
+                className="w-full bg-blue-600 text-white py-4 px-6 rounded-lg hover:bg-blue-700 transition-colors mt-4 disabled:bg-gray-400 disabled:cursor-not-allowed"
               >
-                Add to Cart
+                {selectedVariant ? (selectedVariant.stock === 0 ? "Out of Stock" : "Add to Cart") : "Unavailable"}
               </button>
             </div>
           </div>

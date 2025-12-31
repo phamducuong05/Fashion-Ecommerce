@@ -1,20 +1,23 @@
 import { useState, useEffect } from "react";
 import type { ProductSummary } from "./components/ProductCard";
-import { Routes, Route } from "react-router";
+import { Routes, Route, useLocation } from "react-router";
 import HomePage from "./pages/home";
 import AboutPage from "./pages/about";
 import Header from "./components/Header";
+import Footer from "./components/Footer";
 import SignInPage from "./pages/signin";
 import RegisterPage from "./pages/register";
 import ProductsPage from "./pages/products";
 import CartPage from "./pages/cart";
 import ProductDetail from "./components/ProductDetails";
+import CheckoutPage from "./pages/checkout";
+import OrderSuccessPage from "./pages/order-success";
+import { API_URL } from "./config";
+import ProfilePage from "./pages/profile";
+import OrderHistoryPage from "./pages/order-history";
+import ForgotPasswordPage from "./pages/forgot-password";
 
-export interface CartItemType {
-  id: string;
-  name: string;
-  price: number;
-  image: string;
+export interface CartItemType extends ProductSummary {
   quantity: number;
   color: string;
   size: string;
@@ -146,31 +149,99 @@ function App() {
     return cart ? JSON.parse(cart) : [];
   });
 
+  const location = useLocation();
+  const [token, setToken] = useState<string | null>(localStorage.getItem("token"));
+
   useEffect(() => {
-    localStorage.setItem("cart", JSON.stringify(cartItems));
-  }, [cartItems]);
+    setToken(localStorage.getItem("token"));
+  }, [location]);
+
+  // Fetch cart from DB on load if logged in
+  useEffect(() => {
+    if (token) {
+      fetch(`${API_URL}/api/cart`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.status === "success" && data.data) {
+            // Transform DB cart to Frontend format
+            const dbItems = data.data.items.map((item: any) => ({
+              id: item.variant.product.id, // Using product ID for now as per frontend logic
+              name: item.variant.product.name,
+              price: Number(item.variant.product.price),
+              image: item.variant.image || item.variant.product.thumbnail,
+              quantity: item.quantity,
+              color: item.variant.color,
+              size: item.variant.size,
+              variantId: item.variant.id, // Keep track of variantId
+            }));
+            setCartItems(dbItems);
+          }
+        })
+        .catch((err) => console.error("Failed to fetch cart:", err));
+    }
+  }, [token]);
+
+  // Sync to local storage only if NOT logged in (or keep both synced? Let's keep local as backup/guest)
+  useEffect(() => {
+    if (!token) {
+        localStorage.setItem("cart", JSON.stringify(cartItems));
+    }
+  }, [cartItems, token]);
 
   const removeFromCart = (product: ProductSummary) => {};
 
-  const handleAddToCart = (product: ProductSummary) => {
+  const handleAddToCart = async (product: ProductSummary) => {
+    // Optimistic UI update
     setCartItems((prev) => {
-      const isExist = prev.find((item) => item.id === product.id);
+      const isExist = prev.find((item) => item.id === product.id && item.color === product.color && item.size === product.size);
       if (isExist) {
         return prev.map((item) =>
-          item.id === product.id
+          item.id === product.id && item.color === product.color && item.size === product.size
             ? { ...item, quantity: item.quantity + 1 }
             : item
         );
       }
-      return [...prev, { ...product, quantity: 1 }];
+      return [...prev, { ...product, quantity: 1 } as CartItemType];
     });
+
+    if (token) {
+        // Sync to DB
+        try {
+            // Need variantId, but product summary might not have it if it's from ProductCard. 
+            // Ideally ProductSummary should have variant info or we find it.
+            // For now, let's assume we pass enough info to backend to find variant or we need to update ProductSummary.
+            // Wait, ProductDetails passes a full object. 
+            
+            // If we don't have specific variant ID, backend `addToCart` finds it by productId + color + size.
+            // That matches our backend logic! Good.
+
+            await fetch(`${API_URL}/api/cart/add`, {
+                method: "POST",
+                headers: { 
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}` 
+                },
+                body: JSON.stringify({
+                    productId: product.id,
+                    quantity: 1,
+                    color: product.color,
+                    size: product.size
+                })
+            });
+        } catch (err) {
+            console.error("Failed to add to cart DB:", err);
+            // Revert state if needed? For now just log.
+        }
+    }
   };
 
   const cartItemCount = cartItems.reduce((sum, item) => sum + item.quantity, 0);
 
   return (
     <>
-      <Header cartItemCount={cartItemCount} />
+      <Header cartItemCount={cartItemCount} isLoggedIn={!!token} />
       <Routes>
         <Route
           path="/"
@@ -185,6 +256,7 @@ function App() {
         <Route path="/about" element={<AboutPage />} />
         <Route path="/signin" element={<SignInPage />}></Route>
         <Route path="/register" element={<RegisterPage />}></Route>
+        <Route path="/forgot-password" element={<ForgotPasswordPage />}></Route>
         <Route
           path="/products"
           element={<ProductsPage onAddToCart={handleAddToCart} />}
@@ -195,11 +267,16 @@ function App() {
             <CartPage cartItems={cartItems} setCartItems={setCartItems} />
           }
         />
+        <Route path="/checkout" element={<CheckoutPage />} />
+        <Route path="/order-success" element={<OrderSuccessPage />} />
         <Route
           path="/productdetail/:id"
           element={<ProductDetail onAddToCart={handleAddToCart} />}
         />
+        <Route path="/profile" element={<ProfilePage />} />
+        <Route path="/orders" element={<OrderHistoryPage />} />
       </Routes>
+      <Footer />
     </>
   );
 }

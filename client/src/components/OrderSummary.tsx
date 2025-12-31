@@ -1,5 +1,6 @@
 import { Tag } from "lucide-react";
 import { useState } from "react";
+import { Link } from "react-router";
 
 export interface OrderSummaryProps {
   subtotal: number;
@@ -111,9 +112,11 @@ export function OrderSummary({
         )}
       </div>
 
-      <button className="w-full bg-gray-900 text-white py-3 rounded-lg hover:bg-gray-800 transition-colors font-medium">
-        Proceed to Checkout
-      </button>
+      <Link to="/checkout" className="block w-full">
+        <button className="w-full bg-gray-900 text-white py-3 rounded-lg hover:bg-gray-800 transition-colors font-medium">
+            Proceed to Checkout
+        </button>
+      </Link>
     </div>
   );
 }
