@@ -772,5 +772,13 @@
         }
       ]
     }
-  ]
+  ],
+  "profile": {
+    "status": "active",
+    "createdAt": "January 1, 2024",
+    "name": "CCC",
+    "email": "CCC@store.com"
+  },
+  "change-password": {},
+  "account": {}
 }

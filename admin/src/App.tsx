@@ -1,11 +1,12 @@
 import { useState } from 'react';
-import { LayoutDashboard, Package, Users, MessageSquare, Menu, X, ShoppingBag, Tag } from 'lucide-react';
+import { LayoutDashboard, Package, Users, MessageSquare, Menu, X, ShoppingBag, Tag, Settings } from 'lucide-react';
 import { Dashboard } from './components/Dashboard';
 import { ProductManagement } from './components/ProductManagement';
 import { CustomerManagement } from './components/CustomerManagement';
 import { ChatInterface } from './components/ChatInterface';
 import { OrderManagement } from './components/OrderManagement';
 import { PromotionManagement } from './components/PromotionManagement';
+import { SettingsPanel } from './components/SettingsPanel';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -21,24 +22,27 @@ export default function App() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#FFFBF0] via-[#FFF8E7] to-[#F5EBD7]">
+    <div className="min-h-screen bg-gray-50">
       {/* Sidebar */}
       <aside
         className={`fixed top-0 left-0 z-40 h-screen transition-transform ${
           sidebarOpen ? 'translate-x-0' : '-translate-x-full'
-        } w-64 bg-gradient-to-b from-[#5C4033] via-[#6F4E37] to-[#5C4033] shadow-2xl`}
+        } w-64 bg-[#1a1d29] shadow-xl`}
       >
-        <div className="h-full px-3 py-6 overflow-y-auto">
+        <div className="h-full px-3 py-6 overflow-y-auto flex flex-col">
           <div className="flex items-center justify-between mb-8 px-3">
-            <h2 className="text-[#FFF8E7]">Admin Panel</h2>
+            <div>
+              <h2 className="text-white">Adam de Adam</h2>
+              <p className="text-gray-400 text-sm">Admin Panel</p>
+            </div>
             <button
               onClick={() => setSidebarOpen(false)}
-              className="lg:hidden text-[#F5DEB3] hover:text-white transition-colors"
+              className="lg:hidden text-gray-400 hover:text-white transition-colors"
             >
               <X className="w-6 h-6" />
             </button>
           </div>
-          <ul className="space-y-2">
+          <ul className="space-y-2 flex-1">
             {navigation.map((item) => {
               const Icon = item.icon;
               return (
@@ -47,8 +51,8 @@ export default function App() {
                     onClick={() => setActiveTab(item.id)}
                     className={`flex items-center w-full p-3 rounded-lg transition-all ${
                       activeTab === item.id
-                        ? 'bg-[#F5DEB3] text-[#4E342E] shadow-lg'
-                        : 'text-[#F5DEB3] hover:bg-[#8B6F47]/50'
+                        ? 'bg-[#0f1117] text-white'
+                        : 'text-gray-300 hover:bg-[#252837]'
                     }`}
                   >
                     <Icon className="w-5 h-5 mr-3" />
@@ -58,27 +62,40 @@ export default function App() {
               );
             })}
           </ul>
+          <div className="pt-4 border-t border-gray-700">
+            <button
+              onClick={() => setActiveTab('settings')}
+              className={`flex items-center w-full p-3 rounded-lg transition-all ${
+                activeTab === 'settings'
+                  ? 'bg-[#0f1117] text-white'
+                  : 'text-gray-300 hover:bg-[#252837]'
+              }`}
+            >
+              <Settings className="w-5 h-5 mr-3" />
+              <span>Settings</span>
+            </button>
+          </div>
         </div>
       </aside>
 
       {/* Main Content */}
       <div className={`transition-all ${sidebarOpen ? 'lg:ml-64' : ''}`}>
         {/* Top Bar */}
-        <header className="bg-[#FFFEF9]/95 backdrop-blur-sm shadow-md sticky top-0 z-30 border-b border-[#D4A574]">
+        <header className="bg-white shadow-sm sticky top-0 z-30 border-b border-gray-200">
           <div className="px-4 py-4 lg:px-8">
             <div className="flex items-center justify-between">
               <button
                 onClick={() => setSidebarOpen(!sidebarOpen)}
-                className="p-2 rounded-lg text-[#5C4033] hover:bg-[#F5DEB3] transition-colors"
+                className="p-2 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors"
               >
                 <Menu className="w-6 h-6" />
               </button>
               <div className="flex items-center gap-4">
                 <div className="text-right hidden sm:block">
-                  <p className="text-sm text-[#4E342E]">Admin User</p>
-                  <p className="text-xs text-[#8B6F47]">admin@store.com</p>
+                  <p className="text-sm text-gray-900">Admin User</p>
+                  <p className="text-xs text-gray-500">admin@store.com</p>
                 </div>
-                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#A0826D] to-[#8B6F47] flex items-center justify-center text-white shadow-lg">
+                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-gray-700 to-gray-900 flex items-center justify-center text-white shadow-md">
                   A
                 </div>
               </div>
@@ -94,6 +111,7 @@ export default function App() {
           {activeTab === 'customers' && <CustomerManagement />}
           {activeTab === 'promotions' && <PromotionManagement />}
           {activeTab === 'chat' && <ChatInterface />}
+          {activeTab === 'settings' && <SettingsPanel />}
         </main>
       </div>
 

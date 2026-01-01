@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Send, Search } from 'lucide-react';
+import { Send, Search, MessageSquare } from 'lucide-react';
 import axios from 'axios';
 
 interface Message {
@@ -21,19 +21,22 @@ interface Chat {
 
 export function ChatInterface() {
   const [chats, setChats] = useState<Chat[]>([]);
-  const [selectedChat, setSelectedChat] = useState<Chat | null>(chats[0]);
+  const [selectedChat, setSelectedChat] = useState<Chat | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [messageText, setMessageText] = useState('');
-  const [messages, setMessages] = useState<Message[]>(selectedChat?.messages || []);
+  const [messages, setMessages] = useState<Message[]>([]);
 
   useEffect(() => {
     const getChatMessages = async () => {
-      const response = await axios.get<Chat[]>('/api/chatmessages')
-
-      setChats(response.data)
-    }
+      try {
+        const response = await axios.get<Chat[]>('/api/chatmessages');
+        setChats(response.data);
+      } catch (error) {
+        console.error(error);
+      }
+    };
     getChatMessages();
-  }, [])
+  }, []);
 
   const handleSendMessage = (e: React.FormEvent) => {
     e.preventDefault();
@@ -63,47 +66,42 @@ export function ChatInterface() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
       <div>
-        <h2 className="text-[#3E2723] mb-2">Customer Chat</h2>
-        <p className="text-[#6F4E37]">Communicate with your customers in real-time</p>
+        <h2 className="text-gray-900 mb-2">Customer Chat</h2>
+        <p className="text-gray-600">Communicate with your customers in real-time</p>
       </div>
 
-      {/* Chat Container */}
-      <div className="bg-[#FFFEF9] rounded-xl shadow-lg border border-[#D4A574] overflow-hidden h-[600px] flex flex-col lg:flex-row">
-        {/* Chat List Sidebar */}
-        <div className="lg:w-80 border-b lg:border-b-0 lg:border-r border-[#D4A574] flex flex-col">
-          {/* Search */}
-          <div className="p-4 border-b border-[#D4A574]">
+      <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden h-[600px] flex flex-col lg:flex-row">
+        <div className="lg:w-80 border-b lg:border-b-0 lg:border-r border-gray-200 flex flex-col">
+          <div className="p-4 border-b border-gray-200">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[#A0826D] w-4 h-4" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
               <input
                 type="text"
                 placeholder="Search chats..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-9 pr-3 py-2 border border-[#D4A574] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#A0826D]"
+                className="w-full pl-9 pr-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
           </div>
 
-          {/* Chat List */}
           <div className="flex-1 overflow-y-auto">
             {filteredChats.map((chat) => (
               <button
                 key={chat.id}
                 onClick={() => handleSelectChat(chat)}
-                className={`w-full p-4 text-left hover:bg-[#FFF8E7] transition-colors border-b border-[#F5EBD7] ${
-                  selectedChat?.id === chat.id ? 'bg-[#FFF8E7]' : ''
+                className={`w-full p-4 text-left hover:bg-gray-50 transition-colors border-b border-gray-100 ${
+                  selectedChat?.id === chat.id ? 'bg-gray-50' : ''
                 }`}
               >
                 <div className="flex items-start justify-between mb-2">
                   <div className="flex-1 min-w-0">
-                    <h4 className="text-[#3E2723] truncate">{chat.customerName}</h4>
+                    <h4 className="text-gray-900 truncate">{chat.customerName}</h4>
                     <p className="text-xs text-gray-500 truncate">{chat.customerEmail}</p>
                   </div>
                   {chat.unread > 0 && (
-                    <span className="ml-2 px-2 py-1 bg-[#8B6F47] text-white text-xs rounded-full">
+                    <span className="ml-2 px-2 py-1 bg-blue-600 text-white text-xs rounded-full">
                       {chat.unread}
                     </span>
                   )}
@@ -120,37 +118,36 @@ export function ChatInterface() {
           </div>
         </div>
 
-        {/* Chat Messages */}
         <div className="flex-1 flex flex-col">
           {selectedChat ? (
             <>
-              {/* Chat Header */}
-              <div className="p-4 border-b border-[#D4A574] bg-gradient-to-r from-[#FFF8E7] to-[#F5DEB3]">
-                <h3 className="text-[#3E2723]">{selectedChat.customerName}</h3>
-                <p className="text-sm text-[#6F4E37]">{selectedChat.customerEmail}</p>
+              <div className="p-4 border-b border-gray-200 bg-gray-50">
+                <h3 className="text-gray-900">{selectedChat.customerName}</h3>
+                <p className="text-sm text-gray-600">{selectedChat.customerEmail}</p>
               </div>
 
-              {/* Messages */}
-              <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gradient-to-br from-[#FFF8E7]/30 to-[#F5DEB3]/30">
-                {messages.map((message) => (
+              <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50">
+                {messages.map((message, index) => (
                   <div
-                    key={message.id}
-                    className={`flex ${message.sender === 'admin' ? 'justify-end' : 'justify-start'}`}
+                    key={index}
+                    className={`flex ${
+                      message.sender === 'admin' ? 'justify-end' : 'justify-start'
+                    }`}
                   >
                     <div
                       className={`max-w-xs lg:max-w-md px-4 py-3 rounded-2xl ${
                         message.sender === 'admin'
-                          ? 'bg-gradient-to-br from-[#8B6F47] to-[#6F4E37] text-white rounded-br-none'
-                          : 'bg-white text-gray-800 rounded-bl-none shadow-md'
+                          ? 'bg-blue-600 text-white rounded-br-none'
+                          : 'bg-white text-gray-800 rounded-bl-none shadow-sm border border-gray-200'
                       }`}
                     >
                       <p className="text-sm">{message.text}</p>
                       <p
                         className={`text-xs mt-1 ${
-                          message.sender === 'admin' ? 'text-[#F5DEB3]' : 'text-gray-400'
+                          message.sender === 'admin' ? 'text-blue-100' : 'text-gray-500'
                         }`}
                       >
-                        {new Date (message.timestamp).toLocaleTimeString([], {
+                        {new Date(message.timestamp).toLocaleTimeString([], {
                           hour: '2-digit',
                           minute: '2-digit',
                         })}
@@ -160,19 +157,18 @@ export function ChatInterface() {
                 ))}
               </div>
 
-              {/* Message Input */}
-              <form onSubmit={handleSendMessage} className="p-4 border-t border-[#D4A574] bg-white">
+              <form onSubmit={handleSendMessage} className="p-4 border-t border-gray-200 bg-white">
                 <div className="flex gap-2">
                   <input
                     type="text"
                     value={messageText}
                     onChange={(e) => setMessageText(e.target.value)}
                     placeholder="Type your message..."
-                    className="flex-1 px-4 py-3 border border-[#D4A574] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#A0826D]"
+                    className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                   <button
                     type="submit"
-                    className="px-6 py-3 bg-gradient-to-r from-[#8B6F47] to-[#6F4E37] text-white rounded-lg hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                     disabled={!messageText.trim()}
                   >
                     <Send className="w-5 h-5" />
@@ -181,8 +177,11 @@ export function ChatInterface() {
               </form>
             </>
           ) : (
-            <div className="flex-1 flex items-center justify-center text-gray-400">
-              <p>Select a chat to start messaging</p>
+            <div className="flex-1 flex items-center justify-center bg-gray-50">
+              <div className="text-center text-gray-500">
+                <MessageSquare className="w-16 h-16 mx-auto mb-4 text-gray-300" />
+                <p>Select a chat to start messaging</p>
+              </div>
             </div>
           )}
         </div>
