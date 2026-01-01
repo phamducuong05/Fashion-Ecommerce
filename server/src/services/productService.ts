@@ -101,8 +101,18 @@ export const getAllProducts = async (
     oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
 
     if (new Date(product.createdAt) > oneYearAgo) sections.push("new");
-    if (product.discount > 0) sections.push("sale");
-    if (product.sold > 100) sections.push("best seller");
+
+    const originalPrice = Number(product.originalPrice);
+    const price = Number(product.price);
+    const discountPercent =
+      originalPrice > 0 ? ((originalPrice - price) / originalPrice) * 100 : 0;
+
+    if (discountPercent > 0) {
+      sections.push("sale");
+    }
+    if (product.reviewCount > 5) {
+      sections.push("best seller");
+    }
 
     return {
       id: product.id.toString(),

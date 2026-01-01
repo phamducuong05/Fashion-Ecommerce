@@ -12,10 +12,9 @@ import { Button } from "../components/variants/button";
 
 interface HomeProp {
   cartItemCount: number;
-  handleAddToCart: (product: ProductSummary) => void;
 }
 
-const HomePage = ({ cartItemCount, handleAddToCart }: HomeProp) => {
+const HomePage = ({ cartItemCount }: HomeProp) => {
   const [products, setProduct] = useState<ProductSummary[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -114,7 +113,6 @@ const HomePage = ({ cartItemCount, handleAddToCart }: HomeProp) => {
       <section className="pt-8 pb-16 md:pt-12 md:pb-24 bg-white relative z-10 shadow-sm">
         <Hot
           whatsHotProducts={whatsHotProducts}
-          handleAddToCart={handleAddToCart}
           whatsHotTab={whatsHotTab}
           setWhatsHotTab={setWhatsHotTab}
         />
@@ -125,7 +123,6 @@ const HomePage = ({ cartItemCount, handleAddToCart }: HomeProp) => {
           featuredTab={featuredTab}
           setFeaturedTab={setFeaturedTab}
           featuredProducts={featuredProducts}
-          handleAddToCart={handleAddToCart}
         />
       </section>
 

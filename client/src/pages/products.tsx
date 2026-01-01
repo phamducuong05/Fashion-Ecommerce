@@ -7,10 +7,6 @@ import useDebounce from "../hooks/useDebounce";
 import { ErrorDisplay } from "../components/ErrorDisplay";
 import LoadingSpinner from "../components/LoadingSpinner";
 
-interface ProductsPageProp {
-  onAddToCart: (product: ProductSummary) => void;
-}
-
 export interface Category {
   id: number;
   name: string;
@@ -19,7 +15,7 @@ export interface Category {
   children?: Category[];
 }
 
-const ProductsPage = ({ onAddToCart }: ProductsPageProp) => {
+const ProductsPage = () => {
   const [products, setProducts] = useState<ProductSummary[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -148,7 +144,7 @@ const ProductsPage = ({ onAddToCart }: ProductsPageProp) => {
               <ErrorDisplay message={error} onRetry={handleRetry} />
             ) : products.length > 0 ? (
               <div className="animate-fade-in-up">
-                <ProductList products={products} onAddToCart={onAddToCart} />
+                <ProductList products={products} />
                 <div className="mt-12">
                   <Pagination
                     currentPage={currentPage}

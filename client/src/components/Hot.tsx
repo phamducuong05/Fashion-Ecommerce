@@ -7,17 +7,11 @@ import { ArrowRight } from "lucide-react"; // Icon mũi tên (nếu bạn có c�
 
 interface HotProp {
   whatsHotProducts: ProductSummary[];
-  handleAddToCart: (product: ProductSummary) => void;
   whatsHotTab: string;
   setWhatsHotTab: (value: string) => void;
 }
 
-const Hot = ({
-  whatsHotProducts,
-  handleAddToCart,
-  whatsHotTab,
-  setWhatsHotTab,
-}: HotProp) => {
+const Hot = ({ whatsHotProducts, whatsHotTab, setWhatsHotTab }: HotProp) => {
   return (
     <section className="w-full py-20 bg-gray-50/50">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -87,7 +81,7 @@ const Hot = ({
               <div key={product.id} className="animate-fade-in-up">
                 {" "}
                 {/* Class này cần config tailwind hoặc CSS */}
-                <ProductCard product={product} onAddToCart={handleAddToCart} />
+                <ProductCard product={product} />
               </div>
             ))}
           </div>

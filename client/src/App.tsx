@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import type { ProductSummary } from "./components/ProductCard";
-import { Routes, Route } from "react-router";
+import { Routes, Route, useNavigate } from "react-router";
 import HomePage from "./pages/home";
 import AboutPage from "./pages/about";
 import Header from "./components/Header";
@@ -10,9 +10,13 @@ import ProductsPage from "./pages/products";
 import CartPage from "./pages/cart";
 import ProductDetail from "./components/ProductDetails";
 import ContactPage from "./pages/contact";
+import ProfilePage from "./pages/profile";
 
 export interface CartItemType {
   id: string;
+  productId: string;
+  variantId: string;
+  stock: number;
   name: string;
   price: number;
   image: string;
@@ -142,29 +146,117 @@ export interface FormData {
 // ];
 
 function App() {
-  const [cartItems, setCartItems] = useState<CartItemType[]>(() => {
-    const cart = localStorage.getItem("cart");
-    return cart ? JSON.parse(cart) : [];
-  });
+  const [cartItems, setCartItems] = useState<CartItemType[]>([]);
+  const navigate = useNavigate();
 
   useEffect(() => {
-    localStorage.setItem("cart", JSON.stringify(cartItems));
-  }, [cartItems]);
+    const initializeCart = async () => {
+      const token = localStorage.getItem("token");
 
-  const removeFromCart = (product: ProductSummary) => {};
-
-  const handleAddToCart = (product: ProductSummary) => {
-    setCartItems((prev) => {
-      const isExist = prev.find((item) => item.id === product.id);
-      if (isExist) {
-        return prev.map((item) =>
-          item.id === product.id
-            ? { ...item, quantity: item.quantity + 1 }
-            : item
-        );
+      if (token) {
+        // A. TRƯỜNG HỢP CÓ TOKEN (USER): Lấy từ API
+        try {
+          const res = await fetch("http://localhost:3000/api/cart", {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          if (res.ok) {
+            const data = await res.json();
+            setCartItems(data);
+          }
+        } catch (error) {
+          console.error("Lỗi tải giỏ hàng từ server:", error);
+        }
+      } else {
+        // B. TRƯỜNG HỢP KHÔNG TOKEN (GUEST): Lấy từ LocalStorage
+        const localCart = localStorage.getItem("cart");
+        if (localCart) {
+          setCartItems(JSON.parse(localCart));
+        }
       }
-      return [...prev, { ...product, quantity: 1 }];
-    });
+    };
+
+    initializeCart();
+  }, []); // Chạy 1 lần khi load trang
+
+  const handleAddToCart = async (
+    product: any,
+    variant: any,
+    quantity: number
+  ) => {
+    const token = localStorage.getItem("token");
+
+    // === TRƯỜNG HỢP 1: KHÁCH VÃNG LAI (Lưu Local) ===
+    if (!token) {
+      setCartItems((prev) => {
+        const variantIdStr = variant.id.toString();
+
+        const isExist = prev.find((item) => item.variantId === variantIdStr);
+
+        if (isExist) {
+          // Cộng dồn số lượng
+          return prev.map((item) => {
+            if (item.variantId === variantIdStr) {
+              const newQty = item.quantity + quantity;
+              // Check stock client-side
+              if (newQty > item.stock) {
+                alert(`Kho chỉ còn ${item.stock} sản phẩm!`);
+                return item;
+              }
+              return { ...item, quantity: newQty };
+            }
+            return item;
+          });
+        }
+
+        // Tạo item mới
+        const newItem: CartItemType = {
+          id: `guest_${Date.now()}`,
+          productId: product.id.toString(),
+          variantId: variantIdStr,
+          name: product.name,
+          price: Number(product.price),
+          image: variant.image || product.thumbnail || "",
+          quantity: quantity,
+          color: variant.color,
+          size: variant.size,
+          stock: variant.stock,
+        };
+
+        return [...prev, newItem];
+      });
+
+      alert("Đã thêm vào giỏ hàng (Guest Mode)!");
+      return;
+    }
+
+    // === TRƯỜNG HỢP 2: ĐÃ ĐĂNG NHẬP (Lưu Database) ===
+    try {
+      const res = await fetch("http://localhost:3000/api/cart/add", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          variantId: variant.id,
+          quantity: quantity,
+        }),
+      });
+
+      if (!res.ok) throw new Error("Lỗi thêm giỏ hàng");
+
+      // Đồng bộ lại state từ Server để đảm bảo ID và dữ liệu chuẩn nhất
+      const resCart = await fetch("http://localhost:3000/api/cart", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const newCartData = await resCart.json();
+      setCartItems(newCartData);
+
+      alert("Đã thêm vào giỏ hàng!");
+    } catch (error) {
+      console.error(error);
+      alert("Lỗi kết nối server!");
+    }
   };
 
   const cartItemCount = cartItems.reduce((sum, item) => sum + item.quantity, 0);
@@ -173,33 +265,26 @@ function App() {
     <>
       <Header cartItemCount={cartItemCount} />
       <Routes>
-        <Route
-          path="/"
-          element={
-            <HomePage
-              cartItemCount={cartItemCount}
-              handleAddToCart={handleAddToCart}
-            />
-          }
-        />
-        <Route path="/contact" element={<ContactPage />} />
-        <Route path="/about" element={<AboutPage />} />
-        <Route path="/signin" element={<SignInPage />}></Route>
-        <Route path="/register" element={<RegisterPage />}></Route>
-        <Route
-          path="/products"
-          element={<ProductsPage onAddToCart={handleAddToCart} />}
-        ></Route>
+        <Route path="/" element={<HomePage cartItemCount={cartItemCount} />} />
+
+        <Route path="/products" element={<ProductsPage />} />
+
+        {/* Truyền cartItems và setCartItems xuống CartPage để nó hiển thị */}
         <Route
           path="/cart"
           element={
             <CartPage cartItems={cartItems} setCartItems={setCartItems} />
           }
         />
+
         <Route
           path="/productdetail/:id"
           element={<ProductDetail onAddToCart={handleAddToCart} />}
         />
+
+        {/* ... các route khác (signin, register, profile...) */}
+        <Route path="/signin" element={<SignInPage />} />
+        <Route path="/register" element={<RegisterPage />} />
       </Routes>
     </>
   );

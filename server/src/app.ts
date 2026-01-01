@@ -3,6 +3,8 @@ import express from "express";
 import cors from "cors";
 import productRoutes from "./routes/productRoutes";
 import categoryRoutes from "./routes/categoryRoutes";
+import authRoutes from "./routes/authRoutes";
+import cartRoutes from "./routes/cart.routes";
 
 const app = express();
 app.use(cors());
@@ -11,6 +13,8 @@ app.use(express.json());
 // Đã đăng ký route này rồi thì KHÔNG CẦN LÀM GÌ THÊM
 app.use("/api/products", productRoutes);
 app.use("/api/categories", categoryRoutes);
+app.use("/api/auth", authRoutes);
+app.use("/api/cart", cartRoutes);
 
 const PORT = 3000;
 app.listen(PORT, () => {
