@@ -31,7 +31,7 @@ const ProductsPage = () => {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const res = await fetch("http://localhost:3000/api/categories");
+        const res = await fetch(`${import.meta.env.VITE_API_URL}/categories`);
         const data = await res.json();
         setCategories(data.data || []);
       } catch (err) {
@@ -50,7 +50,7 @@ const ProductsPage = () => {
       try {
         setLoading(true);
 
-        let url = `http://localhost:3000/api/products?page=${currentPage}&limit=12`;
+        let url = `${import.meta.env.VITE_API_URL}/products?page=${currentPage}&limit=12`;
 
         if (debouncedSearch) url += `&search=${debouncedSearch}`;
         if (filterCategory) url += `&category=${filterCategory}`;

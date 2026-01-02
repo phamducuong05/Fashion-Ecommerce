@@ -38,7 +38,7 @@ const CartPage = ({ cartItems, setCartItems }: CartProp) => {
 
       try {
         // Lưu ý: Port 5000 (Backend)
-        const response = await fetch("http://localhost:3000/api/cart", {
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/cart`, {
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`, // --- QUAN TRỌNG: Gửi Token ---
@@ -90,7 +90,7 @@ const CartPage = ({ cartItems, setCartItems }: CartProp) => {
     );
 
     try {
-      const res = await fetch(`http://localhost:3000/api/cart/${id}`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/cart/${id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -118,7 +118,7 @@ const CartPage = ({ cartItems, setCartItems }: CartProp) => {
     setCartItems((prev) => prev.filter((item) => item.id !== id));
 
     try {
-      const res = await fetch(`http://localhost:3000/api/cart/${id}`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/cart/${id}`, {
         method: "DELETE",
         headers: {
           Authorization: `Bearer ${token}`,

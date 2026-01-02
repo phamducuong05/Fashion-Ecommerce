@@ -42,7 +42,7 @@ const HomePage = ({ cartItemCount }: HomeProp) => {
     setError(null);
     try {
       // Tăng limit lên 20 để đủ data chia dòng
-      const res = await fetch("http://localhost:3000/api/products?limit=100");
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/products?limit=100`);
       if (!res.ok) throw new Error("Không thể tải danh sách sản phẩm.");
       const data = await res.json();
       setProduct(data.data as ProductSummary[]);

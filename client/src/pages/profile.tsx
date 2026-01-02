@@ -23,7 +23,7 @@ const ProfilePage = () => {
       }
 
       try {
-        const res = await fetch("http://localhost:3000/api/users/profile", {
+        const res = await fetch(`${import.meta.env.VITE_API_URL}/users/profile`, {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
@@ -56,7 +56,7 @@ const ProfilePage = () => {
   const handleUpdateProfile = async (newName: string, newAvatar: string) => {
     const token = getToken();
     try {
-      const res = await fetch("http://localhost:3000/api/users/profile", {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/users/profile`, {
         method: "PUT", // Gọi method PUT
         headers: {
           "Content-Type": "application/json",

@@ -44,7 +44,7 @@ function App() {
       if (token) {
         // A. TRƯỜNG HỢP CÓ TOKEN (USER): Lấy từ API
         try {
-          const res = await fetch("http://localhost:3000/api/cart", {
+          const res = await fetch(`${import.meta.env.VITE_API_URL}/cart`, {
             headers: { Authorization: `Bearer ${token}` },
           });
           if (res.ok) {
@@ -119,7 +119,7 @@ function App() {
 
     // === TRƯỜNG HỢP 2: ĐÃ ĐĂNG NHẬP (Lưu Database) ===
     try {
-      const res = await fetch("http://localhost:3000/api/cart/add", {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/cart/add`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -134,7 +134,7 @@ function App() {
       if (!res.ok) throw new Error("Lỗi thêm giỏ hàng");
 
       // Đồng bộ lại state từ Server để đảm bảo ID và dữ liệu chuẩn nhất
-      const resCart = await fetch("http://localhost:3000/api/cart", {
+      const resCart = await fetch(`${import.meta.env.VITE_API_URL}/cart`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       const newCartData = await resCart.json();

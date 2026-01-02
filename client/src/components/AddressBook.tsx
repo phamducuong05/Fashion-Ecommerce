@@ -40,7 +40,7 @@ export function AddressBook() {
     if (!token) return;
     try {
       // Đổi port 5000
-      const res = await fetch("http://localhost:3000/api/addresses", {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/addresses`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (res.ok) setAddresses(await res.json());
@@ -88,7 +88,7 @@ export function AddressBook() {
     if (!confirm("Are you sure you want to delete this address?")) return;
     const token = getToken();
     try {
-      const res = await fetch(`http://localhost:3000/api/addresses/${id}`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/addresses/${id}`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -102,8 +102,8 @@ export function AddressBook() {
     e.preventDefault();
     const token = getToken();
     const url = editingId
-      ? `http://localhost:3000/api/addresses/${editingId}`
-      : "http://localhost:3000/api/addresses";
+      ? `${import.meta.env.VITE_API_URL}/addresses/${editingId}`
+      : `${import.meta.env.VITE_API_URL}/addresses`;
 
     const method = editingId ? "PUT" : "POST";
 
