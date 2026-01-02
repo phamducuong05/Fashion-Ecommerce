@@ -82,6 +82,15 @@ const ProfilePage = () => {
     }
   };
 
+  const handleLogout = () => {
+    if (confirm("Bạn có chắc chắn muốn đăng xuất?")) {
+      // 1. Xóa Token khỏi localStorage
+      localStorage.removeItem("token");
+      localStorage.removeItem("cart");
+      navigate("/signin");
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -98,6 +107,7 @@ const ProfilePage = () => {
           <ProfileHeader
             user={user}
             onEditClick={() => setIsEditModalOpen(true)}
+            onLogout={handleLogout}
           />
 
           <div className="grid grid-cols-1 lg:grid-cols-1 gap-6">

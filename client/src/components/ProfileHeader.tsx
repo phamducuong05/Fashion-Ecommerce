@@ -1,5 +1,5 @@
 import { ImageWithFallback } from "./imagefallback";
-import { Edit, Calendar, Mail } from "lucide-react";
+import { Edit, Calendar, Mail, LogOut } from "lucide-react";
 
 // Định nghĩa kiểu dữ liệu User cho Frontend
 export interface UserProfileType {
@@ -13,9 +13,14 @@ export interface UserProfileType {
 interface ProfileHeaderProps {
   user: UserProfileType | null;
   onEditClick: () => void;
+  onLogout: () => void;
 }
 
-export function ProfileHeader({ user, onEditClick }: ProfileHeaderProps) {
+export function ProfileHeader({
+  user,
+  onEditClick,
+  onLogout,
+}: ProfileHeaderProps) {
   const formatDate = (dateString?: string) => {
     if (!dateString) return "N/A";
     return new Date(dateString).toLocaleDateString("en-US", {
@@ -71,6 +76,14 @@ export function ProfileHeader({ user, onEditClick }: ProfileHeaderProps) {
               >
                 <Edit className="w-4 h-4" />
                 Edit Profile
+              </button>
+              <button
+                onClick={onLogout}
+                className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-white text-red-600 border border-gray-200 rounded-full text-sm font-medium hover:bg-red-50 hover:border-red-200 transition-all shadow-sm active:scale-95"
+                title="Sign out"
+              >
+                <LogOut className="w-4 h-4" />
+                Log Out
               </button>
             </div>
           </div>

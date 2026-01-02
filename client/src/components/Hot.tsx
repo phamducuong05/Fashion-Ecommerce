@@ -76,7 +76,7 @@ const Hot = ({ whatsHotProducts, whatsHotTab, setWhatsHotTab }: HotProp) => {
 
         {/* --- PRODUCT GRID --- */}
         {whatsHotProducts.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-8">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
             {whatsHotProducts.map((product) => (
               <div key={product.id} className="animate-fade-in-up">
                 {" "}
