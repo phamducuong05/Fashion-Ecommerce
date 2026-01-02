@@ -1,4 +1,5 @@
 import { PrismaClient } from "@prisma/client";
+import { AppError } from "../utils/AppError";
 
 const prisma = new PrismaClient();
 
@@ -15,7 +16,7 @@ const getUserProfile = async (userId: number) => {
   });
 
   if (!user) {
-    throw new Error("Người dùng không tồn tại");
+    throw new AppError("Người dùng không tồn tại", 404);
   }
 
   return user;

@@ -1,4 +1,5 @@
 import { PrismaClient } from "@prisma/client";
+import { AppError } from "../utils/AppError";
 
 const prisma = new PrismaClient();
 
@@ -119,7 +120,7 @@ const updateQuantity = async (
 ) => {
   // Kiểm tra quantity hợp lệ
   if (quantity < 1) {
-    throw new Error("Số lượng phải lớn hơn 0");
+    throw new AppError("Số lượng phải lớn hơn 0", 400);
   }
 
   const cartItem = await prisma.cartItem.findUnique({
@@ -128,7 +129,7 @@ const updateQuantity = async (
   });
 
   if (!cartItem || cartItem.cart.userId !== userId) {
-    throw new Error("Không tìm thấy sản phẩm trong giỏ hàng");
+    throw new AppError("Không tìm thấy sản phẩm trong giỏ hàng", 404);
   }
 
   return await prisma.cartItem.update({

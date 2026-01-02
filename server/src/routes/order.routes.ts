@@ -7,5 +7,6 @@ const router = Router();
 // GET /api/orders/my-orders
 router.get("/my-orders", authenticateToken, orderController.getMyOrders);
 router.get("/:id", authenticateToken, orderController.getOrderDetail);
+router.post("/", authenticateToken, orderController.createOrder);
 
 export default router;

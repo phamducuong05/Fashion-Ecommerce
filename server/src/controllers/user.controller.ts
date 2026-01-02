@@ -1,35 +1,27 @@
 import { Response } from "express";
 import { AuthRequest } from "../middlewares/auth.middlewares"; // Import interface AuthRequest bạn đã có
 import userService from "../services/user.service";
+import { catchAsync } from "../utils/catchAsync";
+import { sendResponse } from "../utils/apiResponse";
 
-const getProfile = async (req: AuthRequest, res: Response) => {
-  try {
-    const userId = req.user?.id; // Lấy ID từ token đã giải mã qua middleware
-    if (!userId) {
-      return res.status(401).json({ message: "Unauthorized" });
-    }
-
-    const user = await userService.getUserProfile(userId);
-    res.json(user);
-  } catch (error: any) {
-    console.error(error);
-    res.status(500).json({ message: "Lỗi lấy thông tin cá nhân" });
+const getProfile = catchAsync(async (req: AuthRequest, res: Response) => {
+  const userId = req.user?.id;
+  if (!userId) {
+    return sendResponse(res, 401, false, "Unauthorized");
   }
-};
 
-const updateProfile = async (req: AuthRequest, res: Response) => {
-  try {
-    const userId = req.user?.id;
-    const { name, avatar } = req.body;
+  const user = await userService.getUserProfile(userId);
+  res.json(user);
+});
 
-    if (!userId) return res.status(401).json({ message: "Unauthorized" });
+const updateProfile = catchAsync(async (req: AuthRequest, res: Response) => {
+  const userId = req.user?.id;
+  const { name, avatar } = req.body;
 
-    const updatedUser = await userService.updateUser(userId, { name, avatar });
-    res.json(updatedUser);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Lỗi cập nhật thông tin" });
-  }
-};
+  if (!userId) return sendResponse(res, 401, false, "Unauthorized");
+
+  const updatedUser = await userService.updateUser(userId, { name, avatar });
+  res.json(updatedUser);
+});
 
 export default { getProfile, updateProfile };

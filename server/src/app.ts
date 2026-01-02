@@ -1,4 +1,5 @@
 // src/app.ts
+import "dotenv/config";
 import express from "express";
 import cors from "cors";
 import productRoutes from "./routes/productRoutes";
@@ -21,9 +22,13 @@ app.use("/api/users", userRoutes);
 app.use("/api/addresses", addressRoutes);
 app.use("/api/orders", orderRoutes);
 
-const PORT = 3000;
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-  console.log(`🚀 Server ready at: http://localhost:${PORT}`);
-  console.log(`👉 Check products at: http://localhost:${PORT}/api/products`);
+// Global Error Handler
+app.use((err: any, req: any, res: any, next: any) => {
+  const statusCode = err.statusCode || 500;
+  res.status(statusCode).json({
+    status: err.status || "error",
+    message: err.message || "Internal Server Error",
+  });
 });
+
+export default app;

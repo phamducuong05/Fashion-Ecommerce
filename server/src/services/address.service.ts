@@ -1,4 +1,5 @@
 import { PrismaClient } from "@prisma/client";
+import { AppError } from "../utils/AppError";
 
 const prisma = new PrismaClient();
 
@@ -15,8 +16,9 @@ const createAddress = async (userId: number, data: any) => {
   console.log("👉 [Service] Data received for create:", data);
 
   if (!data.recipientName || !data.phone || !data.city || !data.detail) {
-    throw new Error(
-      `Thiếu thông tin bắt buộc! Nhận được: recipientName=${data.recipientName}, detail=${data.detail}`
+    throw new AppError(
+      `Thiếu thông tin bắt buộc! Nhận được: recipientName=${data.recipientName}, detail=${data.detail}`,
+      400
     );
   }
 
@@ -80,7 +82,7 @@ const deleteAddress = async (userId: number, addressId: number) => {
     where: { id: addressId, userId },
   });
 
-  if (!address) throw new Error("Address not found or unauthorized");
+  if (!address) throw new AppError("Address not found or unauthorized", 404);
 
   return await prisma.address.delete({
     where: { id: addressId },
