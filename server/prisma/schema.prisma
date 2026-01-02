@@ -1,0 +1,298 @@
+// prisma/schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ================= ENUMS =================
+enum Role {
+  CUSTOMER
+  ADMIN
+}
+
+enum OrderStatus {
+  PENDING
+  CONFIRMED
+  SHIPPING
+  COMPLETED
+  CANCELLED
+  RETURNED
+}
+
+// ================= USER & AUTH =================
+model User {
+  id              Int              @id @default(autoincrement())
+  email           String           @unique
+  password        String
+  name            String?
+  phone           String?
+  role            Role             @default(CUSTOMER)
+  avatar          String?
+  createdAt       DateTime         @default(now())
+
+  addresses       Address[]
+  cart            Cart?
+  orders          Order[]
+  reviews         Review[]
+  supportMessages SupportMessage[]
+  userPayments    UserPayment[]    
+  claimedVouchers UserVoucher[]
+  favorites       ProductVariant[] @relation("UserFavorites")
+  chatConversations ChatConversation[]
+}
+
+// ================= PAYMENT SYSTEM =================
+model PaymentMethod {
+  id           Int           @id @default(autoincrement())
+  name         String
+  code         String        @unique 
+  description  String?
+  image        String?
+  isActive     Boolean       @default(true)
+
+  savedInUsers UserPayment[]
+}
+
+model UserPayment {
+  id              Int           @id @default(autoincrement())
+  userId          Int
+  user            User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  paymentMethodId Int
+  paymentMethod   PaymentMethod @relation(fields: [paymentMethodId], references: [id])
+  
+  provider        String?       
+  accountNumber   String        
+  expiryDate      String?
+  isDefault       Boolean       @default(false)
+  createdAt       DateTime      @default(now())
+}
+
+// ================= ADDRESS =================
+model Address {
+  id            Int     @id @default(autoincrement())
+  userId        Int
+  user          User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  recipientName String
+  phone         String
+  city          String
+  district      String?
+  ward          String?
+  detail        String
+  isDefault     Boolean @default(false)
+}
+
+// ================= CATEGORY =================
+model Category {
+  id       Int        @id @default(autoincrement())
+  name     String
+  slug     String     @unique
+  image    String?
+  
+  parentId Int?
+  parent   Category?  @relation("CategoryHierarchy", fields: [parentId], references: [id])
+  children Category[] @relation("CategoryHierarchy")
+  
+  products Product[]  @relation("CategoryToProduct")
+}
+
+// ================= PRODUCT SYSTEM =================
+model Product {
+  id            Int              @id @default(autoincrement())
+  name          String
+  slug          String           @unique
+  description   String?
+  thumbnail     String?
+  originalPrice Decimal          @db.Decimal(10, 2)
+  price         Decimal          @db.Decimal(10, 2)
+  isActive      Boolean          @default(true)
+  rating        Float            @default(0)
+  reviewCount   Int              @default(0)
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+
+  variants      ProductVariant[]
+  reviews       Review[]
+  categories    Category[]       @relation("CategoryToProduct")
+}
+
+model ProductVariant {
+  id         Int         @id @default(autoincrement())
+  productId  Int
+  product    Product     @relation(fields: [productId], references: [id], onDelete: Cascade)
+  
+  color      String
+  size       String
+  sku        String?     @unique
+  image      String?
+  stock      Int         @default(0)
+
+  cartItems  CartItem[]
+  orderItems OrderItem[]
+  favoritedBy User[]     @relation("UserFavorites")
+
+  @@unique([productId, color, size])
+}
+
+// ================= CART SYSTEM =================
+model Cart {
+  id        Int        @id @default(autoincrement())
+  userId    Int        @unique
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  cartItems CartItem[]
+  updatedAt DateTime   @updatedAt
+}
+
+model CartItem {
+  id        Int            @id @default(autoincrement())
+  cartId    Int
+  cart      Cart           @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  variantId Int
+  variant   ProductVariant @relation(fields: [variantId], references: [id], onDelete: Cascade)
+  quantity  Int
+
+  @@unique([cartId, variantId])
+}
+
+// ================= ORDER SYSTEM =================
+model Order {
+  id              Int            @id @default(autoincrement())
+  userId          Int
+  user            User           @relation(fields: [userId], references: [id])
+  
+  shippingAddress String         @db.Text 
+  paymentMethod   String         
+  
+  voucherId       Int?
+  voucher         Voucher?       @relation(fields: [voucherId], references: [id])
+  
+  status          OrderStatus    @default(PENDING)
+  totalAmount     Decimal        @db.Decimal(10, 2)
+  shippingFee     Decimal        @db.Decimal(10, 2) @default(0)
+  discountAmount  Decimal        @db.Decimal(10, 2) @default(0)
+  finalAmount     Decimal        @db.Decimal(10, 2)
+  paymentStatus   String?        
+  
+  orderItems      OrderItem[]
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+}
+
+model OrderItem {
+  id        Int            @id @default(autoincrement())
+  orderId   Int
+  order     Order          @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  variantId Int
+  variant   ProductVariant @relation(fields: [variantId], references: [id])
+  
+  quantity  Int
+  price     Decimal        @db.Decimal(10, 2)
+
+  @@unique([orderId, variantId])
+}
+
+// ================= VOUCHER SYSTEM =================
+model Voucher {
+  id          Int           @id @default(autoincrement())
+  code        String        @unique
+  description String?
+  value       Decimal       @db.Decimal(10, 2)
+  type        String        @default("FIXED")
+  stock       Int           @default(0)
+  usedCount   Int           @default(0)
+  startDate   DateTime
+  endDate     DateTime
+  isActive    Boolean       @default(true)
+  
+  orders      Order[]
+  claimers    UserVoucher[]
+}
+
+model UserVoucher {
+  id        Int     @id @default(autoincrement())
+  userId    Int
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  voucherId Int
+  voucher   Voucher @relation(fields: [voucherId], references: [id], onDelete: Cascade)
+  
+  isUsed    Boolean @default(false)
+  claimedAt DateTime @default(now())
+
+  @@unique([userId, voucherId])
+}
+
+// ================= EXTRAS =================
+model Review {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id])
+  productId Int
+  product   Product  @relation(fields: [productId], references: [id])
+  
+  rating    Int
+  comment   String?
+  createdAt DateTime @default(now())
+}
+
+model SupportMessage {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id])
+  
+  content   String   @db.Text
+  status    String   @default("OPEN")
+  createdAt DateTime @default(now())
+}
+
+// ================= CHAT SYSTEM =================
+enum ChatStatus {
+  OPEN
+  CLOSED
+  PENDING
+}
+
+enum MessageSender {
+  CUSTOMER
+  ADMIN
+}
+
+model ChatConversation {
+  id          Int            @id @default(autoincrement())
+  userId      Int
+  user        User           @relation(fields: [userId], references: [id])
+  
+  status      ChatStatus     @default(OPEN)
+  unreadCount Int            @default(0)
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+  
+  messages    ChatMessage[]
+}
+
+model ChatMessage {
+  id             Int              @id @default(autoincrement())
+  conversationId Int
+  conversation   ChatConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  
+  sender         MessageSender
+  content        String           @db.Text
+  isRead         Boolean          @default(false)
+  createdAt      DateTime         @default(now())
+}
+
+// ================= BANNER SYSTEM =================
+model Banner {
+  id        Int      @id @default(autoincrement())
+  title     String
+  subtitle  String?
+  imageUrl  String
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

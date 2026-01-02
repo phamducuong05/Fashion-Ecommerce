@@ -1,0 +1,80 @@
+[
+  {
+    "id": 1,
+    "customerName": "Sarah Johnson",
+    "customerEmail": "sarah.j@email.com",
+    "lastMessage": "When will my order be delivered?",
+    "unread": 2,
+    "lastActive": "2024-11-27T14:30:00.000Z",
+    "messages": [
+      {
+        "id": 1,
+        "sender": "customer",
+        "text": "Hi, I placed an order yesterday. Order #ORD-1003",
+        "timestamp": "2024-11-27T14:25:00.000Z"
+      },
+      {
+        "id": 2,
+        "sender": "customer",
+        "text": "When will my order be delivered?",
+        "timestamp": "2024-11-27T14:30:00.000Z"
+      }
+    ]
+  },
+  {
+    "id": 2,
+    "customerName": "Michael Chen",
+    "customerEmail": "mchen@email.com",
+    "lastMessage": "Thank you for your help!",
+    "unread": 0,
+    "lastActive": "2024-11-26T10:15:00.000Z",
+    "messages": [
+      {
+        "id": 1,
+        "sender": "customer",
+        "text": "I need to change my shipping address",
+        "timestamp": "2024-11-26T10:00:00.000Z"
+      },
+      {
+        "id": 2,
+        "sender": "admin",
+        "text": "I'd be happy to help! Could you provide your order number?",
+        "timestamp": "2024-11-26T10:05:00.000Z"
+      },
+      {
+        "id": 3,
+        "sender": "customer",
+        "text": "Order #ORD-1005",
+        "timestamp": "2024-11-26T10:08:00.000Z"
+      },
+      {
+        "id": 4,
+        "sender": "admin",
+        "text": "Address updated successfully!",
+        "timestamp": "2024-11-26T10:12:00.000Z"
+      },
+      {
+        "id": 5,
+        "sender": "customer",
+        "text": "Thank you for your help!",
+        "timestamp": "2024-11-26T10:15:00.000Z"
+      }
+    ]
+  },
+  {
+    "id": 3,
+    "customerName": "Emma Davis",
+    "customerEmail": "emma.davis@email.com",
+    "lastMessage": "Do you ship internationally?",
+    "unread": 1,
+    "lastActive": "2024-11-27T11:45:00.000Z",
+    "messages": [
+      {
+        "id": 1,
+        "sender": "customer",
+        "text": "Do you ship internationally?",
+        "timestamp": "2024-11-27T11:45:00.000Z"
+      }
+    ]
+  }
+]

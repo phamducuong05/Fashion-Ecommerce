@@ -1,0 +1,85 @@
+[
+  {
+    "id": 1,
+    "name": "Classic Cotton T-Shirt",
+    "category": "Men - T-Shirts",
+    "price": 29.99,
+    "stock": 45,
+    "image": "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400",
+    "description": "A classic cotton t-shirt, comfortable and perfect for everyday wear.",
+    "status": "available",
+    "variants": [
+      {
+        "size": "M",
+        "colors": ["Black", "White", "Navy"],
+        "imageUrl": "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400"
+      },
+      {
+        "size": "L",
+        "colors": ["Black", "White"],
+        "imageUrl": "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400"
+      }
+    ]
+  },
+  {
+    "id": 2,
+    "name": "Floral Summer Dress",
+    "category": "Women - Dress",
+    "price": 89.99,
+    "stock": 32,
+    "image": "https://images.unsplash.com/photo-1572804013309-59a88b7e92f1?w=400",
+    "description": "A light and airy floral summer dress, perfect for warm days.",
+    "status": "available",
+    "variants": [
+      {
+        "size": "S",
+        "colors": ["Floral Blue", "Floral Pink"],
+        "imageUrl": "https://images.unsplash.com/photo-1572804013309-59a88b7e92f1?w=400"
+      },
+      {
+        "size": "M",
+        "colors": ["Floral Blue", "Floral Pink"],
+        "imageUrl": "https://images.unsplash.com/photo-1572804013309-59a88b7e92f1?w=400"
+      }
+    ]
+  },
+  {
+    "id": 3,
+    "name": "Leather Crossbody Bag",
+    "category": "Bags",
+    "price": 129.99,
+    "stock": 18,
+    "image": "https://images.unsplash.com/photo-1548036328-c9fa89d128fa?w=400",
+    "description": "A stylish leather crossbody bag, perfect for daily use and travel.",
+    "status": "available",
+    "variants": [
+      {
+        "size": "One Size",
+        "colors": ["Brown", "Black", "Tan"],
+        "imageUrl": "https://images.unsplash.com/photo-1548036328-c9fa89d128fa?w=400"
+      }
+    ]
+  },
+  {
+    "id": 4,
+    "name": "Kids Running Shoes",
+    "category": "Kids - Shoes",
+    "price": 49.99,
+    "stock": 0,
+    "image": "https://images.unsplash.com/photo-1514989940723-e8e51635b782?w=400",
+    "description": "Durable and comfortable running shoes for kids, available in multiple colors.",
+    "status": "sold-out",
+    "variants": [
+      {
+        "size": "S",
+        "colors": ["Blue", "Pink"],
+        "imageUrl": "https://images.unsplash.com/photo-1514989940723-e8e51635b782?w=400"
+      },
+      {
+        "size": "M",
+        "colors": ["Blue", "Pink"],
+        "imageUrl": "https://images.unsplash.com/photo-1514989940723-e8e51635b782?w=400"
+      }
+    ]
+  }
+]
