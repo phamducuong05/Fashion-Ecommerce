@@ -282,7 +282,7 @@ function App() {
           element={<ProductDetail onAddToCart={handleAddToCart} />}
         />
 
-        {/* ... các route khác (signin, register, profile...) */}
+        <Route path="/profile" element={<ProfilePage />} />
         <Route path="/signin" element={<SignInPage />} />
         <Route path="/register" element={<RegisterPage />} />
       </Routes>
