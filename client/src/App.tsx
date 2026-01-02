@@ -11,6 +11,7 @@ import CartPage from "./pages/cart";
 import ProductDetail from "./components/ProductDetails";
 import ContactPage from "./pages/contact";
 import ProfilePage from "./pages/profile";
+import OrderDetailPage from "./components/OrderDetailPage";
 
 export interface CartItemType {
   id: string;
@@ -281,6 +282,7 @@ function App() {
           path="/productdetail/:id"
           element={<ProductDetail onAddToCart={handleAddToCart} />}
         />
+        <Route path="/orders/:id" element={<OrderDetailPage />} />
 
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/signin" element={<SignInPage />} />

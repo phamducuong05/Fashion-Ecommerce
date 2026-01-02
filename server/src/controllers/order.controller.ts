@@ -15,4 +15,21 @@ const getMyOrders = async (req: AuthRequest, res: Response) => {
   }
 };
 
-export default { getMyOrders };
+const getOrderDetail = async (req: AuthRequest, res: Response) => {
+  try {
+    const userId = req.user?.id;
+    const orderId = Number(req.params.id);
+
+    if (!userId) return res.status(401).json({ message: "Unauthorized" });
+    if (isNaN(orderId))
+      return res.status(400).json({ message: "Invalid Order ID" });
+
+    const order = await orderService.getOrderById(userId, orderId);
+    res.json(order);
+  } catch (error: any) {
+    console.error(error);
+    res.status(404).json({ message: error.message });
+  }
+};
+
+export default { getMyOrders, getOrderDetail };
