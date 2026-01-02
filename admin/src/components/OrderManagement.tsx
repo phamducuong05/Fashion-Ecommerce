@@ -67,7 +67,7 @@ export function OrderManagement() {
     status: 'delivered' | 'cancelled'
   ) => {
     const payload = { id, status };
-    await axios.patch(`/api/orders/${id}`, payload);
+    await axios.put(`/api/orders/${id}`, payload);
   };
 
   /* =======================

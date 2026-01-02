@@ -23,6 +23,7 @@ router.get('/customers/:id', CustomerController.getCustomer);
 // Orders
 router.get('/orders', OrderController.listOrders);
 router.get('/orders/:id', OrderController.getOrder);
+router.put('/orders/:id', OrderController.updateOrderStatus);
 
 // Promotions (raw vouchers)
 router.get('/promotions', PromotionController.getPromotions);

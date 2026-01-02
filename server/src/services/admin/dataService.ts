@@ -220,6 +220,41 @@ export class DataService {
     return orders.find((o) => o.id === id);
   }
 
+  // Update order status
+  static async updateOrderStatus(id: string, status: string) {
+    // Map lowercase status to database enum values
+    const statusMap: Record<string, string> = {
+      'pending': 'PENDING',
+      'confirmed': 'CONFIRMED',
+      'shipping': 'SHIPPING',
+      'delivered': 'COMPLETED',
+      'completed': 'COMPLETED',
+      'cancelled': 'CANCELLED',
+      'returned': 'RETURNED',
+    };
+
+    const dbStatus = statusMap[status.toLowerCase()];
+    if (!dbStatus) {
+      throw new Error(`Invalid status: ${status}`);
+    }
+
+    if (isDatabaseAvailable()) {
+      return prisma.order.update({
+        where: { id: Number(id) },
+        data: { status: dbStatus as any },
+        include: { orderItems: true, user: true }
+      });
+    }
+    
+    // For JSON fallback (no actual update, just return the order)
+    const orders = readJson<any[]>('order.json');
+    const order = orders.find((o) => o.id === id);
+    if (order) {
+      order.status = dbStatus;
+    }
+    return order;
+  }
+
   // Promotions / vouchers
   static async getPromotions() {
     if (isDatabaseAvailable()) {
