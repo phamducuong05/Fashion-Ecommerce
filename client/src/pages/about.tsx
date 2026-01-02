@@ -1,4 +1,4 @@
-import { Award, Shield, Users, Target } from "lucide-react";
+import { Award, Shield, Users, Target, Leaf } from "lucide-react";
 
 const AboutPage = () => {
   return (
