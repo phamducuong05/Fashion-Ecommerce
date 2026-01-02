@@ -270,8 +270,8 @@ function App() {
     }
   };
 
-  const cartItemCount = Array.isArray(cartItems) 
-    ? cartItems.reduce((sum, item) => sum + item.quantity, 0) 
+  const cartItemCount = Array.isArray(cartItems)
+    ? cartItems.reduce((sum, item) => sum + item.quantity, 0)
     : 0;
 
   return (
@@ -299,6 +299,8 @@ function App() {
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/signin" element={<SignInPage />} />
         <Route path="/register" element={<RegisterPage />} />
+        <Route path="/about" element={<AboutPage />} />
+        <Route path="/contact" element={<ContactPage />} />
       </Routes>
     </>
   );
