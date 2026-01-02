@@ -78,7 +78,6 @@ export function OrderHistory() {
       case "COMPLETED":
         return {
           style: "bg-emerald-50 text-emerald-700 border-emerald-200",
-          icon: CheckCircle2,
           dot: "bg-emerald-500",
         };
       case "SHIPPING":

@@ -1,5 +1,5 @@
 import { Button } from "./variants/button";
-import { ShoppingCart, User, Menu, Search } from "lucide-react";
+import { ShoppingCart, User, Menu } from "lucide-react";
 import { Link, useNavigate } from "react-router";
 import { useState } from "react";
 
@@ -8,7 +8,6 @@ interface HeaderProps {
 }
 
 const Header = ({ cartItemCount }: HeaderProps) => {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const navigate = useNavigate();
 
   const handleUserClick = () => {

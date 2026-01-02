@@ -153,7 +153,7 @@ function App() {
     <>
       <Header cartItemCount={cartItemCount} />
       <Routes>
-        <Route path="/" element={<HomePage cartItemCount={cartItemCount} />} />
+        <Route path="/" element={<HomePage />} />
 
         <Route path="/products" element={<ProductsPage />} />
 

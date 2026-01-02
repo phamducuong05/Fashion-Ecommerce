@@ -3,7 +3,7 @@ import ProductCard from "./ProductCard";
 import type { ProductSummary } from "./ProductCard";
 import { Tabs, TabsList, TabsTrigger } from "./Tab";
 import { Link } from "react-router"; // Lưu ý: Thường là react-router-dom
-import { ArrowRight } from "lucide-react"; // Icon mũi tên (nếu bạn có cài lucide-react)
+ // Icon mũi tên (nếu bạn có cài lucide-react)
 
 interface HotProp {
   whatsHotProducts: ProductSummary[];

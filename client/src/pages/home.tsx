@@ -11,11 +11,11 @@ import { Loader2, AlertCircle } from "lucide-react";
 import { Button } from "../components/variants/button";
 import { SupportWidget } from "../components/SupportWidget";
 
-interface HomeProp {
-  cartItemCount: number;
-}
+// interface HomeProp {
+//   cartItemCount: number;
+// }
 
-const HomePage = ({ cartItemCount }: HomeProp) => {
+const HomePage = () => {
   const [products, setProduct] = useState<ProductSummary[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
