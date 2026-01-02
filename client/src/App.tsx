@@ -162,16 +162,25 @@ function App() {
           });
           if (res.ok) {
             const data = await res.json();
-            setCartItems(data);
+            // Ensure data is an array
+            setCartItems(Array.isArray(data) ? data : []);
           }
         } catch (error) {
           console.error("Lỗi tải giỏ hàng từ server:", error);
+          setCartItems([]);
         }
       } else {
         // B. TRƯỜNG HỢP KHÔNG TOKEN (GUEST): Lấy từ LocalStorage
-        const localCart = localStorage.getItem("cart");
-        if (localCart) {
-          setCartItems(JSON.parse(localCart));
+        try {
+          const localCart = localStorage.getItem("cart");
+          if (localCart) {
+            const parsed = JSON.parse(localCart);
+            setCartItems(Array.isArray(parsed) ? parsed : []);
+          }
+        } catch (error) {
+          console.error("Lỗi parse cart từ localStorage:", error);
+          localStorage.removeItem("cart");
+          setCartItems([]);
         }
       }
     };
@@ -251,7 +260,8 @@ function App() {
         headers: { Authorization: `Bearer ${token}` },
       });
       const newCartData = await resCart.json();
-      setCartItems(newCartData);
+      // Ensure data is an array
+      setCartItems(Array.isArray(newCartData) ? newCartData : []);
 
       alert("Đã thêm vào giỏ hàng!");
     } catch (error) {
@@ -260,7 +270,9 @@ function App() {
     }
   };
 
-  const cartItemCount = cartItems.reduce((sum, item) => sum + item.quantity, 0);
+  const cartItemCount = Array.isArray(cartItems) 
+    ? cartItems.reduce((sum, item) => sum + item.quantity, 0) 
+    : 0;
 
   return (
     <>
