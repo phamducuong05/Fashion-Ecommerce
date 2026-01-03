@@ -44,6 +44,7 @@ model User {
   claimedVouchers UserVoucher[]
   favorites       ProductVariant[] @relation("UserFavorites")
   chatConversations ChatConversation[]
+  chatSessions    ChatSession[]
 }
 
 // ================= PAYMENT SYSTEM =================
@@ -119,6 +120,7 @@ model Product {
   variants      ProductVariant[]
   reviews       Review[]
   categories    Category[]       @relation("CategoryToProduct")
+  messageProducts MessageProduct[]
 }
 
 model ProductVariant {
@@ -295,4 +297,43 @@ model Banner {
   isActive  Boolean  @default(true)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+// ================= CHATBOT SESSION SYSTEM =================
+enum ChatRole {
+  USER
+  BOT
+}
+
+// Bảng 1: Quản lý các cuộc hội thoại chatbot
+model ChatSession {
+  id        Int              @id @default(autoincrement())
+  userId    Int?             // NULL nếu là khách vãng lai (Guest)
+  user      User?            @relation(fields: [userId], references: [id], onDelete: SetNull)
+  title     String           @default("New Chat")
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
+
+  messages  ChatBotMessage[]
+}
+
+// Bảng 2: Lưu nội dung tin nhắn chatbot
+model ChatBotMessage {
+  id        BigInt       @id @default(autoincrement())
+  sessionId Int
+  session   ChatSession  @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  role      ChatRole
+  content   String       @db.Text
+  createdAt DateTime     @default(now())
+
+  products  MessageProduct[]
+}
+
+// Bảng 3: Lưu các sản phẩm được AI gợi ý trong 1 tin nhắn
+model MessageProduct {
+  id        Int            @id @default(autoincrement())
+  messageId BigInt
+  message   ChatBotMessage @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  productId Int
+  product   Product        @relation(fields: [productId], references: [id], onDelete: Cascade)
 }

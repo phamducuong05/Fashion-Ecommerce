@@ -161,3 +161,124 @@ The seed now creates:
 - 3 Vouchers
 - 20 Chat Conversations with 93 Messages
 - 3 Banners
+
+---
+
+## Date: January 3, 2026
+
+## Chatbot Session System (Added)
+
+### Overview
+Added a new chatbot session system to manage AI-powered chat conversations with product suggestions. This is separate from the admin chat system and is designed for the AI chatbot functionality.
+
+### New Enum
+
+#### ChatRole
+```prisma
+enum ChatRole {
+  USER
+  BOT
+}
+```
+
+### New Models
+
+#### ChatSession
+Manages chatbot conversation sessions. Supports both logged-in users and guest users.
+
+```prisma
+model ChatSession {
+  id        Int              @id @default(autoincrement())
+  userId    Int?             // NULL nếu là khách vãng lai (Guest)
+  user      User?            @relation(fields: [userId], references: [id], onDelete: SetNull)
+  title     String           @default("New Chat")
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
+
+  messages  ChatBotMessage[]
+}
+```
+
+| Field | Type | Description |
+|-------|------|-------------|
+| id | Int | Primary key |
+| userId | Int? | Optional - NULL for guest users |
+| title | String | Chat title, defaults to "New Chat" |
+| createdAt | DateTime | Creation timestamp |
+| updatedAt | DateTime | Last update timestamp |
+
+#### ChatBotMessage
+Stores individual messages in a chatbot conversation.
+
+```prisma
+model ChatBotMessage {
+  id        BigInt       @id @default(autoincrement())
+  sessionId Int
+  session   ChatSession  @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  role      ChatRole
+  content   String       @db.Text
+  createdAt DateTime     @default(now())
+
+  products  MessageProduct[]
+}
+```
+
+| Field | Type | Description |
+|-------|------|-------------|
+| id | BigInt | Primary key |
+| sessionId | Int | Foreign key to ChatSession |
+| role | ChatRole | USER or BOT |
+| content | String | Message content |
+| createdAt | DateTime | Creation timestamp |
+
+#### MessageProduct
+Stores AI-suggested products linked to a specific bot message.
+
+```prisma
+model MessageProduct {
+  id        Int            @id @default(autoincrement())
+  messageId BigInt
+  message   ChatBotMessage @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  productId Int
+  product   Product        @relation(fields: [productId], references: [id], onDelete: Cascade)
+}
+```
+
+| Field | Type | Description |
+|-------|------|-------------|
+| id | Int | Primary key |
+| messageId | BigInt | Foreign key to ChatBotMessage |
+| productId | Int | Foreign key to Product |
+
+### Updated Models
+
+#### User
+Added relation to ChatSession:
+```prisma
+chatSessions    ChatSession[]
+```
+
+#### Product
+Added relation to MessageProduct:
+```prisma
+messageProducts MessageProduct[]
+```
+
+### Relationships Diagram
+
+```
+User (optional)
+  │
+  └──< ChatSession
+          │
+          └──< ChatBotMessage
+                  │
+                  └──< MessageProduct >── Product
+```
+
+### Migration Command
+
+```bash
+cd server
+npx prisma migrate dev --name add_chatbot_sessions
+```
