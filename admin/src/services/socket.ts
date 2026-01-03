@@ -70,6 +70,12 @@ class SocketService {
     this.socket?.emit('conversation:getMessages', conversationId);
   }
 
+  // Mark conversation as read (reset unread count)
+  markConversationAsRead(conversationId: number) {
+    console.log('🔵 Marking conversation as read:', conversationId);
+    this.socket?.emit('conversation:markAsRead', conversationId);
+  }
+
   // Send a message
   sendMessage(data: { conversationId?: number; message: string; sender: 'ADMIN' }) {
     this.socket?.emit('message:send', data);

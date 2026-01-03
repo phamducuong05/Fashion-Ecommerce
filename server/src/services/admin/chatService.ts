@@ -123,6 +123,27 @@ export class ChatService {
     return messages;
   }
 
+  // Mark conversation as read (reset unread count)
+  static async markConversationAsRead(conversationId: number) {
+    // Update conversation unreadCount to 0
+    await prisma.chatConversation.update({
+      where: { id: conversationId },
+      data: { unreadCount: 0 },
+    });
+
+    // Mark all customer messages as read
+    await prisma.chatMessage.updateMany({
+      where: {
+        conversationId,
+        sender: "CUSTOMER",
+        isRead: false,
+      },
+      data: { isRead: true },
+    });
+
+    return { success: true };
+  }
+
   // Get or create conversation for a user
   static async getOrCreateConversation(userId: number) {
     let conversation = await prisma.chatConversation.findFirst({

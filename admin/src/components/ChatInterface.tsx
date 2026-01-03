@@ -122,6 +122,9 @@ export function ChatInterface() {
   const handleSelectConversation = (conversation: Conversation) => {
     setSelectedConversation(conversation);
     
+    // Mark conversation as read (reset unread count)
+    socketService.markConversationAsRead(conversation.id);
+    
     // Load messages for this conversation
     socketService.getMessages(conversation.id, (data) => {
       console.log('💬 Messages loaded:', data);
@@ -154,21 +157,27 @@ export function ChatInterface() {
     <div className="space-y-6">
       <div>
         <h2 className="text-gray-900 mb-2">Customer Chat</h2>
-        <p className="text-gray-600">
-          Communicate with your customers in real-time
+        <div className="flex items-center gap-4">
           {isConnected && (
-            <span className="ml-2 text-green-600 text-sm">● Connected</span>
+            <span className="text-green-600 text-sm flex items-center">
+              <span className="w-2 h-2 bg-green-600 rounded-full mr-2"></span>
+              Connected
+            </span>
           )}
           {!isConnected && (
-            <span className="ml-2 text-red-600 text-sm">● Disconnected</span>
+            <span className="text-red-600 text-sm flex items-center">
+              <span className="w-2 h-2 bg-red-600 rounded-full mr-2"></span>
+              Disconnected
+            </span>
           )}
           <button 
             onClick={loadConversations}
-            className="ml-4 text-sm bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700"
+            className="text-sm bg-blue-600 text-white px-4 py-1.5 rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-1"
           >
-            🔄 Refresh Conversations
+            <span>🔄</span>
+            Refresh
           </button>
-        </p>
+        </div>
       </div>
 
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden h-[600px] flex flex-col lg:flex-row">

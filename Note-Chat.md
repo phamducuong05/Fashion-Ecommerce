@@ -639,32 +639,68 @@ npm run dev
 
 **As Customer:**
 1. Go to http://localhost:3000
-2. Add user to localStorage: `localStorage.setItem('user', JSON.stringify({id: 22, name: 'Test User', email: 'test@example.com'}))`
-3. Refresh page
-4. Click "Support Messages" → "Chat with Admin"
+2. **Login with a valid user account** (authentication now required)
+3. Click the floating chat icon (bottom right)
+4. Click "Chat with Admin"
 5. Send a message
+6. **Test offline messages:** Logout, have admin send you a message, login again and open chat to see the message
 
 **As Admin:**
 1. Go to http://localhost:5173
-2. Navigate to "Chat" section
+2. Navigate to "Chat" section in sidebar
 3. Admin auto-connects with ID: 1
-4. See customer conversations appear
+4. See customer conversations appear (auto-refreshes)
 5. Click conversation to view messages
-6. Reply to customer
+6. Reply to customer - message saves even if customer is offline
+7. Customer will see your message when they login and open chat
 
 ---
 
 ## 📝 Important Configuration
 
-### Admin Default User ID
-Location: `admin/src/components/ChatInterface.tsx`
+### Customer Authentication
+Location: `client/src/components/SupportWidget.tsx`
 ```typescript
-admin = {
-  id: 1, // ⚠️ Change this to match your admin user ID
-  name: 'Admin User',
-  email: 'admin@store.com',
-  role: 'ADMIN'
+// Now checks if user is logged in before opening admin chat
+const handleAdminChatClick = () => {
+  const userDataString = localStorage.getItem("user");
+  
+  if (!userDataString) {
+    // Redirects to login page
+    alert("⚠️ You need to login to chat with admin");
+    navigate("/signin");
+    return;
+  }
+  
+  setCurrentView("ADMIN");
 };
+```
+
+### Message History Loading
+Location: `server/src/server.ts`
+```typescript
+// Customer loads conversation history on connect
+socket.on("customer:getMyConversation", async () => {
+  const user = onlineUsers.get(socket.id);
+  if (!user) return;
+  
+  const conversation = await ChatService.getOrCreateConversation(user.userId);
+  const messages = await ChatService.getMessages(conversation.id);
+  
+  socket.emit("customer:myConversation", { conversation, messages });
+});
+```
+
+### Admin Message Logic
+Location: `server/src/services/admin/chatService.ts`
+```typescript
+// Admin messages only require conversationId (no user validation)
+// Customer messages validate user and auto-create conversation
+if (data.sender === "CUSTOMER") {
+  // Verify user exists, create conversation if needed
+} else if (data.sender === "ADMIN") {
+  // Only validate conversationId exists
+}
 ```
 
 ### Socket.IO CORS
@@ -684,20 +720,26 @@ cors: {
 
 ## 🔐 Security Considerations
 
-### Current Implementation
-- ⚠️ Basic user validation (checks if user exists)
-- ⚠️ No authentication token verification
+### Current Implementation (v1.2.0)
+- ✅ User authentication required for customer chat
+- ✅ Redirect to login if not authenticated
+- ✅ User validation (checks if user exists in database)
+- ✅ Conversation ownership validation
+- ✅ Sender type validation (CUSTOMER vs ADMIN)
+- ⚠️ No JWT token verification on socket connection (relies on localStorage)
 - ⚠️ Admin uses default ID (for testing)
 - ⚠️ CORS allows localhost only
 
 ### Production Recommendations
 1. **Add JWT Authentication:**
    - Verify JWT token on Socket.IO connection
-   - Include token in socket handshake
-   - Validate user role (CUSTOMER/ADMIN)
+   - Include token in socket handshake auth
+   - Validate user role (CUSTOMER/ADMIN) on server
+   - Refresh token mechanism for long sessions
 
 2. **Rate Limiting:**
    - Limit messages per minute per user
+   - Prevent spam/flooding attacks
    - Prevent spam/abuse
 
 3. **Input Sanitization:**
@@ -762,14 +804,26 @@ GROUP BY sender;
 - [ ] File/image upload in chat
 - [ ] Emoji picker
 - [ ] Message reactions
-- [ ] Sound notifications
+- [ ] Sound notifications for new messages
 - [ ] Desktop notifications
 - [ ] Conversation assignment (multiple admins)
 - [ ] Canned responses / Quick replies
 - [ ] Chat history export
 - [ ] Customer satisfaction rating
-- [ ] Chatbot integration
+- [ ] Chatbot integration (AI responses)
 - [ ] Multi-language support
+
+### Completed Features ✅
+- [x] Real-time bidirectional messaging
+- [x] Database persistence (PostgreSQL)
+- [x] Duplicate message prevention
+- [x] Connection status indicators
+- [x] Message history loading
+- [x] Offline message support
+- [x] Customer authentication check
+- [x] Login redirect for unauthenticated users
+- [x] Admin message sending without user validation
+- [x] Conversation auto-creation for customers
 
 ### Performance Improvements
 - [ ] Message pagination (load older messages)
@@ -777,6 +831,7 @@ GROUP BY sender;
 - [ ] Message caching
 - [ ] Lazy load conversations
 - [ ] Compress message payloads
+- [ ] WebSocket reconnection with exponential backoff
 
 ### UI/UX Improvements
 - [ ] Message search within conversation
@@ -786,6 +841,7 @@ GROUP BY sender;
 - [ ] Conversation tags/categories
 - [ ] Archive conversations
 - [ ] Pin important conversations
+- [ ] Dark mode support
 
 ---
 

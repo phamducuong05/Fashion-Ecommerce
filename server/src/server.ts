@@ -156,6 +156,22 @@ io.on("connection", (socket) => {
     }
   });
 
+  // Mark conversation as read (when admin opens it)
+  socket.on("conversation:markAsRead", async (conversationId: number) => {
+    console.log("✅ Marking conversation as read:", conversationId);
+    try {
+      const { ChatService } = await import("./services/admin/chatService");
+      await ChatService.markConversationAsRead(conversationId);
+      console.log(`✅ Conversation ${conversationId} marked as read`);
+      
+      // Broadcast updated conversations to all admins
+      const conversations = await ChatService.getAllConversations();
+      io.emit("admin:conversationsList", conversations);
+    } catch (error) {
+      console.error("❌ Error marking conversation as read:", error);
+    }
+  });
+
   // Customer requests their own conversation
   socket.on("customer:getMyConversation", async () => {
     const user = onlineUsers.get(socket.id);
