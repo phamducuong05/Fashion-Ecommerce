@@ -34,6 +34,7 @@ const port = process.env.PORT || 4000;
 // Middleware
 app.use(cors());
 app.use(express.json());
+app.use(express.static("public")); // Serve static files for testing
 
 // =============================================
 // ADMIN API ROUTES - /api/admin/*
@@ -82,11 +83,12 @@ io.on("connection", (socket) => {
   // User joins (authenticate)
   socket.on("user:join", (userData: UserSocket) => {
     onlineUsers.set(socket.id, userData);
-    console.log(`👤 User joined: ${userData.userName} (${userData.role})`);
+    console.log(`👤 User joined: ${userData.userName} (${userData.role}) - Socket ID: ${socket.id} - User ID: ${userData.userId}`);
 
     // If admin joins, send them list of active conversations
     if (userData.role === "ADMIN") {
       socket.emit("admin:online");
+      console.log("✅ Admin marked as online");
     }
   });
 
@@ -97,7 +99,13 @@ io.on("connection", (socket) => {
     sender: "CUSTOMER" | "ADMIN";
   }) => {
     const user = onlineUsers.get(socket.id);
-    if (!user) return;
+    if (!user) {
+      console.error("❌ User not found in onlineUsers map for socket:", socket.id);
+      socket.emit("message:error", { error: "User not authenticated. Please reconnect." });
+      return;
+    }
+
+    console.log("📨 Message received from:", user.userName, "Data:", data);
 
     try {
       // Save message to database
@@ -109,33 +117,66 @@ io.on("connection", (socket) => {
         sender: data.sender,
       });
 
+      console.log("✅ Message saved to database:", savedMessage.id);
+
       // Emit to all clients (both user and admin)
       io.emit("message:received", savedMessage);
+      console.log("📤 Message broadcasted to all clients");
     } catch (error) {
-      console.error("Error saving message:", error);
-      socket.emit("message:error", { error: "Failed to send message" });
+      console.error("❌ Error saving message:", error);
+      socket.emit("message:error", { 
+        error: error instanceof Error ? error.message : "Failed to send message" 
+      });
     }
   });
 
   // Admin requests conversation list
   socket.on("admin:getConversations", async () => {
+    console.log("📋 Admin requesting conversations list");
     try {
       const { ChatService } = await import("./services/admin/chatService");
       const conversations = await ChatService.getAllConversations();
+      console.log(`✅ Sending ${conversations.length} conversations to admin`);
       socket.emit("admin:conversationsList", conversations);
     } catch (error) {
-      console.error("Error fetching conversations:", error);
+      console.error("❌ Error fetching conversations:", error);
     }
   });
 
   // Get messages for a conversation
   socket.on("conversation:getMessages", async (conversationId: number) => {
+    console.log("💬 Requesting messages for conversation:", conversationId);
     try {
       const { ChatService } = await import("./services/admin/chatService");
       const messages = await ChatService.getMessages(conversationId);
+      console.log(`✅ Sending ${messages.length} messages for conversation ${conversationId}`);
       socket.emit("conversation:messages", { conversationId, messages });
     } catch (error) {
-      console.error("Error fetching messages:", error);
+      console.error("❌ Error fetching messages:", error);
+    }
+  });
+
+  // Customer requests their own conversation
+  socket.on("customer:getMyConversation", async () => {
+    const user = onlineUsers.get(socket.id);
+    if (!user) {
+      console.error("❌ User not authenticated");
+      return;
+    }
+
+    console.log("🔍 Customer requesting their conversation:", user.userId);
+    try {
+      const { ChatService } = await import("./services/admin/chatService");
+      const conversation = await ChatService.getOrCreateConversation(user.userId);
+      const messages = await ChatService.getMessages(conversation.id);
+      
+      console.log(`✅ Sending conversation ${conversation.id} with ${messages.length} messages to customer`);
+      socket.emit("customer:myConversation", {
+        conversation,
+        messages,
+      });
+    } catch (error) {
+      console.error("❌ Error fetching customer conversation:", error);
     }
   });
 

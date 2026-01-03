@@ -48,6 +48,16 @@ function App() {
           const res = await fetch("/api/cart", {
             headers: { Authorization: `Bearer ${token}` },
           });
+          
+          // If user not found or token invalid, clear localStorage
+          if (res.status === 404 || res.status === 401 || res.status === 403) {
+            console.warn("Token invalid or user not found, clearing cart...");
+            localStorage.removeItem("token");
+            localStorage.removeItem("user");
+            setCartItems([]);
+            return;
+          }
+          
           if (res.ok) {
             const data = await res.json();
             // Ensure data is an array

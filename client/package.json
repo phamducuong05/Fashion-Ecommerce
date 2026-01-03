@@ -21,6 +21,7 @@
     "react-dom": "^19.2.0",
     "react-router": "^7.9.6",
     "react-tabs": "^6.1.0",
+    "socket.io-client": "^4.8.3",
     "tailwind-merge": "^3.4.0"
   },
   "devDependencies": {

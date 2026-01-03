@@ -12,21 +12,62 @@ export class ChatService {
   static async saveMessage(data: SaveMessageData) {
     let conversationId = data.conversationId;
 
-    // If no conversation exists, create one
-    if (!conversationId) {
-      const conversation = await prisma.chatConversation.create({
-        data: {
-          userId: data.userId,
-          status: "OPEN",
-        },
+    // For CUSTOMER messages, verify user exists and get/create conversation
+    if (data.sender === "CUSTOMER") {
+      // Verify user exists
+      const user = await prisma.user.findUnique({
+        where: { id: data.userId },
       });
-      conversationId = conversation.id;
+
+      if (!user) {
+        throw new Error(`User with id ${data.userId} not found. Please use an existing user ID from your database.`);
+      }
+
+      // If no conversation exists, get or create one
+      if (!conversationId) {
+        // Check if user already has an open conversation
+        const existingConversation = await prisma.chatConversation.findFirst({
+          where: {
+            userId: data.userId,
+            status: { in: ["OPEN", "PENDING"] },
+          },
+        });
+
+        if (existingConversation) {
+          conversationId = existingConversation.id;
+        } else {
+          // Create new conversation
+          const conversation = await prisma.chatConversation.create({
+            data: {
+              userId: data.userId,
+              status: "OPEN",
+            },
+          });
+          conversationId = conversation.id;
+        }
+      }
+    }
+
+    // For ADMIN messages, conversationId MUST be provided
+    if (data.sender === "ADMIN" && !conversationId) {
+      throw new Error("Admin messages must include a conversationId");
+    }
+
+    // Verify the conversationId exists
+    if (conversationId) {
+      const conversation = await prisma.chatConversation.findUnique({
+        where: { id: conversationId },
+      });
+      
+      if (!conversation) {
+        throw new Error(`Conversation with id ${conversationId} not found`);
+      }
     }
 
     // Create the message
     const message = await prisma.chatMessage.create({
       data: {
-        conversationId: conversationId,
+        conversationId: conversationId!,
         content: data.message,
         sender: data.sender,
       },
