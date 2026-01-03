@@ -30,6 +30,8 @@ const CartPage = ({ cartItems, setCartItems }: CartProp) => {
   const [freeShipping, setFreeShipping] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
+  const [isCheckingOut, setIsCheckingOut] = useState(false);
+
   const [myVouchers, setMyVouchers] = useState<VoucherType[]>([]);
   const [selectedVoucherCode, setSelectedVoucherCode] = useState<string | null>(
     null
@@ -144,6 +146,135 @@ const CartPage = ({ cartItems, setCartItems }: CartProp) => {
       console.error("Lỗi xóa:", error);
       setCartItems(oldCart);
       alert("Không thể xóa sản phẩm.");
+    }
+  };
+
+  const handleCheckout = async (
+    addressId: number,
+    paymentMethod: string,
+    voucherCode: string | null
+  ) => {
+    const token = getToken();
+
+    // Validate
+    if (cartItems.length === 0) {
+      alert("Your cart is empty!");
+      return;
+    }
+
+    if (!token) {
+      alert("Please sign in to checkout");
+      navigate("/signin");
+      return;
+    }
+
+    // Handle Online Payment - VNPay Integration
+    if (paymentMethod === "ONLINE") {
+      setIsCheckingOut(true);
+
+      try {
+        // Calculate final amount (subtotal + shipping - discount)
+
+        // Call VNPay payment URL creation endpoint
+        const response = await fetch("api/payment/create_payment_url", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            bankCode: "NCB", // Default bank code
+            language: "vn", // Default language
+            shippingAddressId: addressId,
+            voucherCode: voucherCode,
+          }),
+        });
+
+        if (!response.ok) {
+          // Log ra xem lỗi gì để dễ debug
+          const errData = await response.json();
+          throw new Error(errData.message || "Failed to create payment URL");
+        }
+
+        const data = await response.json();
+
+        // Check if payment URL is returned
+        if (data.paymentUrl) {
+          // Save checkout info to localStorage for later (when returning from VNPay)
+          localStorage.setItem(
+            "pendingCheckout",
+            JSON.stringify({
+              addressId: addressId,
+              voucherCode: voucherCode,
+              paymentMethod: "ONLINE",
+              timestamp: Date.now(),
+            })
+          );
+
+          // Open payment URL in new tab
+          window.open(data.paymentUrl, "_blank");
+
+          // Optional: Show message to user
+          alert(
+            "Payment page opened in new tab. Please complete your payment."
+          );
+        } else {
+          throw new Error("No payment URL returned");
+        }
+      } catch (error: any) {
+        console.error("VNPay payment error:", error);
+        alert(`Failed to initiate payment: ${error.message}`);
+      } finally {
+        setIsCheckingOut(false);
+      }
+
+      return;
+    }
+
+    // Handle COD Payment
+    if (paymentMethod === "COD") {
+      setIsCheckingOut(true);
+
+      try {
+        const response = await fetch("api/orders", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            shippingAddressId: addressId,
+            paymentMethod: "COD",
+            voucherCode: voucherCode,
+          }),
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.message || "Checkout failed");
+        }
+
+        const orderData = await response.json();
+        const orderId = orderData.data?.id || orderData.id;
+
+        // Success - Clear cart and redirect
+        setCartItems([]);
+        localStorage.removeItem("cart"); // Clear guest cart if any
+
+        alert("Order placed successfully!");
+
+        // Redirect to order detail page
+        if (orderId) {
+          navigate(`/orders/${orderId}`);
+        } else {
+          navigate("/profile"); // Fallback to profile/order history
+        }
+      } catch (error: any) {
+        console.error("Checkout error:", error);
+        alert(`Failed to place order: ${error.message}`);
+      } finally {
+        setIsCheckingOut(false);
+      }
     }
   };
 
@@ -277,6 +408,10 @@ const CartPage = ({ cartItems, setCartItems }: CartProp) => {
                 shipping={actualShipping}
                 discount={discount}
                 onApplyDiscount={handleApplyDiscount}
+                onCheckout={(addressId, paymentMethod) =>
+                  handleCheckout(addressId, paymentMethod, selectedVoucherCode)
+                }
+                isProcessing={isCheckingOut}
               />
             </div>
 
