@@ -1,19 +1,21 @@
 // src/server.ts - Unified server for Admin and User APIs
-import 'dotenv/config';
-import express from 'express';
-import cors from 'cors';
+import "dotenv/config";
+import express from "express";
+import cors from "cors";
 
 // Admin routes
-import adminRoutes from './routes/admin';
+import adminRoutes from "./routes/admin";
 
 // User routes
-import productRoutes from './routes/user/productRoutes';
-import categoryRoutes from './routes/user/categoryRoutes';
-import authRoutes from './routes/user/authRoutes';
-import cartRoutes from './routes/user/cartRoutes';
-import userRoutes from './routes/user/userRoutes';
-import addressRoutes from './routes/user/addressRoutes';
-import orderRoutes from './routes/user/orderRoutes';
+import productRoutes from "./routes/user/productRoutes";
+import categoryRoutes from "./routes/user/categoryRoutes";
+import authRoutes from "./routes/user/authRoutes";
+import cartRoutes from "./routes/user/cartRoutes";
+import userRoutes from "./routes/user/userRoutes";
+import addressRoutes from "./routes/user/addressRoutes";
+import orderRoutes from "./routes/user/orderRoutes";
+import voucherRoutes from "./routes/user/voucherRoutes";
+import paymentRoutes from "./routes/user/paymentRoutes";
 
 const app = express();
 const port = process.env.PORT || 4000;
@@ -25,27 +27,29 @@ app.use(express.json());
 // =============================================
 // ADMIN API ROUTES - /api/admin/*
 // =============================================
-app.use('/api/admin', adminRoutes);
+app.use("/api/admin", adminRoutes);
 
 // =============================================
 // USER API ROUTES - /api/*
 // =============================================
-app.use('/api/products', productRoutes);
-app.use('/api/categories', categoryRoutes);
-app.use('/api/auth', authRoutes);
-app.use('/api/cart', cartRoutes);
-app.use('/api/users', userRoutes);
-app.use('/api/addresses', addressRoutes);
-app.use('/api/orders', orderRoutes);
+app.use("/api/products", productRoutes);
+app.use("/api/categories", categoryRoutes);
+app.use("/api/auth", authRoutes);
+app.use("/api/cart", cartRoutes);
+app.use("/api/users", userRoutes);
+app.use("/api/addresses", addressRoutes);
+app.use("/api/orders", orderRoutes);
+app.use("/api/vouchers", voucherRoutes);
+app.use("/api/payment", paymentRoutes);
 
 // Root endpoint
-app.get('/', (_req, res) => {
+app.get("/", (_req, res) => {
   res.json({
-    message: 'Fashion Ecommerce API Server',
+    message: "Fashion Ecommerce API Server",
     endpoints: {
-      admin: '/api/admin/*',
-      user: '/api/*'
-    }
+      admin: "/api/admin/*",
+      user: "/api/*",
+    },
   });
 });
 

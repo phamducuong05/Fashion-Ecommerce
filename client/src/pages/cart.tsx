@@ -7,6 +7,15 @@ import { CartItem } from "../components/CartItem"; // Import component mới c�
 import { Link, useNavigate } from "react-router";
 import { Button } from "../components/variants/button";
 
+interface VoucherType {
+  id: number;
+  userVoucherId: number;
+  code: string;
+  description: string | null;
+  value: string;
+  type: string;
+}
+
 interface CartProp {
   cartItems: CartItemType[];
   setCartItems: React.Dispatch<React.SetStateAction<CartItemType[]>>;
@@ -20,6 +29,13 @@ const CartPage = ({ cartItems, setCartItems }: CartProp) => {
   const [discount, setDiscount] = useState(0);
   const [freeShipping, setFreeShipping] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+
+  const [isCheckingOut, setIsCheckingOut] = useState(false);
+
+  const [myVouchers, setMyVouchers] = useState<VoucherType[]>([]);
+  const [selectedVoucherCode, setSelectedVoucherCode] = useState<string | null>(
+    null
+  );
 
   // Helper lấy token
   const getToken = () => localStorage.getItem("token");
@@ -38,28 +54,28 @@ const CartPage = ({ cartItems, setCartItems }: CartProp) => {
 
       try {
         // Lưu ý: Port 5000 (Backend)
-        const response = await fetch("/api/cart", {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`, // --- QUAN TRỌNG: Gửi Token ---
-          },
-        });
+        const [cartRes, voucherRes] = await Promise.all([
+          fetch("/api/cart", {
+            headers: { Authorization: `Bearer ${token}` },
+          }),
+          fetch("/api/vouchers/my-vouchers", {
+            headers: { Authorization: `Bearer ${token}` },
+          }),
+        ]);
 
-        if (response.status === 401 || response.status === 403) {
-          // Token hết hạn -> Logout
+        if (cartRes.status === 401 || voucherRes.status === 401) {
           localStorage.removeItem("token");
-          alert("Phiên đăng nhập hết hạn, vui lòng đăng nhập lại.");
           navigate("/signin");
           return;
         }
 
-        const data = await response.json();
+        const cartData = await cartRes.json();
+        if (Array.isArray(cartData)) setCartItems(cartData);
 
         // Backend trả về mảng khớp với CartItemProps, set thẳng vào state
-        if (Array.isArray(data)) {
-          setCartItems(data);
-        } else {
-          setCartItems([]);
+        if (voucherRes.ok) {
+          const voucherData = await voucherRes.json();
+          setMyVouchers(voucherData);
         }
       } catch (error) {
         console.error("Lỗi tải giỏ hàng:", error);
@@ -133,6 +149,135 @@ const CartPage = ({ cartItems, setCartItems }: CartProp) => {
     }
   };
 
+  const handleCheckout = async (
+    addressId: number,
+    paymentMethod: string,
+    voucherCode: string | null
+  ) => {
+    const token = getToken();
+
+    // Validate
+    if (cartItems.length === 0) {
+      alert("Your cart is empty!");
+      return;
+    }
+
+    if (!token) {
+      alert("Please sign in to checkout");
+      navigate("/signin");
+      return;
+    }
+
+    // Handle Online Payment - VNPay Integration
+    if (paymentMethod === "ONLINE") {
+      setIsCheckingOut(true);
+
+      try {
+        // Calculate final amount (subtotal + shipping - discount)
+
+        // Call VNPay payment URL creation endpoint
+        const response = await fetch("api/payment/create_payment_url", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            bankCode: "NCB", // Default bank code
+            language: "vn", // Default language
+            shippingAddressId: addressId,
+            voucherCode: voucherCode,
+          }),
+        });
+
+        if (!response.ok) {
+          // Log ra xem lỗi gì để dễ debug
+          const errData = await response.json();
+          throw new Error(errData.message || "Failed to create payment URL");
+        }
+
+        const data = await response.json();
+
+        // Check if payment URL is returned
+        if (data.paymentUrl) {
+          // Save checkout info to localStorage for later (when returning from VNPay)
+          localStorage.setItem(
+            "pendingCheckout",
+            JSON.stringify({
+              addressId: addressId,
+              voucherCode: voucherCode,
+              paymentMethod: "ONLINE",
+              timestamp: Date.now(),
+            })
+          );
+
+          // Open payment URL in new tab
+          window.open(data.paymentUrl, "_blank");
+
+          // Optional: Show message to user
+          alert(
+            "Payment page opened in new tab. Please complete your payment."
+          );
+        } else {
+          throw new Error("No payment URL returned");
+        }
+      } catch (error: any) {
+        console.error("VNPay payment error:", error);
+        alert(`Failed to initiate payment: ${error.message}`);
+      } finally {
+        setIsCheckingOut(false);
+      }
+
+      return;
+    }
+
+    // Handle COD Payment
+    if (paymentMethod === "COD") {
+      setIsCheckingOut(true);
+
+      try {
+        const response = await fetch("api/orders", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            shippingAddressId: addressId,
+            paymentMethod: "COD",
+            voucherCode: voucherCode,
+          }),
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.message || "Checkout failed");
+        }
+
+        const orderData = await response.json();
+        const orderId = orderData.data?.id || orderData.id;
+
+        // Success - Clear cart and redirect
+        setCartItems([]);
+        localStorage.removeItem("cart"); // Clear guest cart if any
+
+        alert("Order placed successfully!");
+
+        // Redirect to order detail page
+        if (orderId) {
+          navigate(`/orders/${orderId}`);
+        } else {
+          navigate("/profile"); // Fallback to profile/order history
+        }
+      } catch (error: any) {
+        console.error("Checkout error:", error);
+        alert(`Failed to place order: ${error.message}`);
+      } finally {
+        setIsCheckingOut(false);
+      }
+    }
+  };
+
   // --- Logic hiển thị (Giữ nguyên code cũ của bạn) ---
   if (isLoading) {
     return (
@@ -153,34 +298,31 @@ const CartPage = ({ cartItems, setCartItems }: CartProp) => {
   const actualShipping = freeShipping ? 0 : shipping;
 
   // Coupon Logic (Tạm thời giữ ở Frontend)
-  const possessedCodes = [
-    { code: "SAVE10", description: "$10 off your order" },
-    { code: "FASHION15", description: "$15 off your order" },
-    { code: "FREESHIP", description: "Free shipping" },
-  ];
-
   const handleApplyDiscount = (code: string) => {
-    const discountCodes: {
-      [key: string]: { type: "amount" | "freeship"; value: number };
-    } = {
-      SAVE10: { type: "amount", value: 10 },
-      SAVE20: { type: "amount", value: 20 },
-      FASHION15: { type: "amount", value: 15 },
-      FREESHIP: { type: "freeship", value: 0 },
-    };
+    // Tìm voucher trong danh sách đã fetch từ API
+    const voucher = myVouchers.find((v) => v.code === code);
 
-    const discountData = discountCodes[code.toUpperCase()];
-    if (discountData) {
-      if (discountData.type === "freeship") {
+    if (voucher) {
+      const val = Number(voucher.value); // Chuyển string sang number
+
+      if (voucher.type === "FREESHIP") {
         setFreeShipping(true);
         setDiscount(0);
+      } else if (voucher.type === "PERCENT") {
+        // Ví dụ: Giảm 10%
+        const percentDiscount = (subtotal * val) / 100;
+        setDiscount(percentDiscount);
+        setFreeShipping(false);
       } else {
-        setDiscount(discountData.value);
+        // FIXED Amount
+        setDiscount(val);
         setFreeShipping(false);
       }
-      alert(`Applied code: ${code}`);
+
+      setSelectedVoucherCode(code); // Lưu lại code đang chọn để UI highlight
+      alert(`Applied voucher: ${code}`);
     } else {
-      alert("Invalid code");
+      alert("Invalid or expired voucher");
     }
   };
 
@@ -266,42 +408,65 @@ const CartPage = ({ cartItems, setCartItems }: CartProp) => {
                 shipping={actualShipping}
                 discount={discount}
                 onApplyDiscount={handleApplyDiscount}
+                onCheckout={(addressId, paymentMethod) =>
+                  handleCheckout(addressId, paymentMethod, selectedVoucherCode)
+                }
+                isProcessing={isCheckingOut}
               />
             </div>
 
-            {cartItems.length > 0 && (
-              <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-                <div className="flex items-center gap-2 mb-4">
-                  <Ticket className="w-5 h-5 text-indigo-600" />
-                  <h3 className="font-bold text-gray-900">Available Coupons</h3>
-                </div>
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+              <div className="flex items-center gap-2 mb-4">
+                <Ticket className="w-5 h-5 text-indigo-600" />
+                <h3 className="font-bold text-gray-900">Your Vouchers</h3>
+              </div>
 
-                <div className="space-y-3">
-                  {possessedCodes.map((code) => (
+              {myVouchers.length > 0 ? (
+                <div className="space-y-3 max-h-80 overflow-y-auto pr-1 custom-scrollbar">
+                  {myVouchers.map((voucher) => (
                     <div
-                      key={code.code}
-                      className="group relative flex flex-col sm:flex-row sm:items-center justify-between bg-indigo-50/50 border border-dashed border-indigo-200 p-3 rounded-lg hover:border-indigo-400 transition-colors cursor-pointer"
-                      onClick={() => handleApplyDiscount(code.code)}
+                      key={voucher.id}
+                      onClick={() => handleApplyDiscount(voucher.code)}
+                      className={`group relative flex flex-col sm:flex-row sm:items-center justify-between border border-dashed p-3 rounded-lg transition-all cursor-pointer ${
+                        selectedVoucherCode === voucher.code
+                          ? "bg-indigo-50 border-indigo-500 ring-1 ring-indigo-500"
+                          : "bg-gray-50/50 border-gray-300 hover:border-indigo-400 hover:bg-indigo-50/30"
+                      }`}
                     >
                       <div className="flex flex-col">
                         <span className="font-bold text-indigo-700 font-mono tracking-wide">
-                          {code.code}
+                          {voucher.code}
                         </span>
-                        <span className="text-xs text-indigo-600/80">
-                          {code.description}
+                        <span className="text-xs text-gray-600">
+                          {voucher.description ||
+                            (voucher.type === "FREESHIP"
+                              ? "Free Shipping"
+                              : `Discount $${Number(voucher.value).toFixed(
+                                  2
+                                )}`)}
                         </span>
                       </div>
 
                       <div className="mt-2 sm:mt-0">
-                        <button className="text-xs font-bold bg-white text-indigo-600 px-3 py-1 rounded-full border border-indigo-100 shadow-sm group-hover:bg-indigo-600 group-hover:text-white transition-all">
-                          Apply
-                        </button>
+                        {selectedVoucherCode === voucher.code ? (
+                          <span className="text-xs font-bold text-indigo-600 flex items-center gap-1">
+                            Applied ✓
+                          </span>
+                        ) : (
+                          <button className="text-xs font-bold bg-white text-indigo-600 px-3 py-1 rounded-full border border-indigo-100 shadow-sm group-hover:bg-indigo-600 group-hover:text-white transition-all">
+                            Apply
+                          </button>
+                        )}
                       </div>
                     </div>
                   ))}
                 </div>
-              </div>
-            )}
+              ) : (
+                <div className="text-center py-6 text-gray-400 text-sm">
+                  <p>No vouchers available.</p>
+                </div>
+              )}
+            </div>
 
             <div className="flex justify-center gap-4 text-gray-400 grayscale opacity-70">
               <p className="text-xs text-center">
