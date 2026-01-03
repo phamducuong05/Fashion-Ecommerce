@@ -1,148 +1,250 @@
-import { Package, ChevronRight } from "lucide-react";
+import { useEffect, useState } from "react";
+import {
+  Package,
+  ChevronRight,
+  Calendar,
+  Clock,
+  CheckCircle2,
+  Truck,
+  Loader2,
+  XCircle,
+} from "lucide-react";
 import { ImageWithFallback } from "./imagefallback";
+import { Link } from "react-router";
+
+interface OrderItem {
+  id: number;
+  quantity: number;
+  price: string;
+  variant: {
+    size: string;
+    color: string;
+    image: string | null;
+    product: {
+      name: string;
+      thumbnail: string | null;
+    };
+  };
+}
+
+interface Order {
+  id: number;
+  status: string;
+  totalAmount: string;
+  createdAt: string;
+  orderItems: OrderItem[];
+}
 
 export function OrderHistory() {
-  const orders = [
-    {
-      id: "ORD-2024-1234",
-      date: "November 15, 2024",
-      status: "Delivered",
-      total: 189.99,
-      items: [
-        {
-          name: "Casual Summer Dress",
-          image:
-            "https://images.unsplash.com/photo-1595777457583-95e059d581b8?w=200&h=200&fit=crop",
-          size: "M",
-          quantity: 1,
-          price: 89.99,
-        },
-        {
-          name: "Leather Crossbody Bag",
-          image:
-            "https://images.unsplash.com/photo-1548036328-c9fa89d128fa?w=200&h=200&fit=crop",
-          size: "One Size",
-          quantity: 1,
-          price: 100.0,
-        },
-      ],
-    },
-    {
-      id: "ORD-2024-1198",
-      date: "October 28, 2024",
-      status: "Delivered",
-      total: 129.99,
-      items: [
-        {
-          name: "Denim Jacket",
-          image:
-            "https://images.unsplash.com/photo-1551028719-00167b16eac5?w=200&h=200&fit=crop",
-          size: "S",
-          quantity: 1,
-          price: 129.99,
-        },
-      ],
-    },
-    {
-      id: "ORD-2024-1156",
-      date: "October 12, 2024",
-      status: "Delivered",
-      total: 249.97,
-      items: [
-        {
-          name: "Wool Blend Coat",
-          image:
-            "https://images.unsplash.com/photo-1539533018447-63fcce2678e3?w=200&h=200&fit=crop",
-          size: "M",
-          quantity: 1,
-          price: 199.99,
-        },
-        {
-          name: "Silk Scarf",
-          image:
-            "https://images.unsplash.com/photo-1601924994987-69e26d50dc26?w=200&h=200&fit=crop",
-          size: "One Size",
-          quantity: 1,
-          price: 49.98,
-        },
-      ],
-    },
-  ];
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const getStatusColor = (status: string) => {
-    switch (status.toLowerCase()) {
-      case "delivered":
-        return "bg-green-100 text-green-800";
-      case "shipped":
-        return "bg-blue-100 text-blue-800";
-      case "processing":
-        return "bg-yellow-100 text-yellow-800";
+  useEffect(() => {
+    const fetchOrders = async () => {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        setLoading(false);
+        return;
+      }
+      try {
+        const res = await fetch("/api/orders/my-orders", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (res.ok) {
+          const data = await res.json();
+          setOrders(data);
+        }
+      } catch (error) {
+        console.error("Error fetching orders:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchOrders();
+  }, []);
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+  };
+
+  const getStatusConfig = (status: string) => {
+    switch (status.toUpperCase()) {
+      case "DELIVERED":
+      case "COMPLETED":
+        return {
+          style: "bg-emerald-50 text-emerald-700 border-emerald-200",
+          icon: CheckCircle2,
+          dot: "bg-emerald-500",
+        };
+      case "SHIPPING":
+      case "SHIPPED":
+        return {
+          style: "bg-blue-50 text-blue-700 border-blue-200",
+          icon: Truck,
+          dot: "bg-blue-500",
+        };
+      case "PENDING":
+      case "PROCESSING":
+        return {
+          style: "bg-amber-50 text-amber-700 border-amber-200",
+          icon: Clock,
+          dot: "bg-amber-500",
+        };
+      case "CANCELLED":
+        return {
+          style: "bg-red-50 text-red-700 border-red-200",
+          icon: XCircle,
+          dot: "bg-red-500",
+        };
       default:
-        return "bg-gray-100 text-gray-800";
+        return {
+          style: "bg-gray-50 text-gray-700 border-gray-200",
+          icon: Package,
+          dot: "bg-gray-500",
+        };
     }
   };
 
+  if (loading)
+    return (
+      <div className="p-8 text-center flex justify-center">
+        <Loader2 className="animate-spin" />
+      </div>
+    );
+
+  if (orders.length === 0) {
+    return (
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-12 text-center">
+        <Package className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+        <h3 className="text-lg font-medium text-gray-900">No orders yet</h3>
+        <p className="text-gray-500 mt-1">
+          Start shopping to create your first order!
+        </p>
+      </div>
+    );
+  }
+
   return (
-    <div className="bg-white rounded-lg shadow p-6">
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-gray-900">Order History</h2>
-        <span className="text-gray-500 text-sm">{orders.length} orders</span>
+    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+        <div>
+          <h2 className="text-2xl font-bold text-gray-900 tracking-tight">
+            Order History
+          </h2>
+          <p className="text-sm text-gray-500 mt-1">
+            Check the status of recent orders.
+          </p>
+        </div>
+        <div className="px-4 py-2 bg-gray-50 rounded-lg border border-gray-200 text-sm font-medium text-gray-600">
+          Total Orders: {orders.length}
+        </div>
       </div>
 
-      <div className="space-y-4">
-        {orders.map((order) => (
-          <div
-            key={order.id}
-            className="border border-gray-200 rounded-lg p-4 hover:border-gray-300 transition-colors"
-          >
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-4">
-              <div className="flex items-center gap-3">
-                <Package className="w-5 h-5 text-gray-400" />
-                <div>
-                  <p className="text-gray-900">{order.id}</p>
-                  <p className="text-gray-500 text-sm">{order.date}</p>
-                </div>
-              </div>
+      <div className="space-y-6">
+        {orders.map((order) => {
+          const statusConfig = getStatusConfig(order.status);
 
-              <div className="flex items-center gap-3">
-                <span
-                  className={`px-3 py-1 text-sm rounded-full ${getStatusColor(
-                    order.status
-                  )}`}
-                >
-                  {order.status}
-                </span>
-                <button className="p-2 text-gray-400 hover:text-gray-600 transition-colors">
-                  <ChevronRight className="w-5 h-5" />
-                </button>
-              </div>
-            </div>
-
-            <div className="space-y-3 mb-4">
-              {order.items.map((item, index) => (
-                <div key={index} className="flex items-center gap-3">
-                  <ImageWithFallback
-                    src={item.image}
-                    alt={item.name}
-                    className="w-16 h-16 rounded-lg object-cover"
-                  />
-                  <div className="flex-1">
-                    <p className="text-gray-900">{item.name}</p>
-                    <p className="text-gray-500 text-sm">
-                      Size: {item.size} • Qty: {item.quantity}
-                    </p>
+          return (
+            <div
+              key={order.id}
+              className="group border border-gray-200 rounded-xl overflow-hidden hover:border-indigo-200 hover:shadow-md transition-all duration-300"
+            >
+              {/* HEADER ĐƠN HÀNG */}
+              <div className="bg-gray-50/50 p-6 border-b border-gray-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div className="flex items-start gap-4">
+                  <div className="p-3 bg-white rounded-xl border border-gray-200 shadow-sm">
+                    <Package className="w-6 h-6 text-indigo-600" />
                   </div>
-                  <p className="text-gray-900">${item.price.toFixed(2)}</p>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <h3 className="font-bold text-gray-900">
+                        Order #{order.id}
+                      </h3>
+                      <span
+                        className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium border ${statusConfig.style}`}
+                      >
+                        <span
+                          className={`w-1.5 h-1.5 rounded-full ${statusConfig.dot}`}
+                        />
+                        {order.status}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2 mt-1 text-sm text-gray-500">
+                      <Calendar className="w-3.5 h-3.5" />
+                      {formatDate(order.createdAt)}
+                    </div>
+                  </div>
                 </div>
-              ))}
-            </div>
 
-            <div className="flex items-center justify-between pt-4 border-t border-gray-200">
-              <span className="text-gray-600">Total</span>
-              <span className="text-gray-900">${order.total.toFixed(2)}</span>
+                {/* NÚT VIEW DETAILS -> Chuyển hướng sang trang chi tiết */}
+                <Link
+                  to={`/orders/${order.id}`}
+                  className="flex items-center gap-1 text-sm font-semibold text-indigo-600 hover:text-indigo-800 transition-colors group-hover:translate-x-1 duration-300"
+                >
+                  View Details <ChevronRight className="w-4 h-4" />
+                </Link>
+              </div>
+
+              {/* LIST SẢN PHẨM TRONG ĐƠN (Hiển thị tóm tắt) */}
+              <div className="p-6">
+                <div className="space-y-6">
+                  {order.orderItems.map((item) => (
+                    <div
+                      key={item.id}
+                      className="flex items-start sm:items-center gap-4"
+                    >
+                      <div className="relative group/image">
+                        <ImageWithFallback
+                          // Ưu tiên ảnh variant, nếu không có lấy ảnh sản phẩm gốc
+                          src={
+                            item.variant.image ||
+                            item.variant.product.thumbnail ||
+                            ""
+                          }
+                          alt={item.variant.product.name}
+                          className="w-20 h-20 rounded-lg object-cover border border-gray-100"
+                        />
+                      </div>
+
+                      <div className="flex-1 min-w-0">
+                        <h4 className="font-medium text-gray-900 truncate">
+                          {item.variant.product.name}
+                        </h4>
+                        <div className="flex items-center gap-3 mt-1 text-sm text-gray-500">
+                          <span className="bg-gray-100 px-2 py-0.5 rounded text-xs">
+                            Size: {item.variant.size} | Color:{" "}
+                            {item.variant.color}
+                          </span>
+                          <span>Qty: {item.quantity}</span>
+                        </div>
+                      </div>
+
+                      <div className="text-right">
+                        <p className="font-semibold text-gray-900">
+                          ${Number(item.price).toFixed(2)}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="mt-6 pt-6 border-t border-gray-100 flex justify-between items-center">
+                  <span className="text-sm font-medium text-gray-500">
+                    Total Amount
+                  </span>
+                  <span className="text-xl font-bold text-gray-900">
+                    ${Number(order.totalAmount).toFixed(2)}
+                  </span>
+                </div>
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );
