@@ -10,9 +10,6 @@ class Settings(BaseSettings):
     LANGCACHE_SERVER_URL: str
     LANGCACHE_CACHE_ID: str
     LANGCACHE_API_KEY: str
-    
-    # REDIS CHATBOT MEMORY
-    REDIS_SERVER_URL: str
 
     # QDRANT
     QDRANT_URL: str

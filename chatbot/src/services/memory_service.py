@@ -1,51 +1,90 @@
-import json
 import logging
-import redis.asyncio as redis
-
-from typing import Literal
+from typing import List, Dict
+from sqlalchemy import text
+from src.core.database import PSQLService
 
 logger = logging.getLogger(__name__)
 
 class MemoryService:
-    def __init__(self, server_url: str):
-        self.memory = redis.from_url(
-            url=server_url,
-            decode_responses=True
-        )
-        self.ttl = 86400 # 24h
-        logger.info(f"Redis memory service initialized. URL: {server_url}.")
+    """
+    Handles retrieval of chat history from PostgreSQL to provide context for the RAG pipeline.
     
-    async def add_message(self, session_id: str, role: Literal["user", "chatbot"], content: str):
-        key = f"chat:{session_id}"
-        content = json.dumps({"role": role, "content": content})
+    Note: This service is READ-ONLY. The Node.js Backend handles saving messages 
+    and managing session states.
+    """
+
+    def __init__(self, db_service: PSQLService):
+        """
+        Initializes the MemoryService with a database service instance.
+
+        Args:
+            db_service (PSQLService): The service handling async database connections.
+        """
+        self.db_service = db_service
+        logger.info("MemoryService initialized with PostgreSQL connection.")
+
+    async def get_history(self, session_id: int, limit: int = 20) -> List[Dict[str, str]]:
+        """
+        Fetches the latest `limit` messages for a specific session from the database.
         
-        preview_content = (content[:50] + "...") if len(content) > 50 else content
-        logger.info(f"Adding content {preview_content} from {role} to {key}...")
-        
+        It retrieves messages in descending order (newest first) and then reverses them
+        to chronological order (oldest -> newest) for the LLM context.
+        Also maps the database role 'bot' to the LLM standard 'assistant'.
+
+        Args:
+            session_id (int): The ID of the chat session.
+            limit (int): The maximum number of messages to retrieve (default: 20).
+
+        Returns:
+            List[Dict[str, str]]: A list of message objects, e.g., 
+            [{'role': 'user', 'content': '...'}, {'role': 'assistant', 'content': '...'}]
+        """
+        logger.info(f"Retrieving last {limit} messages for session {session_id}...")
+
         try:
-            await self.memory.rpush(key, content)
+            async with self.db_service.engine.connect() as conn:
+                # Query the latest messages
+                query = text("""
+                    SELECT role, content
+                    FROM chat_messages
+                    WHERE session_id = :session_id
+                    ORDER BY created_at DESC
+                    LIMIT :limit
+                """)
+                
+                result = await conn.execute(query, {"session_id": session_id, "limit": limit})
+                rows = result.mappings().all()
+
+                formatted_messages = []
+                for row in rows:
+                    role = row["role"]
+                    content = row["content"]
+
+                    # Map DB role to LLM role
+                    if role == "bot" or role == "ADMIN":
+                        role = "assistant"
+                    
+                    formatted_messages.append({"role": role, "content": content})
+
+                # Reverse to get chronological order (Past -> Present)
+                return formatted_messages[::-1]
+
         except Exception as e:
-            logger.error(f"Failed to add message {preview_content} from {role} to {key}: {e}")
+            logger.error(f"Failed to retrieve history for session {session_id}: {e}")
+            # Return empty list to prevent pipeline crash, treating it as a new conversation
+            return []
+    
+    #! FOR TESTING ONLY, NOT EXISTS IN PRODUCTION
+    async def add_message_temp(self, session_id: int, role: str, content: str):
+        try:
+            # Map role lại cho đúng chuẩn DB (assistant -> bot)
+            db_role = 'bot' if role == 'assistant' else role
             
-        await self.memory.expire(key, time=self.ttl)
-        
-    async def get_history(self, session_id: str, limit: int=6):
-        # Limit = 6 => Get the 3 latest pairs of (final_query, response)
-        key = f"chat:{session_id}"
-        logger.info(f"Retrieving {int(limit / 2)} latest chat history from {key}...")
-        
-        try:
-            raw_messages = await self.memory.lrange(key, -limit, -1)
-            return [json.loads(msg) for msg in raw_messages]
+            async with self.db_service.engine.begin() as conn:
+                await conn.execute(
+                    text("INSERT INTO chat_messages (session_id, role, content) VALUES (:s, :r, :c)"),
+                    {"s": session_id, "r": db_role, "c": content}
+                )
+                logger.warning(f"⚠️ [TEST MODE] Inserted message to DB: {content[:20]}...")
         except Exception as e:
-            logger.error(f"Failed to retrive {limit / 2} latest chat history from {key}: {e}")
-    
-    async def delete_history(self, session_id: str):
-        key = f"chat:{session_id}"
-        logger.info(f"Deleting {key} history...")
-        try: 
-            await self.memory.delete(key)
-        except Exception as e:
-            logger.error(f"Failed to delete {key} history: {e}")
-        
-        
+            logger.error(f"Error inserting temp message: {e}")

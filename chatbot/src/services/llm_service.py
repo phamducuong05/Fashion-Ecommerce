@@ -96,7 +96,7 @@ class LLMService:
                 return streamer()
             else:
                 logger.debug("Received full response from LLM.")
-                return completion.choices[0].message["content"]
+                return completion.choices[0].message.content
         except Exception as e:
             logger.error(f"Error calling LLM API: {str(e)}", exc_info=True)
         

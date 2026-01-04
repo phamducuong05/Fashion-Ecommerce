@@ -9,6 +9,11 @@ logger = logging.getLogger(__name__)
 
 
 class SyncService:
+    """
+    Service responsible for synchronizing product data from PostgreSQL
+    to Qdrant vector database.
+    """
+
     def __init__(
         self,
         psql_service: PSQLService,
@@ -16,13 +21,12 @@ class SyncService:
         qdrant_service: QdrantService,
     ) -> None:
         """
-        Service responsible for synchronizing product data from PostgreSQL
-        to Qdrant vector database.
+        Initialize the synchronization service.
 
         Parameters:
-            psql_service: PostgreSQL data access layer.
-            embedding_service: Embedding model service for generating vectors.
-            qdrant_service: Qdrant storage and search service.
+            psql_service (PSQLService): Async PostgreSQL data access layer.
+            embedding_service (EmbeddingService): Service for generating vectors.
+            qdrant_service (QdrantService): Service for Qdrant operations.
         """
         self.psql_service = psql_service
         self.embedding_service = embedding_service
@@ -34,20 +38,15 @@ class SyncService:
         self, batch_rows: List[Dict[str, Any]]
     ) -> Tuple[List[int], List[List[float]], List[Any], List[Dict[str, Any]]]:
         """
-        Convert raw DB rows into vectors + payloads suitable for Qdrant.
+        Converts raw DB rows into vectors and payloads for Qdrant.
 
-        Parameters:
-            batch_rows: List of raw DB rows.
+        Maps new DB schema fields (price, image, slug) to the payload.
+
+        Args:
+            batch_rows (List[Dict]): List of raw rows from PostgreSQL.
 
         Returns:
-            Tuple containing:
-                ids: List of product IDs
-                dense_vectors: Dense embedding vectors
-                sparse_vectors: Sparse embedding vectors
-                payloads: Metadata payloads for Qdrant
-
-        Raises:
-            Exception: Any unexpected processing errors.
+            Tuple: (ids, dense_vectors, sparse_vectors, payloads)
         """
         count = len(batch_rows)
         logger.debug(f"Processing batch of {count} records...")
@@ -58,38 +57,60 @@ class SyncService:
             payloads: List[Dict[str, Any]] = []
 
             for row in batch_rows:
+                # 1. Extract Data from new SQL Schema
                 product_id = row["product_id"]
                 ids.append(product_id)
 
-                product_name = row["product_name"]
-                brand = row["brand_name"] or "Unknown"
-                category = row["category"] or "Unknown"
+                product_name = row["product_name"] or "Unknown Product"
+                slug = row["slug"] or ""
+                # "categories" is now a comma-separated string from SQL
+                categories = row["categories"] or "General"
                 desc = row["product_description"] or ""
+                
+                # Pricing & Metadata
+                price = row["price"]
+                original_price = row["original_price"]
+                image_url = row["image_url"] or ""
+                rating = row["rating"] or 0.0
+                review_count = row["review_count"] or 0
+
                 sizes_str = row["available_sizes"] or ""
                 colors_str = row["available_colors"] or ""
 
+                # 2. Build Semantic Text for Embedding
+                # We include price and categories to help the model understand context
                 semantic_text = f"""
-                    Product name: {product_name}
-                    Brand: {brand}
-                    Category: {category}
+                    Product: {product_name}
+                    Category: {categories}
+                    Price: {price}
                     Description: {desc}
                     Colors: {colors_str}
+                    Sizes: {sizes_str}
                 """.strip()
 
                 texts.append(semantic_text)
 
+                # 3. Build Payload for Retrieval
+                # Keys here must match what Pipeline.__extract_product_metadata expects
                 payloads.append(
                     {
                         "product_id": product_id,
-                        "name": product_name,
-                        "brand": brand,
-                        "category": category,
-                        "sizes": sizes_str.split(", ") if sizes_str else [],
-                        "colors": colors_str.split(", ") if colors_str else [],
+                        "product_name": product_name,
+                        "slug": slug,
+                        "categories": categories,
+                        "price": float(price) if price else 0.0,
+                        "original_price": float(original_price) if original_price else 0.0,
+                        "image_url": image_url,
+                        "rating": float(rating),
+                        "review_count": int(review_count),
+                        "product_description": desc,
+                        "available_sizes": sizes_str, # Keep as string for display or split if needed
+                        "available_colors": colors_str,
                         "text_content": semantic_text,
                     }
                 )
 
+            # 4. Generate Embeddings
             dense_vecs, sparse_vecs = self.embedding_service.get_embeddings(texts)
 
             return ids, dense_vecs, sparse_vecs, payloads
@@ -98,21 +119,17 @@ class SyncService:
             logger.error(f"Error processing batch: {e}", exc_info=True)
             raise
 
-    def sync_all(self, batch: int = 128) -> None:
+    async def sync_all(self, batch: int = 128) -> None:
         """
-        Synchronize all products from PostgreSQL to Qdrant in batches.
+        Asynchronously synchronizes all active products from PostgreSQL to Qdrant.
 
-        Parameters:
-            batch: Number of products to process per batch.
-
-        Raises:
-            Exception: If sync fails at any stage.
+        Args:
+            batch (int): Batch size for processing.
         """
         logger.info("Starting full sync (PostgreSQL -> Qdrant).")
 
         try:
-            self.psql_service.connect()
-            rows = self.psql_service.fetch_all()
+            rows = await self.psql_service.fetch_all()
 
             total_rows = len(rows)
             logger.info(f"Fetched {total_rows} rows from database.")
@@ -121,12 +138,12 @@ class SyncService:
                 logger.warning("No products found. Full sync aborted.")
                 return
 
+            # Process in batches
             for i in range(0, total_rows, batch):
                 batch_rows = rows[i : i + batch]
                 ids, dense_vecs, sparse_vecs, payloads = self.__process_batch(
                     batch_rows
                 )
-
                 self.qdrant_service.upsert_products(
                     ids, dense_vecs, sparse_vecs, payloads
                 )
@@ -137,32 +154,22 @@ class SyncService:
             logger.error(f"Full sync failed: {e}", exc_info=True)
             raise
 
-        finally:
-            self.psql_service.disconnect()
-            logger.debug("Database disconnected after full sync.")
-
-    def sync_specifics(self, product_ids: List[int], batch: int = 50) -> None:
+    async def sync_specifics(self, product_ids: List[int], batch: int = 50) -> None:
         """
-        Synchronize specific products by their IDs.
+        Asynchronously synchronizes specific products based on IDs.
 
-        Parameters:
-            product_ids: List of product IDs to sync.
-            batch: Number of items to process per batch.
-
-        Raises:
-            Exception: If the sync process fails.
+        Args:
+            product_ids (List[int]): List of product IDs to sync.
+            batch (int): Batch size.
         """
         if not product_ids:
-            logger.warning(
-                "sync_specifics called with an empty list. Operation skipped."
-            )
+            logger.warning("sync_specifics called with an empty list. Skipped.")
             return
 
         logger.info(f"Starting partial sync for {len(product_ids)} products...")
 
         try:
-            self.psql_service.connect()
-            rows = self.psql_service.fetch_specifics(product_ids=product_ids)
+            rows = await self.psql_service.fetch_specifics(product_ids=product_ids)
 
             total_rows = len(rows)
             logger.info(f"Fetched {total_rows} rows for requested IDs.")
@@ -186,7 +193,3 @@ class SyncService:
         except Exception as e:
             logger.error(f"Partial sync failed: {e}", exc_info=True)
             raise
-
-        finally:
-            self.psql_service.disconnect()
-            logger.debug("Database disconnected after partial sync.")
