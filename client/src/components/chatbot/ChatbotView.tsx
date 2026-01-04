@@ -15,10 +15,19 @@ import {
 import { ProductCard, type Product } from "./ProductCard";
 
 // --- CONFIG ---
-const API_BASE_URL = "http://localhost:5000/api";
+const API_BASE_URL = "http://localhost:4000/api";
 const api = axios.create({
   baseURL: API_BASE_URL,
   headers: { "Content-Type": "application/json" },
+});
+
+// Add JWT token to all requests
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem("token");
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
 });
 
 // --- TYPES ---
@@ -199,10 +208,14 @@ export function ChatbotView({ onBack }: ChatbotViewProps) {
       {/* HEADER */}
       <div className="p-4 bg-indigo-600 text-white flex items-center justify-between shadow-md relative z-20 shrink-0">
         <div className="flex items-center gap-3">
-          <button onClick={onBack} className="hover:bg-indigo-500 p-1.5 rounded-full">
+          <button onClick={onBack} className="hover:bg-indigo-500 p-1.5 rounded-full transition-colors">
             <ChevronLeft className="w-5 h-5" />
           </button>
-          <button onClick={() => setShowSidebar(!showSidebar)} className="md:hidden hover:bg-indigo-500 p-1.5 rounded">
+          <button 
+            onClick={() => setShowSidebar(!showSidebar)} 
+            className="hover:bg-indigo-500 p-1.5 rounded transition-colors"
+            title={showSidebar ? "Hide history" : "Show history"}
+          >
             <Menu className="w-5 h-5" />
           </button>
           
@@ -225,10 +238,10 @@ export function ChatbotView({ onBack }: ChatbotViewProps) {
 
       <div className="flex flex-1 overflow-hidden relative">
         
-        {/* SIDEBAR LIST (Đã bỏ chức năng Edit) */}
+        {/* SIDEBAR LIST */}
         <div className={`
-            absolute inset-y-0 left-0 z-30 w-72 bg-white border-r border-gray-200 transform transition-transform duration-300 flex flex-col shadow-xl md:shadow-none md:relative md:transform-none
-            ${showSidebar ? "translate-x-0" : "-translate-x-full md:translate-x-0"}
+            absolute inset-y-0 left-0 z-30 w-72 bg-white border-r border-gray-200 transform transition-transform duration-300 flex flex-col shadow-xl
+            ${showSidebar ? "translate-x-0" : "-translate-x-full"}
           `}>
           
           {isLoadingSessions ? (
@@ -268,8 +281,8 @@ export function ChatbotView({ onBack }: ChatbotViewProps) {
           )}
         </div>
 
-        {/* OVERLAY MOBILE */}
-        {showSidebar && <div className="absolute inset-0 bg-black/30 z-20 md:hidden" onClick={() => setShowSidebar(false)} />}
+        {/* OVERLAY */}
+        {showSidebar && <div className="absolute inset-0 bg-black/30 z-20" onClick={() => setShowSidebar(false)} />}
 
         {/* MAIN CHAT AREA (Giữ nguyên) */}
         <div className="flex-1 flex flex-col bg-white min-w-0">
@@ -294,9 +307,9 @@ export function ChatbotView({ onBack }: ChatbotViewProps) {
                                     {message.content}
                                 </div>
                                 {message.products && message.products.length > 0 && (
-                                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                                    <div className="grid grid-cols-2 gap-3">
                                         {message.products.map((p) => (
-                                            <div key={p.id} onClick={() => handleProductClick(p.id)} className="cursor-pointer hover:scale-[1.02] transition-transform">
+                                            <div key={p.id} onClick={() => handleProductClick(p.id)} className="cursor-pointer hover:scale-[1.03] transition-transform duration-200">
                                                 <ProductCard product={p} />
                                             </div>
                                         ))}

@@ -14,6 +14,7 @@ import cartRoutes from './routes/user/cartRoutes';
 import userRoutes from './routes/user/userRoutes';
 import addressRoutes from './routes/user/addressRoutes';
 import orderRoutes from './routes/user/orderRoutes';
+import chatbotRoutes from './routes/user/chatbotRoutes';
 
 const app = express();
 const port = process.env.PORT || 4000;
@@ -37,6 +38,7 @@ app.use('/api/cart', cartRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/addresses', addressRoutes);
 app.use('/api/orders', orderRoutes);
+app.use('/api/chat', chatbotRoutes);
 
 // Root endpoint
 app.get('/', (_req, res) => {

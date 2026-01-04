@@ -282,3 +282,78 @@ User (optional)
 cd server
 npx prisma migrate dev --name add_chatbot_sessions
 ```
+
+---
+
+## Chatbot Backend API Implementation
+
+### Date: January 4, 2026
+
+Created complete backend API for chatbot functionality with the following structure:
+
+#### Files Created
+1. **Service Layer**: `server/src/services/user/chatbotService.ts`
+   - Business logic for chatbot operations
+   - Integration with Python AI service
+   - Product data formatting and enrichment
+
+2. **Controller Layer**: `server/src/controllers/user/chatbotController.ts`
+   - Request/response handling
+   - Input validation
+   - Error handling
+
+3. **Routes**: `server/src/routes/user/chatbotRoutes.ts`
+   - RESTful API endpoint definitions
+   - Authentication middleware integration
+
+4. **Documentation**: `server/CHATBOT_API.md`
+   - Complete API documentation
+   - Request/response examples
+   - Testing commands
+
+#### API Endpoints
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/chat/sessions` | Get all chat sessions |
+| POST | `/api/chat/sessions` | Create new chat session |
+| GET | `/api/chat/sessions/:id` | Get session detail with messages |
+| POST | `/api/chat/sessions/:id/messages` | Send message & get AI response |
+| DELETE | `/api/chat/sessions/:id` | Delete chat session |
+
+#### Key Features
+- ✅ JWT Authentication on all endpoints
+- ✅ User authorization (users can only access their own sessions)
+- ✅ Auto-update session title from first message
+- ✅ Integration with Python AI service via HTTP
+- ✅ Product enrichment (includes colors, sizes, ratings)
+- ✅ Cascade delete for sessions and messages
+- ✅ Error handling with fallback messages
+- ✅ 30-second timeout for AI service calls
+
+#### Configuration
+Added to `server/.env`:
+```env
+PYTHON_AI_SERVICE_URL="http://localhost:8000"
+```
+
+#### Dependencies Added
+- `axios`: For HTTP requests to Python AI service
+
+#### Python AI Service Contract
+
+**Request Format:**
+```json
+{
+  "session_id": 123,
+  "query": "User's message"
+}
+```
+
+**Expected Response:**
+```json
+{
+  "content": "Bot's response text",
+  "products": [55, 42, 38]
+}
+```

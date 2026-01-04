@@ -85,7 +85,7 @@ You must strictly follow all rules below to produce a consistent, structured, an
         • Available Sizes:
         • Available Colors:
     - After listing ALL matched products:
-        - Recommend 2-3 similar or related products.
+        - Recommend 2 similar or related products.
         - Do NOT repeat items from the matched list.
         - Use the exact same bullet-point structure.
     - Introduce recommendations with a polite friendly line, for example:
@@ -93,7 +93,7 @@ You must strictly follow all rules below to produce a consistent, structured, an
 
 4. If NO matched products exist:
     - Start by politely stating no exact match was found.
-    - Provide 2-3 suggested alternatives using the exact bullet-point structure above.
+    - Provide 2 suggested alternatives using the exact bullet-point structure above.
 
 5. Formatting Requirements:
     - Never use tables.
@@ -153,22 +153,22 @@ PSQL_FETCH_ALL_QUERIES = """
         p.slug,
         
         p.price,
-        p.original_price,
+        p."originalPrice" AS original_price,
         p.thumbnail AS image_url,
         p.rating,
-        p.review_count,
+        p."reviewCount" AS review_count,
 
         STRING_AGG(DISTINCT c.name, ', ') AS categories,
 
         STRING_AGG(DISTINCT pv.size, ', ') AS available_sizes,
         STRING_AGG(DISTINCT pv.color, ', ') AS available_colors
 
-    FROM products p
-    LEFT JOIN product_categories pc ON pc.product_id = p.id
-    LEFT JOIN categories c ON c.id = pc.category_id
-    LEFT JOIN product_variants pv ON pv.product_id = p.id
+    FROM "Product" p
+    LEFT JOIN "_CategoryToProduct" cp ON cp."B" = p.id
+    LEFT JOIN "Category" c ON c.id = cp."A"
+    LEFT JOIN "ProductVariant" pv ON pv."productId" = p.id
     
-    WHERE p.is_active = TRUE
+    WHERE p."isActive" = TRUE
     GROUP BY p.id
 """
 
@@ -180,20 +180,20 @@ PSQL_FETCH_SPECIFICS_QUERIES = """
         p.slug,
         
         p.price,
-        p.original_price,
+        p."originalPrice" AS original_price,
         p.thumbnail AS image_url,
         p.rating,
-        p.review_count,
+        p."reviewCount" AS review_count,
 
         STRING_AGG(DISTINCT c.name, ', ') AS categories,
 
         STRING_AGG(DISTINCT pv.size, ', ') AS available_sizes,
         STRING_AGG(DISTINCT pv.color, ', ') AS available_colors
 
-    FROM products p
-    LEFT JOIN product_categories pc ON pc.product_id = p.id
-    LEFT JOIN categories c ON c.id = pc.category_id
-    LEFT JOIN product_variants pv ON pv.product_id = p.id
+    FROM "Product" p
+    LEFT JOIN "_CategoryToProduct" cp ON cp."B" = p.id
+    LEFT JOIN "Category" c ON c.id = cp."A"
+    LEFT JOIN "ProductVariant" pv ON pv."productId" = p.id
     
     WHERE p.id IN ({placeholder})
     GROUP BY p.id
