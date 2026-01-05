@@ -1,0 +1,92 @@
+{
+  "stats": [
+    {
+      "title": "Total Revenue",
+      "value": 94200,
+      "change": 12.5,
+      "trend": "up"
+    },
+    {
+      "title": "Total Orders",
+      "value": 1842,
+      "change": 8.2,
+      "trend": "up"
+    },
+    {
+      "title": "Total Customers",
+      "value": 3254,
+      "change": 15.3,
+      "trend": "up"
+    },
+    {
+      "title": "Conversion Rate",
+      "value": 3.8,
+      "unit": "%",
+      "change": -2.1,
+      "trend": "down"
+    }
+  ],
+  "revenueData": [
+    { "name": "Jan", "revenue": 4200 },
+    { "name": "Feb", "revenue": 5100 },
+    { "name": "Mar", "revenue": 4800 },
+    { "name": "Apr", "revenue": 6200 },
+    { "name": "May", "revenue": 7100 },
+    { "name": "Jun", "revenue": 8400 },
+    { "name": "Jul", "revenue": 7800 },
+    { "name": "Aug", "revenue": 9200 },
+    { "name": "Sep", "revenue": 8900 },
+    { "name": "Oct", "revenue": 10100 },
+    { "name": "Nov", "revenue": 11200 },
+    { "name": "Dec", "revenue": 12400 }
+  ],
+  "categoryData": [
+    { "name": "Men Fashion", "value": 4200 },
+    { "name": "Women Fashion", "value": 5800 },
+    { "name": "Kids", "value": 2100 },
+    { "name": "Accessories", "value": 1800 },
+    { "name": "Bags & Wallets", "value": 2900 }
+  ],
+  "bestSellingProducts": [
+    {
+      "id": 1,
+      "name": "Floral Summer Dress",
+      "sales": 342,
+      "revenue": 30780,
+      "trend": "up",
+      "change": 12
+    },
+    {
+      "id": 2,
+      "name": "Classic Cotton T-Shirt",
+      "sales": 298,
+      "revenue": 8942,
+      "trend": "up",
+      "change": 8
+    },
+    {
+      "id": 3,
+      "name": "Leather Crossbody Bag",
+      "sales": 276,
+      "revenue": 35880,
+      "trend": "down",
+      "change": -3
+    },
+    {
+      "id": 4,
+      "name": "Slim Fit Jeans",
+      "sales": 245,
+      "revenue": 19600,
+      "trend": "up",
+      "change": 15
+    },
+    {
+      "id": 5,
+      "name": "Kids Running Shoes",
+      "sales": 198,
+      "revenue": 9900,
+      "trend": "up",
+      "change": 5
+    }
+  ]
+}

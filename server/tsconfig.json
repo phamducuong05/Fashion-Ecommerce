@@ -1,28 +1,14 @@
 {
   "compilerOptions": {
-    // --- 1. Cấu trúc thư mục ---
-    "rootDir": ".",
-    "outDir": "./dist",
-
-    // --- 2. Cấu hình Module  ---
-    "target": "es2020",
-    "module": "commonjs",
-    "moduleResolution": "node",
+    "target": "ES2019",
+    "module": "CommonJS",
+    "rootDir": "src",
+    "outDir": "dist",
     "esModuleInterop": true,
-
-    // --- 3. Thư viện hỗ trợ ---
-    "lib": ["es2020", "esnext.asynciterable"],
-
-    // --- 4. Kiểm tra code ---
-    "strict": true,
-    "noImplicitAny": true,
-    "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
-
-    // --- 5. Prisma ---
-    "emitDecoratorMetadata": true,
-    "experimentalDecorators": true
+    "strict": true,
+    "skipLibCheck": true,
+    "resolveJsonModule": true
   },
-  "include": ["src/**/*", "prisma/**/*"],
-  "exclude": ["node_modules"]
+  "include": ["src/**/*"]
 }
