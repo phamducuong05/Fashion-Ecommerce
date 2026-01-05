@@ -10,6 +10,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import { socketService } from "../services/socket";
+import { ChatbotView } from "./chatbot/ChatbotView";
 
 type ViewState = "MENU" | "CHATBOT" | "ADMIN";
 
@@ -196,53 +197,9 @@ export function SupportWidget() {
             </div>
           )}
 
-          {/* 2. VIEW: CHATBOT AI (Giao diện Placeholder) */}
+          {/* 2. VIEW: CHATBOT AI */}
           {currentView === "CHATBOT" && (
-            <div className="flex flex-col h-full">
-              {/* Header Chatbot */}
-              <div className="p-4 bg-indigo-600 text-white flex items-center justify-between shadow-md">
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={() => setCurrentView("MENU")}
-                    className="hover:bg-indigo-500 p-1 rounded"
-                  >
-                    <ChevronLeft className="w-5 h-5" />
-                  </button>
-                  <div className="flex items-center gap-2">
-                    <Bot className="w-5 h-5" />
-                    <span className="font-bold">AI Stylist</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Body Chat - Nơi bạn tích hợp logic Chatbot của bạn vào đây */}
-              <div className="flex-1 p-4 bg-indigo-50/30 overflow-y-auto">
-                <div className="flex gap-2 mb-4">
-                  <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center flex-shrink-0">
-                    <Sparkles className="w-4 h-4 text-indigo-600" />
-                  </div>
-                  <div className="bg-white p-3 rounded-2xl rounded-tl-none shadow-sm border border-gray-100 text-sm">
-                    Hello! I'm your AI Stylist. Looking for something specific
-                    like a "Summer Dress" or "Office Wear"?
-                  </div>
-                </div>
-                {/* --- INSERT YOUR CHATBOT COMPONENTS HERE --- */}
-              </div>
-
-              {/* Input Placeholder */}
-              <div className="p-3 border-t border-gray-100 bg-white">
-                <div className="relative">
-                  <input
-                    type="text"
-                    placeholder="Ask for suggestions..."
-                    className="w-full pl-4 pr-10 py-2 bg-gray-100 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                  />
-                  <button className="absolute right-2 top-1.5 p-1 text-indigo-600 hover:bg-indigo-50 rounded-full">
-                    <Send className="w-4 h-4" />
-                  </button>
-                </div>
-              </div>
-            </div>
+            <ChatbotView onBack={() => setCurrentView("MENU")} />
           )}
 
           {/* 3. VIEW: ADMIN CHAT (Real-time with Socket.IO) */}

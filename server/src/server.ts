@@ -18,6 +18,7 @@ import addressRoutes from "./routes/user/addressRoutes";
 import orderRoutes from "./routes/user/orderRoutes";
 import voucherRoutes from "./routes/user/voucherRoutes";
 import paymentRoutes from "./routes/user/paymentRoutes";
+import chatbotRoutes from "./routes/user/chatbotRoutes";
 
 const app = express();
 const httpServer = createServer(app);
@@ -53,6 +54,7 @@ app.use("/api/addresses", addressRoutes);
 app.use("/api/orders", orderRoutes);
 app.use("/api/vouchers", voucherRoutes);
 app.use("/api/payment", paymentRoutes);
+app.use("/api/chat", chatbotRoutes);
 
 // Root endpoint
 app.get("/", (_req, res) => {
