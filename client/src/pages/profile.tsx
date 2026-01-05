@@ -31,8 +31,10 @@ const ProfilePage = () => {
           },
         });
 
-        if (res.status === 401 || res.status === 403) {
+        if (res.status === 401 || res.status === 403 || res.status === 404) {
+          // Token invalid, expired, or user not found - clear and redirect to login
           localStorage.removeItem("token");
+          localStorage.removeItem("user");
           navigate("/signin");
           return;
         }

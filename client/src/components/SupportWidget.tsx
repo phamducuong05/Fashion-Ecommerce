@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
+import { useNavigate } from "react-router";
 import {
   MessageCircle,
   Bot,
@@ -8,12 +9,134 @@ import {
   Send,
   Sparkles,
 } from "lucide-react";
+import { socketService } from "../services/socket";
+import { ChatbotView } from "./chatbot/ChatbotView";
 
 type ViewState = "MENU" | "CHATBOT" | "ADMIN";
+
+interface Message {
+  id: number;
+  conversationId: number;
+  sender: "CUSTOMER" | "ADMIN";
+  content: string;
+  createdAt: string;
+  isRead: boolean;
+}
 
 export function SupportWidget() {
   const [isOpen, setIsOpen] = useState(false);
   const [currentView, setCurrentView] = useState<ViewState>("MENU");
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [messageText, setMessageText] = useState("");
+  const [conversationId, setConversationId] = useState<number | undefined>();
+  const [isConnected, setIsConnected] = useState(false);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const navigate = useNavigate();
+
+  // Handler to check if user is logged in before opening admin chat
+  const handleAdminChatClick = () => {
+    const userDataString = localStorage.getItem("user");
+    
+    if (!userDataString) {
+      // User not logged in - close widget and redirect to login
+      setIsOpen(false);
+      alert("⚠️ You need to login to chat with admin");
+      navigate("/signin");
+      return;
+    }
+
+    // User is logged in - proceed to admin chat
+    setCurrentView("ADMIN");
+  };
+
+  // Auto-scroll to bottom when new messages arrive
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
+
+  // Connect to Socket.IO when user opens admin chat
+  useEffect(() => {
+    if (currentView === "ADMIN" && !isConnected) {
+      // Get user info from localStorage (set during login)
+      const userDataString = localStorage.getItem("user");
+      let userData;
+      
+      if (userDataString) {
+        userData = JSON.parse(userDataString);
+      } else {
+        // If no user in localStorage, silently go back to menu
+        console.error("❌ No user data found in localStorage. User must be logged in to use chat.");
+        setCurrentView("MENU");
+        return;
+      }
+      
+      console.log("👤 Connecting with user:", userData);
+      
+      // Connect to socket
+      socketService.connect(userData.id, userData.name || userData.email);
+      setIsConnected(true);
+
+      // Load existing conversation and message history
+      setTimeout(() => {
+        console.log("� Loading conversation history...");
+        socketService.getMyConversation((data) => {
+          console.log("✅ Loaded conversation:", data.conversation.id, "with", data.messages.length, "messages");
+          setConversationId(data.conversation.id);
+          setMessages(data.messages);
+        });
+      }, 1000);
+
+      // Listen for incoming messages
+      const handleNewMessage = (message: Message) => {
+        console.log("📨 New message received:", message);
+        
+        // Set conversationId if not already set
+        if (message.conversationId && !conversationId) {
+          console.log("✅ Setting conversationId from new message:", message.conversationId);
+          setConversationId(message.conversationId);
+        }
+        
+        // Add new message to the list (avoid duplicates)
+        setMessages((prev) => {
+          const exists = prev.some(m => m.id === message.id);
+          if (exists) {
+            console.log("⚠️ Message already exists, skipping:", message.id);
+            return prev;
+          }
+          console.log("✅ Adding message to list:", message.id);
+          return [...prev, message];
+        });
+      };
+
+      socketService.onMessageReceived(handleNewMessage);
+
+      return () => {
+        socketService.offMessageReceived(handleNewMessage);
+      };
+    }
+  }, [currentView]); // Only re-run when view changes
+
+  const handleSendMessage = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!messageText.trim()) return;
+
+    const messageData = {
+      conversationId,
+      message: messageText,
+      sender: "CUSTOMER" as const,
+    };
+
+    console.log("📤 Sending message:", messageData);
+
+    setMessageText("");
+
+    // Send to server - message will be added via message:received event
+    socketService.sendMessage(messageData);
+  };
 
   // Reset về menu khi đóng
   const toggleOpen = () => {
@@ -57,7 +180,7 @@ export function SupportWidget() {
                 </button>
 
                 <button
-                  onClick={() => setCurrentView("ADMIN")}
+                  onClick={handleAdminChatClick}
                   className="group flex items-center gap-4 p-4 bg-white rounded-xl shadow-sm border border-gray-200 hover:border-black hover:shadow-md transition-all text-left"
                 >
                   <div className="p-3 bg-gray-100 text-gray-900 rounded-full group-hover:scale-110 transition-transform">
@@ -74,56 +197,12 @@ export function SupportWidget() {
             </div>
           )}
 
-          {/* 2. VIEW: CHATBOT AI (Giao diện Placeholder) */}
+          {/* 2. VIEW: CHATBOT AI */}
           {currentView === "CHATBOT" && (
-            <div className="flex flex-col h-full">
-              {/* Header Chatbot */}
-              <div className="p-4 bg-indigo-600 text-white flex items-center justify-between shadow-md">
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={() => setCurrentView("MENU")}
-                    className="hover:bg-indigo-500 p-1 rounded"
-                  >
-                    <ChevronLeft className="w-5 h-5" />
-                  </button>
-                  <div className="flex items-center gap-2">
-                    <Bot className="w-5 h-5" />
-                    <span className="font-bold">AI Stylist</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Body Chat - Nơi bạn tích hợp logic Chatbot của bạn vào đây */}
-              <div className="flex-1 p-4 bg-indigo-50/30 overflow-y-auto">
-                <div className="flex gap-2 mb-4">
-                  <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center flex-shrink-0">
-                    <Sparkles className="w-4 h-4 text-indigo-600" />
-                  </div>
-                  <div className="bg-white p-3 rounded-2xl rounded-tl-none shadow-sm border border-gray-100 text-sm">
-                    Hello! I'm your AI Stylist. Looking for something specific
-                    like a "Summer Dress" or "Office Wear"?
-                  </div>
-                </div>
-                {/* --- INSERT YOUR CHATBOT COMPONENTS HERE --- */}
-              </div>
-
-              {/* Input Placeholder */}
-              <div className="p-3 border-t border-gray-100 bg-white">
-                <div className="relative">
-                  <input
-                    type="text"
-                    placeholder="Ask for suggestions..."
-                    className="w-full pl-4 pr-10 py-2 bg-gray-100 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                  />
-                  <button className="absolute right-2 top-1.5 p-1 text-indigo-600 hover:bg-indigo-50 rounded-full">
-                    <Send className="w-4 h-4" />
-                  </button>
-                </div>
-              </div>
-            </div>
+            <ChatbotView onBack={() => setCurrentView("MENU")} />
           )}
 
-          {/* 3. VIEW: ADMIN CHAT (Giao diện Placeholder) */}
+          {/* 3. VIEW: ADMIN CHAT (Real-time with Socket.IO) */}
           {currentView === "ADMIN" && (
             <div className="flex flex-col h-full">
               {/* Header Admin */}
@@ -138,41 +217,90 @@ export function SupportWidget() {
                   <div className="flex items-center gap-2">
                     <div className="relative">
                       <User className="w-5 h-5" />
-                      <span className="absolute bottom-0 right-0 w-2 h-2 bg-green-500 rounded-full border border-black"></span>
+                      {isConnected && (
+                        <span className="absolute bottom-0 right-0 w-2 h-2 bg-green-500 rounded-full border border-black"></span>
+                      )}
                     </div>
                     <div>
                       <span className="font-bold block text-sm">
                         Customer Support
                       </span>
                       <span className="text-[10px] text-gray-300 block leading-none">
-                        Typically replies in 5m
+                        {isConnected ? "Connected" : "Connecting..."}
                       </span>
                     </div>
                   </div>
                 </div>
               </div>
 
-              {/* Body Chat - Nơi bạn tích hợp logic Chat với Admin của bạn vào đây */}
+              {/* Body Chat - Real-time messages */}
               <div className="flex-1 p-4 bg-gray-50 overflow-y-auto">
-                <div className="flex justify-center my-4">
-                  <span className="text-xs text-gray-400">Today, 10:23 AM</span>
-                </div>
-                {/* --- INSERT YOUR ADMIN CHAT COMPONENTS HERE --- */}
+                {messages.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center h-full text-center">
+                    <User className="w-12 h-12 text-gray-300 mb-2" />
+                    <p className="text-sm text-gray-500">
+                      Start a conversation with our support team
+                    </p>
+                  </div>
+                ) : (
+                  <>
+                    {messages.map((message, index) => (
+                      <div key={message.id || index} className="mb-4">
+                        <div
+                          className={`flex ${
+                            message.sender === "CUSTOMER"
+                              ? "justify-end"
+                              : "justify-start"
+                          }`}
+                        >
+                          <div
+                            className={`max-w-[80%] px-4 py-2 rounded-2xl ${
+                              message.sender === "CUSTOMER"
+                                ? "bg-black text-white rounded-br-none"
+                                : "bg-white text-gray-800 border border-gray-200 rounded-bl-none"
+                            }`}
+                          >
+                            <p className="text-sm">{message.content}</p>
+                            <p
+                              className={`text-xs mt-1 ${
+                                message.sender === "CUSTOMER"
+                                  ? "text-gray-300"
+                                  : "text-gray-500"
+                              }`}
+                            >
+                              {new Date(message.createdAt).toLocaleTimeString([], {
+                                hour: "2-digit",
+                                minute: "2-digit",
+                              })}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                    <div ref={messagesEndRef} />
+                  </>
+                )}
               </div>
 
-              {/* Input Placeholder */}
-              <div className="p-3 border-t border-gray-100 bg-white">
+              {/* Input with real-time send */}
+              <form onSubmit={handleSendMessage} className="p-3 border-t border-gray-100 bg-white">
                 <div className="relative">
                   <input
                     type="text"
+                    value={messageText}
+                    onChange={(e) => setMessageText(e.target.value)}
                     placeholder="Type a message..."
                     className="w-full pl-4 pr-10 py-2 bg-gray-100 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-black"
                   />
-                  <button className="absolute right-2 top-1.5 p-1 text-black hover:bg-gray-200 rounded-full">
+                  <button
+                    type="submit"
+                    disabled={!messageText.trim()}
+                    className="absolute right-2 top-1.5 p-1 text-black hover:bg-gray-200 rounded-full disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
                     <Send className="w-4 h-4" />
                   </button>
                 </div>
-              </div>
+              </form>
             </div>
           )}
         </div>

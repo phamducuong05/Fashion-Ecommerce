@@ -13,6 +13,10 @@ const getProfile = async (req: AuthRequest, res: Response) => {
     res.json(user);
   } catch (error: any) {
     console.error(error);
+    // If user not found, return 404 so frontend can handle logout
+    if (error.message === "User not found") {
+      return res.status(404).json({ message: "User not found" });
+    }
     res.status(500).json({ message: "Error fetching profile" });
   }
 };

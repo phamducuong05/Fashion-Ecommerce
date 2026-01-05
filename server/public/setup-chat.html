@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat Setup Helper</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+        }
+        .section {
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #f9f9f9;
+            border-radius: 5px;
+        }
+        .section h2 {
+            color: #444;
+            margin-top: 0;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #555;
+        }
+        input, select {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+        button {
+            background: #000;
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+        }
+        button:hover {
+            background: #333;
+        }
+        .success {
+            background: #4CAF50;
+            color: white;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 20px;
+            display: none;
+        }
+        .info {
+            background: #2196F3;
+            color: white;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        .warning {
+            background: #ff9800;
+            color: white;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        code {
+            background: #333;
+            color: #0f0;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 Chat Setup Helper</h1>
+        <p class="subtitle">Configure localStorage for testing the chat feature</p>
+
+        <div class="warning">
+            ⚠️ <strong>Important:</strong> The user ID must exist in your database!<br>
+            Open Prisma Studio at <code>http://localhost:5555</code> to see valid user IDs.
+        </div>
+
+        <div class="section">
+            <h2>📝 User Information</h2>
+            
+            <label>User ID (must exist in database):</label>
+            <input type="number" id="userId" value="1" placeholder="Enter user ID">
+            
+            <label>Name:</label>
+            <input type="text" id="userName" value="Test User" placeholder="Enter name">
+            
+            <label>Email:</label>
+            <input type="email" id="userEmail" value="test@example.com" placeholder="Enter email">
+            
+            <label>Role:</label>
+            <select id="userRole">
+                <option value="CUSTOMER">Customer</option>
+                <option value="ADMIN">Admin</option>
+            </select>
+            
+            <button onclick="saveUserData()">💾 Save to localStorage</button>
+            
+            <div id="success" class="success"></div>
+        </div>
+
+        <div class="section">
+            <h2>📋 Current localStorage Data</h2>
+            <div id="currentData" style="background: #f0f0f0; padding: 15px; border-radius: 5px; font-family: monospace; white-space: pre-wrap;"></div>
+            <button onclick="clearUserData()" style="background: #f44336; margin-top: 10px;">🗑️ Clear localStorage</button>
+        </div>
+
+        <div class="info">
+            <strong>💡 Quick Setup Steps:</strong><br>
+            1. Open Prisma Studio: <code>npx prisma studio</code><br>
+            2. Check the User table for valid IDs<br>
+            3. Enter a valid user ID above<br>
+            4. Click "Save to localStorage"<br>
+            5. Refresh your frontend app<br>
+            6. Try the chat feature!
+        </div>
+    </div>
+
+    <script>
+        function saveUserData() {
+            const userData = {
+                id: parseInt(document.getElementById('userId').value),
+                name: document.getElementById('userName').value,
+                email: document.getElementById('userEmail').value,
+                role: document.getElementById('userRole').value
+            };
+
+            if (!userData.id || isNaN(userData.id)) {
+                alert('❌ Please enter a valid User ID!');
+                return;
+            }
+
+            localStorage.setItem('user', JSON.stringify(userData));
+            
+            const successDiv = document.getElementById('success');
+            successDiv.style.display = 'block';
+            successDiv.textContent = `✅ User data saved! User ID: ${userData.id}, Role: ${userData.role}`;
+            
+            updateCurrentData();
+            
+            setTimeout(() => {
+                successDiv.style.display = 'none';
+            }, 3000);
+        }
+
+        function clearUserData() {
+            localStorage.removeItem('user');
+            alert('🗑️ User data cleared from localStorage');
+            updateCurrentData();
+        }
+
+        function updateCurrentData() {
+            const userData = localStorage.getItem('user');
+            const currentDataDiv = document.getElementById('currentData');
+            
+            if (userData) {
+                currentDataDiv.textContent = JSON.stringify(JSON.parse(userData), null, 2);
+            } else {
+                currentDataDiv.textContent = 'No user data in localStorage';
+            }
+        }
+
+        // Update on page load
+        updateCurrentData();
+
+        // Update every 2 seconds
+        setInterval(updateCurrentData, 2000);
+    </script>
+</body>
+</html>
