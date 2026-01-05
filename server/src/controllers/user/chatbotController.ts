@@ -76,10 +76,21 @@ const deleteChatSession = async (req: AuthRequest, res: Response) => {
   }
 };
 
+// 6. Sync products to AI service (Admin only)
+const syncProductsToAI = async (req: AuthRequest, res: Response) => {
+  try {
+    const result = await chatbotService.syncProductsToAI();
+    res.status(200).json(result);
+  } catch (error: any) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 export default {
   getChatSessions,
   getChatSessionById,
   createChatSession,
   sendMessage,
   deleteChatSession,
+  syncProductsToAI,
 };

@@ -19,6 +19,32 @@ class ProductSyncRequest(BaseModel):
     action: str = Field(..., pattern="^(update|delete|update_all)$", description="Action to perform")
 
 
+class ProductData(BaseModel):
+    """
+    Individual product data from Node.js backend.
+    """
+    id: str
+    name: str
+    description: Optional[str] = ""
+    price: float
+    originalPrice: float
+    image: Optional[str] = ""
+    rating: float = 0
+    reviewCount: int = 0
+    colors: List[str] = []
+    sizes: List[str] = []
+    categories: List[str] = []
+    slug: str
+
+
+class BulkProductSyncRequest(BaseModel):
+    """
+    Payload for bulk product synchronization from Node.js backend.
+    Sent automatically when admin adds/updates/deletes products.
+    """
+    products: List[ProductData] = Field(..., description="List of products to sync")
+
+
 # --- Response Schemas ---
 
 class ProductColor(BaseModel):

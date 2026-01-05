@@ -287,10 +287,73 @@ const deleteChatSession = async (sessionId: number, userId: number) => {
   return { success: true };
 };
 
+// 6. Sync products to AI service
+const syncProductsToAI = async () => {
+  try {
+    // Get all active products with their variants
+    const products = await prisma.product.findMany({
+      where: { isActive: true },
+      include: {
+        variants: true,
+        categories: true,
+      },
+    });
+
+    // Transform products to AI service format
+    const productsForAI = products.map((product: any) => {
+      const uniqueColors = [...new Set(product.variants.map((v: any) => v.color))];
+      const uniqueSizes = [...new Set(product.variants.map((v: any) => v.size))];
+      
+      return {
+        id: product.id.toString(),
+        name: product.name,
+        description: product.description || "",
+        price: parseFloat(product.price.toString()),
+        originalPrice: parseFloat(product.originalPrice.toString()),
+        image: product.thumbnail || "",
+        rating: product.rating,
+        reviewCount: product.reviewCount,
+        colors: uniqueColors,
+        sizes: uniqueSizes,
+        categories: product.categories.map((c: any) => c.name),
+        slug: product.slug,
+      };
+    });
+
+    // Send to Python AI service
+    const response = await axios.post(
+      `${PYTHON_AI_SERVICE_URL}/api/v1/sync-products`,
+      { products: productsForAI },
+      {
+        headers: { "Content-Type": "application/json" },
+        timeout: 30000,
+      }
+    );
+
+    console.log("✅ Products synced to AI service:", response.data);
+    
+    return {
+      success: true,
+      syncedCount: productsForAI.length,
+      message: response.data.message || "Products synced successfully",
+    };
+  } catch (error: any) {
+    console.error("❌ Error syncing products to AI:", error.message);
+    
+    // Don't throw error - just log it
+    return {
+      success: false,
+      syncedCount: 0,
+      message: `Failed to sync: ${error.message}`,
+    };
+  }
+};
+
 export default {
   getChatSessions,
   getChatSessionById,
   createChatSession,
   sendMessage,
   deleteChatSession,
+  syncProductsToAI,
 };

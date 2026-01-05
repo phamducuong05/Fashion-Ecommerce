@@ -6,6 +6,7 @@ import { PromotionController } from '../../controllers/admin/promotionController
 import { DashboardController } from '../../controllers/admin/dashboardController';
 import { ChatController } from '../../controllers/admin/chatController';
 import { ProfileController } from '../../controllers/admin/profileController';
+import chatbotController from '../../controllers/user/chatbotController';
 
 const router = express.Router();
 
@@ -56,5 +57,8 @@ router.get('/profile', ProfileController.getProfile);
 router.put('/profile', ProfileController.updateProfile);
 router.post('/change-password', ProfileController.changePassword);
 router.delete('/account', ProfileController.deleteAccount);
+
+// AI Chatbot - Sync products to AI service
+router.post('/chatbot/sync', chatbotController.syncProductsToAI);
 
 export default router;

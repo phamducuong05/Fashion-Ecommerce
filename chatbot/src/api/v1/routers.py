@@ -1,15 +1,18 @@
+import logging
 from fastapi import APIRouter, Depends, BackgroundTasks, HTTPException
 from src.api.v1.schemas import (
     ChatRequest,
     ChatResponse,
     ProductSyncRequest,
-    SyncResponse
+    SyncResponse,
+    BulkProductSyncRequest
 )
 from src.api.dependencies import get_rag_pipeline, get_sync_service, get_qdrant_service
 from src.rag.pipeline import Pipeline
 from src.services.sync_service import SyncService
 from src.services.qdrant_service import QdrantService
 
+logger = logging.getLogger(__name__)
 router = APIRouter()
 
 
@@ -91,3 +94,35 @@ async def sync_product_endpoint(
         
     else:
         raise HTTPException(status_code=400, detail="Invalid action provided")
+
+
+@router.post("/sync-products", response_model=SyncResponse)
+async def sync_products_endpoint(
+    background_tasks: BackgroundTasks,
+    request: BulkProductSyncRequest,
+    sync_service: SyncService = Depends(get_sync_service),
+):
+    """
+    Bulk product synchronization endpoint for Node.js backend.
+    
+    This endpoint is called automatically when admin adds/updates/deletes products.
+    It triggers a full re-sync of all active products to Qdrant vector database.
+    
+    Returns:
+        SyncResponse with success status and count of products to be synced.
+    """
+    try:
+        # Get product count for response
+        product_count = len(request.products) if request.products else 0
+        
+        # Queue full sync in background
+        background_tasks.add_task(sync_service.sync_all)
+        
+        return {
+            "status": "success",
+            "message": f"Successfully queued sync for {product_count} products to AI service.",
+        }
+        
+    except Exception as e:
+        logger.error(f"Error in sync_products_endpoint: {e}")
+        raise HTTPException(status_code=500, detail=f"Sync failed: {str(e)}")

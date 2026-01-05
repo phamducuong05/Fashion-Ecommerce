@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { DataService } from '../../services/admin/dataService';
 import prisma from '../../utils/prisma';
+import chatbotService from '../../services/user/chatbotService';
 
 // Helper to create slug from name
 function createSlug(name: string): string {
@@ -78,6 +79,12 @@ export class ProductController {
 
       // Return created product in UI format
       const created = await DataService.getProductById(product.id);
+      
+      // Auto-sync products to AI service
+      chatbotService.syncProductsToAI().catch(err => {
+        console.error('Failed to auto-sync products to AI:', err.message);
+      });
+      
       res.status(201).json(created);
     } catch (error: any) {
       console.error('Error creating product:', error);
@@ -150,6 +157,12 @@ export class ProductController {
 
       // Return updated product
       const updated = await DataService.getProductById(id);
+      
+      // Auto-sync products to AI service
+      chatbotService.syncProductsToAI().catch(err => {
+        console.error('Failed to auto-sync products to AI:', err.message);
+      });
+      
       res.json(updated);
     } catch (error: any) {
       console.error('Error updating product:', error);
@@ -176,6 +189,11 @@ export class ProductController {
       
       // Delete product
       await (prisma as any).product.delete({ where: { id } });
+
+      // Auto-sync products to AI service
+      chatbotService.syncProductsToAI().catch(err => {
+        console.error('Failed to auto-sync products to AI:', err.message);
+      });
 
       res.json({ message: 'Product deleted successfully', id });
     } catch (error: any) {
