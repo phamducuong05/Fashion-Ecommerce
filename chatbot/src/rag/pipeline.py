@@ -90,7 +90,7 @@ class Pipeline:
         intent = self.semantic_router_service.guide(query)
         if not intent:
             logger.info(f"Router returned None for '{query}', falling back to PRODUCT_QUERY")
-            return 'PRODUCT_QUERY'
+            return 'CHITCHAT'
         return intent
     
     async def __search_cache(self, query: str) -> str:
