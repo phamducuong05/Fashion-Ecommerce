@@ -13,6 +13,7 @@ import {
   Loader2,
 } from "lucide-react";
 import { ProductCard, type Product } from "./ProductCard";
+import { useConfirm } from "../ConfirmDialog";
 
 // --- CONFIG ---
 const API_BASE_URL = "http://localhost:4000/api";
@@ -56,6 +57,7 @@ interface ChatbotViewProps {
 export function ChatbotView({ onBack }: ChatbotViewProps) {
   const navigate = useNavigate();
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const { confirm } = useConfirm();
 
   // --- STATE ---
   const [sessions, setSessions] = useState<ChatSessionSummary[]>([]);
@@ -165,7 +167,16 @@ export function ChatbotView({ onBack }: ChatbotViewProps) {
   // 5. DELETE Chat
   const handleDeleteSession = async (e: React.MouseEvent, sessionId: string) => {
     e.stopPropagation();
-    if (!window.confirm("Delete this conversation?")) return;
+    
+    const confirmed = await confirm({
+      title: "Delete Chat",
+      message: "Delete this conversation?",
+      confirmText: "Delete",
+      cancelText: "Cancel",
+      variant: "danger",
+    });
+    
+    if (!confirmed) return;
 
     try {
       await api.delete(`/chat/sessions/${sessionId}`);

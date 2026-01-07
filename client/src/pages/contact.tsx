@@ -12,6 +12,7 @@ import {
   Clock,
   Send,
 } from "lucide-react";
+import { useToast } from "../components/Toast";
 
 // Định nghĩa kiểu dữ liệu cho Form
 interface FormData {
@@ -31,6 +32,7 @@ const ContactPage = () => {
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const { showToast } = useToast();
 
   // 2. Xử lý thay đổi input
   const handleChange = (
@@ -50,7 +52,7 @@ const ContactPage = () => {
 
     // Giả lập độ trễ mạng (1.5 giây)
     setTimeout(() => {
-      alert(`Thank you, ${formData.name}! We have received your message.`);
+      showToast("Thank you! We've received your message.", 'success');
       setFormData({ name: "", phone: "", email: "", message: "" }); // Reset form
       setIsSubmitting(false);
     }, 1500);

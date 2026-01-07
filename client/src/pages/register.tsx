@@ -1,9 +1,11 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router"; // Dùng react-router-dom nếu config cũ
 import { Loader2, AlertCircle } from "lucide-react";
+import { useToast } from "../components/Toast";
 
 const RegisterPage = () => {
   const navigate = useNavigate();
+  const { showToast } = useToast();
 
   // 1. Quản lý dữ liệu Form
   const [formData, setFormData] = useState({
@@ -67,7 +69,7 @@ const RegisterPage = () => {
       localStorage.setItem("user", JSON.stringify(data.data.user));
 
       // Chuyển hướng vào Profile
-      alert("Account created successfully!");
+      showToast("Account created successfully!", 'success');
       navigate("/profile");
       window.location.reload();
     } catch (err) {

@@ -9,7 +9,7 @@ const PaymentResultPage = () => {
   const [status, setStatus] = useState<"loading" | "success" | "failed">(
     "loading"
   );
-  const [message, setMessage] = useState("Đang xác thực thanh toán...");
+  const [message, setMessage] = useState("Verifying payment...");
   const [orderId, setOrderId] = useState<number | null>(null);
 
   const hasCalledAPI = useRef(false);
@@ -27,7 +27,7 @@ const PaymentResultPage = () => {
       const token = localStorage.getItem("token");
       if (!token) {
         setStatus("failed");
-        setMessage("Vui lòng đăng nhập để tiếp tục.");
+        setMessage("Please login to continue.");
         return;
       }
 
@@ -69,7 +69,7 @@ const PaymentResultPage = () => {
         if (data.code === "00") {
           // Backend xác nhận: Checksum đúng + Tiền đã về -> Backend đã tự tạo Order rồi
           setStatus("success");
-          setMessage("Thanh toán thành công! Đơn hàng đã được tạo.");
+          setMessage("Payment successful! Your order has been created.");
           setOrderId(data.orderId);
 
           // Dọn dẹp LocalStorage
@@ -78,13 +78,13 @@ const PaymentResultPage = () => {
         } else {
           // Backend từ chối: Checksum sai hoặc Giao dịch lỗi
           setStatus("failed");
-          setMessage(data.message || "Giao dịch thất bại hoặc bị hủy.");
+          setMessage(data.message || "Transaction failed or cancelled.");
           localStorage.removeItem("pendingCheckout");
         }
       } catch (error) {
         console.error("Payment verify error:", error);
         setStatus("failed");
-        setMessage("Lỗi kết nối đến server xác thực.");
+        setMessage("Connection error to verification server.");
       }
     };
 
@@ -110,9 +110,9 @@ const PaymentResultPage = () => {
           <div>
             <Loader2 className="w-16 h-16 animate-spin text-indigo-600 mx-auto mb-4" />
             <h2 className="text-xl font-bold text-gray-900 mb-2">
-              Đang xử lý...
+              Processing...
             </h2>
-            <p className="text-gray-500">Vui lòng đợi trong giây lát.</p>
+            <p className="text-gray-500">Please wait a moment.</p>
           </div>
         )}
 
@@ -123,14 +123,14 @@ const PaymentResultPage = () => {
               <CheckCircle className="w-10 h-10 text-green-600" />
             </div>
             <h2 className="text-2xl font-bold text-gray-900 mb-2">
-              Thanh toán thành công!
+              Payment Successful!
             </h2>
             <p className="text-gray-600 mb-6">{message}</p>
             <Button
               onClick={handleRedirect}
               className="w-full bg-indigo-600 hover:bg-indigo-700 text-white"
             >
-              Xem đơn hàng
+              View Order
             </Button>
           </div>
         )}
@@ -142,20 +142,20 @@ const PaymentResultPage = () => {
               <XCircle className="w-10 h-10 text-red-600" />
             </div>
             <h2 className="text-2xl font-bold text-gray-900 mb-2">
-              Thanh toán thất bại
+              Payment Failed
             </h2>
             <p className="text-gray-600 mb-6">{message}</p>
             <div className="flex gap-2">
               <Link to="/" className="flex-1">
                 <Button variant="outline" className="w-full">
-                  Trang chủ
+                  Home
                 </Button>
               </Link>
               <Button
                 onClick={handleRedirect}
                 className="flex-1 bg-gray-900 text-white"
               >
-                Về giỏ hàng
+                Back to Cart
               </Button>
             </div>
           </div>
