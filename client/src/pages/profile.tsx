@@ -98,7 +98,9 @@ const ProfilePage = () => {
     });
     
     if (confirmed) {
+      // Clear all user data from localStorage
       localStorage.removeItem("token");
+      localStorage.removeItem("user");
       localStorage.removeItem("cart");
       navigate("/signin");
     }

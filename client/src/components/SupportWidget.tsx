@@ -146,6 +146,13 @@ export function SupportWidget() {
       setIsOpen(false);
       setTimeout(() => setCurrentView("MENU"), 300); // Reset view sau khi đóng
     } else {
+      // Check login before opening
+      const userDataString = localStorage.getItem("user");
+      if (!userDataString) {
+        showToast("Please login to access support", 'warning');
+        navigate("/signin");
+        return;
+      }
       setIsOpen(true);
     }
   };
