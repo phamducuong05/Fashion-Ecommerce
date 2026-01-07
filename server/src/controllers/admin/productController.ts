@@ -30,16 +30,23 @@ export class ProductController {
     try {
       const { name, category, price, stock, image, description, status, variants } = req.body;
 
-      // Find or create category
+      // Find category by name or slug, create if not exists
+      const categorySlug = createSlug(category);
       let categoryRecord = await (prisma as any).category.findFirst({
-        where: { name: category }
+        where: { 
+          OR: [
+            { name: category },
+            { slug: categorySlug }
+          ]
+        }
       });
       
       if (!categoryRecord) {
+        // Create new category with unique slug
         categoryRecord = await (prisma as any).category.create({
           data: {
             name: category,
-            slug: createSlug(category),
+            slug: categorySlug + '-' + Date.now(), // Ensure unique slug
           }
         });
       }
@@ -107,16 +114,22 @@ export class ProductController {
         return res.status(404).json({ message: 'Product not found' });
       }
 
-      // Find or create category
+      // Find category by name or slug, create if not exists
+      const categorySlug = createSlug(category);
       let categoryRecord = await (prisma as any).category.findFirst({
-        where: { name: category }
+        where: { 
+          OR: [
+            { name: category },
+            { slug: categorySlug }
+          ]
+        }
       });
       
       if (!categoryRecord) {
         categoryRecord = await (prisma as any).category.create({
           data: {
             name: category,
-            slug: createSlug(category),
+            slug: categorySlug + '-' + Date.now(),
           }
         });
       }
@@ -134,21 +147,67 @@ export class ProductController {
         }
       });
 
-      // Delete old variants and create new ones
+      // Update variants - smart upsert instead of delete all
       if (variants && Array.isArray(variants)) {
-        await (prisma as any).productVariant.deleteMany({ where: { productId: id } });
+        // Get existing variants
+        const existingVariants = await (prisma as any).productVariant.findMany({
+          where: { productId: id },
+          include: { orderItems: { take: 1 } } // Check if has orders
+        });
         
+        // Build new variant specs
+        const newVariantSpecs: { size: string; color: string; image: string; stock: number }[] = [];
         for (const v of variants) {
           const colors = v.colors || [];
           for (const color of colors) {
+            newVariantSpecs.push({
+              size: v.size,
+              color: color,
+              image: v.imageUrl || image,
+              stock: Math.floor((stock || 0) / (variants.length * colors.length)) || 10,
+            });
+          }
+        }
+        
+        // Delete variants that are not in new specs AND have no orders
+        for (const existing of existingVariants) {
+          const stillNeeded = newVariantSpecs.some(
+            spec => spec.size === existing.size && spec.color === existing.color
+          );
+          if (!stillNeeded && existing.orderItems.length === 0) {
+            // Safe to delete - no orders reference this variant
+            await (prisma as any).cartItem.deleteMany({ where: { variantId: existing.id } });
+            await (prisma as any).productVariant.delete({ where: { id: existing.id } });
+          } else if (!stillNeeded && existing.orderItems.length > 0) {
+            // Can't delete - has orders. Set stock to 0 instead (soft disable)
+            await (prisma as any).productVariant.update({
+              where: { id: existing.id },
+              data: { stock: 0 }
+            });
+          }
+        }
+        
+        // Upsert new variants
+        for (const spec of newVariantSpecs) {
+          const existingMatch = existingVariants.find(
+            (e: any) => e.size === spec.size && e.color === spec.color
+          );
+          if (existingMatch) {
+            // Update existing
+            await (prisma as any).productVariant.update({
+              where: { id: existingMatch.id },
+              data: { image: spec.image, stock: spec.stock }
+            });
+          } else {
+            // Create new
             await (prisma as any).productVariant.create({
               data: {
                 productId: id,
-                size: v.size,
-                color: color,
-                sku: `${createSlug(name)}-${id}-${v.size}-${color}`.toUpperCase(),
-                image: v.imageUrl || image,
-                stock: Math.floor((stock || 0) / (variants.length * colors.length)) || 10,
+                size: spec.size,
+                color: spec.color,
+                sku: `${createSlug(name)}-${id}-${spec.size}-${spec.color}`.toUpperCase(),
+                image: spec.image,
+                stock: spec.stock,
               }
             });
           }
@@ -172,30 +231,68 @@ export class ProductController {
 
   /**
    * DELETE /api/admin/products/:id
-   * Delete a product and its variants
+   * Soft delete product (set isActive=false) or hard delete if no references
    */
   static async deleteProduct(req: Request, res: Response) {
     try {
       const id = Number(req.params.id);
 
       // Check product exists
-      const existing = await (prisma as any).product.findUnique({ where: { id } });
+      const existing = await (prisma as any).product.findUnique({ 
+        where: { id },
+        include: {
+          reviews: { take: 1 },
+          variants: {
+            include: { orderItems: { take: 1 } }
+          }
+        }
+      });
       if (!existing) {
         return res.status(404).json({ message: 'Product not found' });
       }
 
-      // Delete variants first (cascade should handle, but being explicit)
-      await (prisma as any).productVariant.deleteMany({ where: { productId: id } });
+      // Check if product has reviews or any variant has orders
+      const hasReviews = existing.reviews.length > 0;
+      const hasOrders = existing.variants.some((v: any) => v.orderItems.length > 0);
       
-      // Delete product
-      await (prisma as any).product.delete({ where: { id } });
+      if (hasReviews || hasOrders) {
+        // Soft delete - just deactivate the product
+        await (prisma as any).product.update({
+          where: { id },
+          data: { isActive: false }
+        });
+        
+        // Set all variant stocks to 0
+        await (prisma as any).productVariant.updateMany({
+          where: { productId: id },
+          data: { stock: 0 }
+        });
+        
+        res.json({ 
+          message: 'Product deactivated (has order history or reviews)', 
+          id,
+          softDeleted: true 
+        });
+      } else {
+        // Hard delete - no references, safe to delete
+        // Delete cart items first
+        const variantIds = existing.variants.map((v: any) => v.id);
+        await (prisma as any).cartItem.deleteMany({ where: { variantId: { in: variantIds } } });
+        
+        // Delete variants
+        await (prisma as any).productVariant.deleteMany({ where: { productId: id } });
+        
+        // Delete product
+        await (prisma as any).product.delete({ where: { id } });
+        
+        res.json({ message: 'Product deleted permanently', id, softDeleted: false });
+      }
 
       // Auto-sync products to AI service
       chatbotService.syncProductsToAI().catch(err => {
         console.error('Failed to auto-sync products to AI:', err.message);
       });
 
-      res.json({ message: 'Product deleted successfully', id });
     } catch (error: any) {
       console.error('Error deleting product:', error);
       res.status(500).json({ message: 'Failed to delete product', error: error.message });
