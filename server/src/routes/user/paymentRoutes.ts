@@ -6,14 +6,6 @@ import { authenticateToken } from "../../middlewares/auth.middleware";
 import orderService from "../../services/user/orderService";
 import prisma from "../../utils/prisma";
 
-// const config = {
-//   vnp_TmnCode: "4OG4KT58",
-//   vnp_HashSecret: "X69LLPOTNQ72T3BN04UMGPY0FD4F47Z5",
-//   vnp_Url: "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html",
-//   vnp_Api: "https://sandbox.vnpayment.vn/merchant_webapi/api/transaction",
-//   vnp_ReturnUrl: "http://localhost:5173/payment-result",
-// };
-
 const router = express.Router();
 
 const config = {
@@ -167,18 +159,28 @@ router.get(
   authenticateToken,
   async function (req: Request | any, res: Response, next: NextFunction) {
     let vnp_Params = req.query;
-    let secureHash = vnp_Params["vnp_SecureHash"];
+    let secureHash = vnp_Params['vnp_SecureHash'];
 
-    delete vnp_Params["vnp_SecureHash"];
-    delete vnp_Params["vnp_SecureHashType"];
+    // --- BƯỚC SỬA QUAN TRỌNG TẠI ĐÂY ---
+    
+    // Tạo một object mới để chứa dữ liệu sạch
+    let vnp_Params_Fix: any = {};
 
-    vnp_Params = sortObject(vnp_Params);
+    for (const key in vnp_Params) {
+        // Quy tắc vàng: 
+        // 1. Chỉ lấy key bắt đầu bằng "vnp_"
+        // 2. Không lấy chính cái hash (vnp_SecureHash)
+        if (key.startsWith('vnp_') && key !== 'vnp_SecureHash' && key !== 'vnp_SecureHashType') {
+            vnp_Params_Fix[key] = vnp_Params[key];
+        }
+    }
 
-    const secretKey = config.vnp_HashSecret;
-    const signData = querystring.stringify(vnp_Params, { encode: false });
-    const hmac = crypto.createHmac("sha512", secretKey);
-    const signed = hmac.update(Buffer.from(signData, "utf-8")).digest("hex");
+    // Sau đó dùng vnp_Params_Fix để sort và hash (thay vì dùng vnp_Params gốc)
+    vnp_Params_Fix = sortObject(vnp_Params_Fix);
 
+    const signData = querystring.stringify(vnp_Params_Fix, { encode: false });
+    const hmac = crypto.createHmac("sha512", config.vnp_HashSecret);
+    const signed = hmac.update(Buffer.from(signData, 'utf-8')).digest("hex");
     if (secureHash === signed) {
       // Check mã phản hồi từ VNPAY (00 là thành công)
       if (vnp_Params["vnp_ResponseCode"] === "00") {

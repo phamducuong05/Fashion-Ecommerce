@@ -3,6 +3,9 @@ import { AppError } from "../../utils/AppError";
 import { sendOrderConfirmation } from "./emailService";
 import { OrderStatus } from "@prisma/client";
 
+const SHIPPING_COST_USD = 2.0; 
+const FREE_SHIP_THRESHOLD_USD = 50.0;
+
 interface CreateOrderInput {
   userId: number;
   shippingAddressId: number;
@@ -73,9 +76,9 @@ export const createOrder = async (data: CreateOrderInput) => {
       });
     }
 
-    let shippingFee = 30000;
+    let shippingFee = SHIPPING_COST_USD;
     // Free ship nếu đơn > 500k (Ví dụ logic)
-    if (subtotal > 500000) shippingFee = 0;
+    if (subtotal > FREE_SHIP_THRESHOLD_USD) shippingFee = 0;
 
     // --- BƯỚC C: XỬ LÝ VOUCHER (ĐÃ BỔ SUNG) ---
     let discountAmount = 0;

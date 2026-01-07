@@ -1,7 +1,7 @@
-import { useEffect, useState } from "react";
 import { useSearchParams, useNavigate, Link } from "react-router";
 import { CheckCircle, XCircle, Loader2, Home } from "lucide-react";
 import { Button } from "../components/variants/button";
+import { useEffect, useState, useRef } from "react"; // 1. Import useRef
 
 const PaymentResultPage = () => {
   const [searchParams] = useSearchParams();
@@ -12,7 +12,16 @@ const PaymentResultPage = () => {
   const [message, setMessage] = useState("Đang xác thực thanh toán...");
   const [orderId, setOrderId] = useState<number | null>(null);
 
+  const hasCalledAPI = useRef(false);
+
   useEffect(() => {
+    // 3. Kiểm tra chốt chặn ngay đầu hàm
+    if (hasCalledAPI.current) {
+        return; // Nếu đã gọi rồi thì dừng lại ngay, không làm gì cả
+    }
+    
+    // Đánh dấu là đã gọi
+    hasCalledAPI.current = true;
     const verifyPayment = async () => {
       // 1. Lấy Token
       const token = localStorage.getItem("token");
@@ -80,7 +89,9 @@ const PaymentResultPage = () => {
     };
 
     // Chạy 1 lần khi trang load
-    verifyPayment();
+    if (searchParams.get("vnp_ResponseCode")) {
+      verifyPayment();
+    }
   }, [searchParams]);
 
   const handleRedirect = () => {

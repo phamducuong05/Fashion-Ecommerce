@@ -75,9 +75,18 @@ export const getAllProducts = async (
 
   let orderBy: any = { createdAt: "desc" };
 
-  if (sort === "New_Arrivals") orderBy = { createdAt: "desc" };
-  if (sort === "Price: Low to High") orderBy = { price: "asc" };
-  if (sort === "Price : High to Low") orderBy = { price: "desc" };
+  if (sort) {
+     const cleanSort = sort.trim(); // Xóa khoảng trắng thừa ở đầu cuối
+     
+     if (cleanSort === "Price: Low to High" || cleanSort === "price_asc") {
+        orderBy = { price: "asc" };
+     } else if (cleanSort === "Price: High to Low" || cleanSort === "Price : High to Low" || cleanSort === "price_desc") {
+        // Chấp nhận cả trường hợp có dấu cách và không có dấu cách
+        orderBy = { price: "desc" };
+     } else if (cleanSort === "New_Arrivals" || cleanSort === "newest") {
+        orderBy = { createdAt: "desc" };
+     }
+  }
 
   const rawProducts = await prisma.product.findMany({
     where: whereClause,
