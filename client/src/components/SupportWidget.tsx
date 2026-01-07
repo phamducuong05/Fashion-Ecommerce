@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { socketService } from "../services/socket";
 import { ChatbotView } from "./chatbot/ChatbotView";
+import { useToast } from "./Toast";
 
 type ViewState = "MENU" | "CHATBOT" | "ADMIN";
 
@@ -32,6 +33,7 @@ export function SupportWidget() {
   const [isConnected, setIsConnected] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
+  const { showToast } = useToast();
 
   // Handler to check if user is logged in before opening admin chat
   const handleAdminChatClick = () => {
@@ -40,7 +42,7 @@ export function SupportWidget() {
     if (!userDataString) {
       // User not logged in - close widget and redirect to login
       setIsOpen(false);
-      alert("⚠️ You need to login to chat with admin");
+      showToast("Please login to chat with support", 'warning');
       navigate("/signin");
       return;
     }

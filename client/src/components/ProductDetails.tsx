@@ -4,6 +4,7 @@ import { ImageWithFallback } from "./imagefallback";
 import { ProductReviews } from "./ProductReviews";
 import { useParams } from "react-router";
 import type { ProductSummary } from "./ProductCard";
+import { useToast } from "./Toast";
 
 interface ProductVariant {
   id: string;
@@ -42,6 +43,7 @@ const ProductDetail = ({ onAddToCart }: ProductDetailProp) => {
   const [selectedVariant, setSelectedVariant] = useState<ProductVariant | null>(
     null
   );
+  const { showToast } = useToast();
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -86,7 +88,7 @@ const ProductDetail = ({ onAddToCart }: ProductDetailProp) => {
   const handleAddToCartClick = () => {
     if (product && selectedVariant) {
       if (selectedVariant.stock === 0) {
-        alert("Sản phẩm này tạm hết hàng!");
+        showToast("This product is out of stock!", 'warning');
         return;
       }
       // Gọi hàm từ App.tsx

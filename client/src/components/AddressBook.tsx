@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
 import { MapPin, Plus, Edit2, Trash2, Check, X, Phone } from "lucide-react";
+import { useToast } from "./Toast";
+import { useConfirm } from "./ConfirmDialog";
 
 // 1. Interface khớp 100% với Prisma Model
 interface Address {
@@ -16,6 +18,8 @@ interface Address {
 export function AddressBook() {
   const [addresses, setAddresses] = useState<Address[]>([]);
   const [loading, setLoading] = useState(true);
+  const { showToast } = useToast();
+  const { confirm } = useConfirm();
 
   // Modal state
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -85,7 +89,16 @@ export function AddressBook() {
   };
 
   const handleDelete = async (id: number) => {
-    if (!confirm("Are you sure you want to delete this address?")) return;
+    const confirmed = await confirm({
+      title: "Delete Address",
+      message: "Are you sure you want to delete this address?",
+      confirmText: "Delete",
+      cancelText: "Cancel",
+      variant: "danger",
+    });
+    
+    if (!confirmed) return;
+    
     const token = getToken();
     try {
       const res = await fetch(`/api/addresses/${id}`, {
@@ -121,11 +134,11 @@ export function AddressBook() {
         setIsModalOpen(false);
         fetchAddresses();
       } else {
-        alert("Failed to save address");
+        showToast("Failed to save address", 'error');
       }
     } catch (error) {
       console.error(error);
-      alert("Error connecting to server");
+      showToast("Error connecting to server", 'error');
     }
   };
 

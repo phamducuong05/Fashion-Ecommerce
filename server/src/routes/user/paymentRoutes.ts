@@ -6,6 +6,10 @@ import { authenticateToken } from "../../middlewares/auth.middleware";
 import orderService from "../../services/user/orderService";
 import prisma from "../../utils/prisma";
 
+const SHIPPING_COST_USD = 2.0;
+const FREE_SHIP_THRESHOLD_USD = 50.0;
+const VNDTOUSD = 23000;
+
 const router = express.Router();
 
 const config = {
@@ -62,7 +66,7 @@ router.post(
     );
 
     // 3. Tính phí ship và giảm giá Voucher (Logic rút gọn giống order.service)
-    let shippingFee = subtotal > 500000 ? 0 : 30000;
+    let shippingFee = subtotal > FREE_SHIP_THRESHOLD_USD ? 0 : SHIPPING_COST_USD;
 
     // Nếu có voucher, tạm tính để trừ tiền (Đoạn này bạn có thể tái sử dụng logic tính voucher từ service)
     // Ở đây tôi giả sử tính toán xong ra Final Amount
@@ -101,7 +105,7 @@ router.post(
       }
     }
 
-    let finalAmount = subtotal + shippingFee - discountAmount;
+    let finalAmount = (subtotal + shippingFee - discountAmount) * VNDTOUSD;
     // TODO: Áp dụng logic trừ voucher ở đây nếu muốn hiển thị đúng số tiền sau giảm trên trang VNPAY
 
     // --- KẾT THÚC BƯỚC BẢO MẬT ---

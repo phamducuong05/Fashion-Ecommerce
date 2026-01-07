@@ -5,12 +5,16 @@ import { AddressBook } from "../components/AddressBook";
 import { OrderHistory } from "../components/OrderHistory";
 import { useNavigate } from "react-router";
 import { EditProfileModal } from "../components/EditProfileModal";
+import { useToast } from "../components/Toast";
+import { useConfirm } from "../components/ConfirmDialog";
 
 const ProfilePage = () => {
   const [user, setUser] = useState<UserProfileType | null>(null);
   const [loading, setLoading] = useState(true);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const navigate = useNavigate();
+  const { showToast } = useToast();
+  const { confirm } = useConfirm();
 
   const getToken = () => localStorage.getItem("token");
 
@@ -77,16 +81,23 @@ const ProfilePage = () => {
         prev ? { ...prev, name: newName, avatar: newAvatar } : null
       );
 
-      alert("Cập nhật hồ sơ thành công!");
+      showToast("Profile updated successfully!", 'success');
     } catch (error) {
       console.error("Update error:", error);
-      alert("Có lỗi xảy ra khi cập nhật.");
+      showToast("Failed to update profile", 'error');
     }
   };
 
-  const handleLogout = () => {
-    if (confirm("Bạn có chắc chắn muốn đăng xuất?")) {
-      // 1. Xóa Token khỏi localStorage
+  const handleLogout = async () => {
+    const confirmed = await confirm({
+      title: "Log Out",
+      message: "Are you sure you want to log out?",
+      confirmText: "Log Out",
+      cancelText: "Cancel",
+      variant: "warning",
+    });
+    
+    if (confirmed) {
       localStorage.removeItem("token");
       localStorage.removeItem("cart");
       navigate("/signin");

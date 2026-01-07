@@ -6,6 +6,7 @@ import { useState, useEffect } from "react";
 import { CartItem } from "../components/CartItem"; // Import component mới của bạn
 import { Link, useNavigate } from "react-router";
 import { Button } from "../components/variants/button";
+import { useToast } from "../components/Toast";
 
 interface VoucherType {
   id: number;
@@ -23,6 +24,7 @@ interface CartProp {
 
 const CartPage = ({ cartItems, setCartItems }: CartProp) => {
   const navigate = useNavigate();
+  const { showToast } = useToast();
 
   // State UI
   const [shipping] = useState(15.0);
@@ -120,7 +122,7 @@ const CartPage = ({ cartItems, setCartItems }: CartProp) => {
       console.error("Lỗi cập nhật:", error);
       // Nếu lỗi thì revert lại số cũ
       setCartItems(oldCart);
-      alert("Không thể cập nhật số lượng (Có thể lỗi mạng hoặc hết hàng).");
+      showToast("Failed to update quantity", 'error');
     }
   };
 
@@ -145,7 +147,7 @@ const CartPage = ({ cartItems, setCartItems }: CartProp) => {
     } catch (error) {
       console.error("Lỗi xóa:", error);
       setCartItems(oldCart);
-      alert("Không thể xóa sản phẩm.");
+      showToast("Failed to remove item", 'error');
     }
   };
 
@@ -158,12 +160,12 @@ const CartPage = ({ cartItems, setCartItems }: CartProp) => {
 
     // Validate
     if (cartItems.length === 0) {
-      alert("Your cart is empty!");
+      showToast("Your cart is empty!", 'warning');
       return;
     }
 
     if (!token) {
-      alert("Please sign in to checkout");
+      showToast("Please sign in to checkout", 'warning');
       navigate("/signin");
       return;
     }
@@ -215,15 +217,16 @@ const CartPage = ({ cartItems, setCartItems }: CartProp) => {
           window.open(data.paymentUrl, "_blank");
 
           // Optional: Show message to user
-          alert(
-            "Payment page opened in new tab. Please complete your payment."
+          showToast(
+            "Payment page opened in new tab. Please complete your payment.",
+            'info'
           );
         } else {
           throw new Error("No payment URL returned");
         }
       } catch (error: any) {
         console.error("VNPay payment error:", error);
-        alert(`Failed to initiate payment: ${error.message}`);
+        showToast(`Failed to initiate payment: ${error.message}`, 'error');
       } finally {
         setIsCheckingOut(false);
       }
@@ -261,7 +264,7 @@ const CartPage = ({ cartItems, setCartItems }: CartProp) => {
         setCartItems([]);
         localStorage.removeItem("cart"); // Clear guest cart if any
 
-        alert("Order placed successfully!");
+        showToast("Order placed successfully!", 'success');
 
         // Redirect to order detail page
         if (orderId) {
@@ -271,7 +274,7 @@ const CartPage = ({ cartItems, setCartItems }: CartProp) => {
         }
       } catch (error: any) {
         console.error("Checkout error:", error);
-        alert(`Failed to place order: ${error.message}`);
+        showToast(`Failed to place order: ${error.message}`, 'error');
       } finally {
         setIsCheckingOut(false);
       }
@@ -320,9 +323,9 @@ const CartPage = ({ cartItems, setCartItems }: CartProp) => {
       }
 
       setSelectedVoucherCode(code); // Lưu lại code đang chọn để UI highlight
-      alert(`Applied voucher: ${code}`);
+      showToast("Voucher applied successfully!", 'success');
     } else {
-      alert("Invalid or expired voucher");
+      showToast("Invalid or expired voucher", 'error');
     }
   };
 

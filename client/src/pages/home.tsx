@@ -10,6 +10,7 @@ import { useState, useEffect } from "react";
 import { Loader2, AlertCircle } from "lucide-react";
 import { Button } from "../components/variants/button";
 import { SupportWidget } from "../components/SupportWidget";
+import { useToast } from "../components/Toast";
 
 interface HomeProp {
   cartItemCount: number;
@@ -22,6 +23,7 @@ const HomePage = ({ cartItemCount }: HomeProp) => {
 
   const [featuredTab, setFeaturedTab] = useState("Men Polos");
   const [whatsHotTab, setWhatsHotTab] = useState("new");
+  const { showToast } = useToast();
 
   const [formData, setFormData] = useState<FormData>({
     name: "",
@@ -33,7 +35,7 @@ const HomePage = ({ cartItemCount }: HomeProp) => {
   const handleSubmitContact = (e: React.FormEvent) => {
     e.preventDefault();
     console.log("Form submitted:", formData);
-    alert("Cảm ơn bạn đã liên hệ! Chúng tôi sẽ phản hồi sớm.");
+    showToast("Thank you for contacting us! We'll respond soon.", 'success');
     setFormData({ name: "", phone: "", email: "", message: "" });
   };
 

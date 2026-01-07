@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useToast } from "./components/Toast";
 import type { ProductSummary } from "./components/ProductCard";
 import { Routes, Route, useNavigate } from "react-router";
 import HomePage from "./pages/home";
@@ -37,6 +38,7 @@ export interface FormData {
 function App() {
   const [cartItems, setCartItems] = useState<CartItemType[]>([]);
   const navigate = useNavigate();
+  const { showToast } = useToast();
 
   useEffect(() => {
     const initializeCart = async () => {
@@ -107,7 +109,7 @@ function App() {
               const newQty = item.quantity + quantity;
               // Check stock client-side
               if (newQty > item.stock) {
-                alert(`Kho chỉ còn ${item.stock} sản phẩm!`);
+                showToast(`Only ${item.stock} items left in stock!`, 'warning');
                 return item;
               }
               return { ...item, quantity: newQty };
@@ -133,7 +135,7 @@ function App() {
         return [...prev, newItem];
       });
 
-      alert("Đã thêm vào giỏ hàng (Guest Mode)!");
+      showToast("Added to cart!", 'success');
       return;
     }
 
@@ -161,10 +163,10 @@ function App() {
       // Ensure data is an array
       setCartItems(Array.isArray(newCartData) ? newCartData : []);
 
-      alert("Đã thêm vào giỏ hàng!");
+      showToast("Added to cart!", 'success');
     } catch (error) {
       console.error(error);
-      alert("Lỗi kết nối server!");
+      showToast("Server connection error!", 'error');
     }
   };
 
