@@ -19,6 +19,7 @@ import orderRoutes from "./routes/user/orderRoutes";
 import voucherRoutes from "./routes/user/voucherRoutes";
 import paymentRoutes from "./routes/user/paymentRoutes";
 import chatbotRoutes from "./routes/user/chatbotRoutes";
+import reviewRoutes from "./routes/user/reviewRoutes";
 
 const app = express();
 const httpServer = createServer(app);
@@ -55,6 +56,7 @@ app.use("/api/orders", orderRoutes);
 app.use("/api/vouchers", voucherRoutes);
 app.use("/api/payment", paymentRoutes);
 app.use("/api/chat", chatbotRoutes);
+app.use("/api/reviews", reviewRoutes);
 
 // Root endpoint
 app.get("/", (_req, res) => {
@@ -85,7 +87,9 @@ io.on("connection", (socket) => {
   // User joins (authenticate)
   socket.on("user:join", (userData: UserSocket) => {
     onlineUsers.set(socket.id, userData);
-    console.log(`👤 User joined: ${userData.userName} (${userData.role}) - Socket ID: ${socket.id} - User ID: ${userData.userId}`);
+    console.log(
+      `👤 User joined: ${userData.userName} (${userData.role}) - Socket ID: ${socket.id} - User ID: ${userData.userId}`
+    );
 
     // If admin joins, send them list of active conversations
     if (userData.role === "ADMIN") {
@@ -95,42 +99,51 @@ io.on("connection", (socket) => {
   });
 
   // User sends message
-  socket.on("message:send", async (data: {
-    conversationId?: number;
-    message: string;
-    sender: "CUSTOMER" | "ADMIN";
-  }) => {
-    const user = onlineUsers.get(socket.id);
-    if (!user) {
-      console.error("❌ User not found in onlineUsers map for socket:", socket.id);
-      socket.emit("message:error", { error: "User not authenticated. Please reconnect." });
-      return;
+  socket.on(
+    "message:send",
+    async (data: {
+      conversationId?: number;
+      message: string;
+      sender: "CUSTOMER" | "ADMIN";
+    }) => {
+      const user = onlineUsers.get(socket.id);
+      if (!user) {
+        console.error(
+          "❌ User not found in onlineUsers map for socket:",
+          socket.id
+        );
+        socket.emit("message:error", {
+          error: "User not authenticated. Please reconnect.",
+        });
+        return;
+      }
+
+      console.log("📨 Message received from:", user.userName, "Data:", data);
+
+      try {
+        // Save message to database
+        const { ChatService } = await import("./services/admin/chatService");
+        const savedMessage = await ChatService.saveMessage({
+          conversationId: data.conversationId,
+          userId: user.userId,
+          message: data.message,
+          sender: data.sender,
+        });
+
+        console.log("✅ Message saved to database:", savedMessage.id);
+
+        // Emit to all clients (both user and admin)
+        io.emit("message:received", savedMessage);
+        console.log("📤 Message broadcasted to all clients");
+      } catch (error) {
+        console.error("❌ Error saving message:", error);
+        socket.emit("message:error", {
+          error:
+            error instanceof Error ? error.message : "Failed to send message",
+        });
+      }
     }
-
-    console.log("📨 Message received from:", user.userName, "Data:", data);
-
-    try {
-      // Save message to database
-      const { ChatService } = await import("./services/admin/chatService");
-      const savedMessage = await ChatService.saveMessage({
-        conversationId: data.conversationId,
-        userId: user.userId,
-        message: data.message,
-        sender: data.sender,
-      });
-
-      console.log("✅ Message saved to database:", savedMessage.id);
-
-      // Emit to all clients (both user and admin)
-      io.emit("message:received", savedMessage);
-      console.log("📤 Message broadcasted to all clients");
-    } catch (error) {
-      console.error("❌ Error saving message:", error);
-      socket.emit("message:error", { 
-        error: error instanceof Error ? error.message : "Failed to send message" 
-      });
-    }
-  });
+  );
 
   // Admin requests conversation list
   socket.on("admin:getConversations", async () => {
@@ -151,7 +164,9 @@ io.on("connection", (socket) => {
     try {
       const { ChatService } = await import("./services/admin/chatService");
       const messages = await ChatService.getMessages(conversationId);
-      console.log(`✅ Sending ${messages.length} messages for conversation ${conversationId}`);
+      console.log(
+        `✅ Sending ${messages.length} messages for conversation ${conversationId}`
+      );
       socket.emit("conversation:messages", { conversationId, messages });
     } catch (error) {
       console.error("❌ Error fetching messages:", error);
@@ -165,7 +180,7 @@ io.on("connection", (socket) => {
       const { ChatService } = await import("./services/admin/chatService");
       await ChatService.markConversationAsRead(conversationId);
       console.log(`✅ Conversation ${conversationId} marked as read`);
-      
+
       // Broadcast updated conversations to all admins
       const conversations = await ChatService.getAllConversations();
       io.emit("admin:conversationsList", conversations);
@@ -185,10 +200,14 @@ io.on("connection", (socket) => {
     console.log("🔍 Customer requesting their conversation:", user.userId);
     try {
       const { ChatService } = await import("./services/admin/chatService");
-      const conversation = await ChatService.getOrCreateConversation(user.userId);
+      const conversation = await ChatService.getOrCreateConversation(
+        user.userId
+      );
       const messages = await ChatService.getMessages(conversation.id);
-      
-      console.log(`✅ Sending conversation ${conversation.id} with ${messages.length} messages to customer`);
+
+      console.log(
+        `✅ Sending conversation ${conversation.id} with ${messages.length} messages to customer`
+      );
       socket.emit("customer:myConversation", {
         conversation,
         messages,

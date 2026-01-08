@@ -88,7 +88,7 @@ const ProductDetail = ({ onAddToCart }: ProductDetailProp) => {
   const handleAddToCartClick = () => {
     if (product && selectedVariant) {
       if (selectedVariant.stock === 0) {
-        showToast("This product is out of stock!", 'warning');
+        showToast("This product is out of stock!", "warning");
         return;
       }
       // Gọi hàm từ App.tsx
@@ -305,7 +305,7 @@ const ProductDetail = ({ onAddToCart }: ProductDetailProp) => {
         </div>
 
         <div className="mt-12">
-          <ProductReviews />
+          <ProductReviews productId={product.id} />
         </div>
       </div>
     </div>
