@@ -161,7 +161,7 @@ export function ProductReviews({ productId }: ProductReviewsProps) {
   return (
     <div className="bg-white rounded-lg shadow-md mt-8 p-8">
       <h2 className="text-2xl font-bold text-gray-900 mb-6">
-        Khách hàng đánh giá ({reviews.length})
+        User Review ({reviews.length})
       </h2>
 
       {/* --- FORM VIẾT ĐÁNH GIÁ --- */}
