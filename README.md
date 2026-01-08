@@ -1,5 +1,4 @@
-# Fashion-Ecommerce 
-Merge version of admin backend and user backend.
+# This is the codebase for Software Engineer Course
 
 - Read Note-Schema.md and Note-Merge.md for more detail.
 
