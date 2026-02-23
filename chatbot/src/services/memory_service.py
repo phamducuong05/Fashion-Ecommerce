@@ -77,7 +77,6 @@ class MemoryService:
     #! FOR TESTING ONLY, NOT EXISTS IN PRODUCTION
     # async def add_message_temp(self, session_id: int, role: str, content: str):
     #     try:
-    #         # Map role lại cho đúng chuẩn DB (assistant -> bot)
     #         db_role = 'bot' if role == 'assistant' else role
             
     #         async with self.db_service.engine.begin() as conn:
@@ -85,6 +84,6 @@ class MemoryService:
     #                 text('INSERT INTO "ChatBotMessage" ("sessionId", role, content) VALUES (:s, :r, :c)'),
     #                 {"s": session_id, "r": db_role, "c": content}
     #             )
-    #             logger.warning(f"⚠️ [TEST MODE] Inserted message to DB: {content[:20]}...")
+    #             logger.warning(f"[TEST MODE] Inserted message to DB: {content[:20]}...")
     #     except Exception as e:
     #         logger.error(f"Error inserting temp message: {e}")
