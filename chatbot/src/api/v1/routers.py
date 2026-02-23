@@ -113,14 +113,14 @@ async def sync_products_endpoint(
     """
     try:
         # Get product count for response
-        product_count = len(request.products) if request.products else 0
+        product_ids = [p.id for p in request.products]
         
         # Queue full sync in background
-        background_tasks.add_task(sync_service.sync_all)
+        background_tasks.add_task(sync_service.sync_specifics, product_ids)
         
         return {
             "status": "success",
-            "message": f"Successfully queued sync for {product_count} products to AI service.",
+            "message": f"Successfully queued sync for {len(product_ids)} products to AI service.",
         }
         
     except Exception as e:
