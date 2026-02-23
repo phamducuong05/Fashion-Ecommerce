@@ -1,5 +1,6 @@
 import logging
 import asyncio
+import json
 
 from concurrent.futures import ThreadPoolExecutor
 from langcache import LangCache
@@ -21,18 +22,18 @@ class CacheService:
             API key used for authenticating requests to LangCache.
         threshold (float, optional):
             Similarity score threshold used when searching for cached responses.
-            Defaults to 0.9.
+            Defaults to 1.
     """
 
     def __init__(
-        self, server_url: str, cache_id: str, api_key: str, threshold: float = 0.9
+        self, server_url: str, cache_id: str, api_key: str, threshold: float = 0.95
     ):
         logger.info(f"Connecting to LangCache at {server_url}...")
         self.lang_cache = LangCache(
             server_url=server_url, cache_id=cache_id, api_key=api_key
         )
         self.threshold = threshold
-        self.executer = ThreadPoolExecutor(max_workers=5)
+        self.executor = ThreadPoolExecutor(max_workers=5)
         logger.info(f"Successfully create Cache service with threshold {threshold}.")
 
     async def search_response(self, prompt) -> str:
@@ -51,18 +52,23 @@ class CacheService:
         logger.debug(f"Searching LangCache for response to prompt: {preview_prompt}.")
         try:
             loop = asyncio.get_running_loop()
-            search_result = await loop.run_in_executor(
-                self.executer,
+
+            result = await loop.run_in_executor(
+                self.executor,
                 lambda: self.lang_cache.search(
-                    prompt=prompt, similarity_threshold=self.threshold
-                ),
+                    prompt=prompt,
+                    similarity_threshold=self.threshold
+                )
             )
-            if search_result.data and len(search_result.data) > 0:
-                logger.info(f"Hit cache for prompt: {preview_prompt}")
-                return search_result.data[0].response
-            else:
-                logger.info(f"Cache miss for prompt: {preview_prompt}")
-                return None
+
+            if result.data:
+                logger.info(f"Cache hit: {preview_prompt}")
+
+                raw = result.data[0].response
+                return json.loads(raw)   # ← decode JSON
+
+            logger.info(f"Cache miss: {preview_prompt}")
+            return None
         except Exception as e:
             logger.error(
                 f"Error while searching LangCache for response to prompt: {preview_prompt}: {e}"
@@ -74,7 +80,7 @@ class CacheService:
 
         Args:
             prompt (str): The input prompt to be stored.
-            response (str): The generated response associated with the prompt.
+            response (json): The generated response associated with the prompt.
 
         Returns:
             None: This method returns nothing; it completes once the save
@@ -86,11 +92,16 @@ class CacheService:
             f"Saving LLM response to LangCache. Prompt: {preview_prompt}; Response: {preview_response}."
         )
         try:
+            payload = json.dumps(response)  # ← encode JSON
+
             loop = asyncio.get_running_loop()
+
             await loop.run_in_executor(
-                self.executer,
-                lambda: self.lang_cache.set(prompt=prompt, response=response),
+                self.executor,
+                lambda: self.lang_cache.set(prompt=prompt, response=payload)
             )
-            logger.info("Successfully save LLM response to Langcache.")
+
+            logger.info(f"Saved cache for: {preview_prompt}")
+
         except Exception as e:
             logger.error(f"Error while saving LLM response to LangCache: {e}")

@@ -77,12 +77,10 @@ class MemoryService:
     #! FOR TESTING ONLY, NOT EXISTS IN PRODUCTION
     # async def add_message_temp(self, session_id: int, role: str, content: str):
     #     try:
-    #         db_role = 'bot' if role == 'assistant' else role
-            
     #         async with self.db_service.engine.begin() as conn:
     #             await conn.execute(
     #                 text('INSERT INTO "ChatBotMessage" ("sessionId", role, content) VALUES (:s, :r, :c)'),
-    #                 {"s": session_id, "r": db_role, "c": content}
+    #                 {"s": session_id, "r": role, "c": content}
     #             )
     #             logger.warning(f"[TEST MODE] Inserted message to DB: {content[:20]}...")
     #     except Exception as e:

@@ -225,7 +225,7 @@ class Pipeline:
         products_data = []
         
         #! FOR TESTING ONLY, NOT EXISTS IN PRODUCTION
-        # await self.memory_service.add_message_temp(session_id, "user", user_query)
+        # await self.memory_service.add_message_temp(session_id, "USER", user_query)
         
         # 3. Handling Logic
         if route == 'CHITCHAT': 
@@ -234,14 +234,10 @@ class Pipeline:
             
         else: # PRODUCT_QUERY
             # A. Check Cache
-            # cache_ans = await self.__search_cache(reflected_query)
-            # if cache_ans:
-            #     logger.info("Cache hit!")
-            #     return {
-            #         "content": cache_ans,
-            #         "products": [],
-            #         "intent": route
-            #     }
+            cache_obj = await self.cache_service.search_response(reflected_query)
+            if cache_obj:
+                logger.info("Cache hit!")
+                return cache_obj
             
             # B. Format Query & Retrieve
             search_queries = await self.__format_query(query=reflected_query)
@@ -259,10 +255,17 @@ class Pipeline:
             
             # E. Save to Cache
             if response_text:
-                await self.cache_service.save_response(prompt=reflected_query, response=response_text)
+                await self.cache_service.save_response(
+                    prompt=reflected_query,
+                    response={
+                        "content": response_text, 
+                        "intent": route,
+                        "products": products_data
+                    }
+                )
         
         #! FOR TESTING ONLY, NOT EXISTS IN PRODUCTION
-        # await self.memory_service.add_message_temp(session_id, "bot", response_text)
+        # await self.memory_service.add_message_temp(session_id, "BOT", response_text)
         # 4. Return structured data to Node.js Backend
         return {
             "content": response_text,
